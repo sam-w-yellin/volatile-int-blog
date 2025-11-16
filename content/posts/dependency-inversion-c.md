@@ -1,28 +1,41 @@
 ---
-title: "Dependency inversion in C: struct-of-function-pointers and building libraries"
+title: "Dependency inversion in C"
 date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
+Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
 
-# Dependency Inversion in Embedded C Without Runtime Polymorphism
+1. An initialization function that accepts a module name to prepend to each log message.
+2. A log function that accepts a message to log.
 
-A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level semantics but different physical interfaces.
+A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it's very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?
+
+A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level logic but differences in the presentation layer.
 
 The solution is **dependency inversion**: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward—high-level code is unaware of how the interface is concretely implemented.
 
 Languages with full runtime polymorphism natively support this. C does not. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers—something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
 
-Let’s ground this in an example.
+Let’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
+{{< mermaid >}}
+graph TD
+    Main --> Worker
+    Worker --> StdoutLogger
+{{< /mermaid >}}
 
-## A Simple Logging Interface
+Dependency inversion frees components from needing to know the details of how logging is implemented. The resulting architecture looks as follows:
+{{< mermaid >}}
+graph TD
+    Main --> Worker
+    Main --> StdoutLogger
+    Main --> FileLogger
+    Worker --> LoggerInterface
+    StdoutLogger --> LoggerInterface
+    FileLogger --> LoggerInterface
+{{< /mermaid >}}
 
-Suppose we’re designing a logging facility. The system needs two APIs:
-
-1. An initialization function that accepts a module name to prepend to each log message.
-2. A log function that accepts a message to log.
-
-A naïve embedded implementation might tightly couple these to a specific implementation - such as logging to stdout. But this has a serious drawback - its very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? The indirection through an interface provides this flexibility.
+It's worth a note that it is totally fine - and in fact expected - that `main` depends on the low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
 
 ## Defining the Interface
 So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
@@ -51,7 +64,7 @@ Now, we create two low-level implementations of the high-level logger interface.
 {{<readfile "dependency-inversion-c/plugins/file_logger/src/file_logger.c" >}}
 {{< /highlight >}}
 
-## Using the Logger
+## Using the Logger in a Component
 
 Let's create a component that uses a logger. We'll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging *interface* and not a particular logger.
 
@@ -63,8 +76,8 @@ Let's create a component that uses a logger. We'll make a generic worker that do
 {{<readfile "dependency-inversion-c/core/components/src/worker.c" >}}
 {{< /highlight >}}
 
-## Pulling it all together
-Its now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file.
+## Wiring together into an Application
+It's now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.
 
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/app/main.c" >}}
@@ -74,20 +87,20 @@ If we compile this all together and run, we should see the two stdout loggers em
 ```bash
 make > /dev/null
 ./demo
-[stdout_logger_1] Component did some work
-[stdout_logger_2] Component did some work
+[stdout_logger_1] Worker did some work
+[stdout_logger_2] Worker did some work
 cat log.txt
-[file_logger] Component did some work
+[file_logger] Worker did some work
 ```
 
 ## Verifying Dependency Inversion
 
-To confirm our high-level logger has*no dependency on any concrete implementation, let's investigate the `worker.o` file created for the worker component. Run `make worker.o` to create the object file for our worker component. We can then use `nm` to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!
+To confirm the components implementing business logic - like `worker` - have no dependency on any concrete implementation, let's investigate the `worker` object file. If we run `make worker.o` to create the object file for our worker component, we can then use `nm` to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!
 ```bash
 make worker.o
 nm worker
-0000000000000030 T _component_do_work
-0000000000000000 T _component_init
+0000000000000030 T _worker_do_work
+0000000000000000 T _worker_init
 000000000000006c s l_.str
 0000000000000000 t ltmp0
 000000000000006c s ltmp1
@@ -95,7 +108,7 @@ nm worker
 ```
 
 ## The Cost of Indirection
-While this abstraction is very low cost, it is not *zero* cost. We need to dereferenc our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligable.
+While this abstraction is very low cost, it is not *zero* cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.
 
 ## Other Options
 What are the other options for tackling this sort of problem? There's a few options.
@@ -103,7 +116,7 @@ What are the other options for tackling this sort of problem? There's a few opti
 1. Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc
 2. Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.
 
-The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we've made it impossible to instantiate multiple types of loggers in a single translation unit. Its my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time.
+The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we've made it impossible to instantiate multiple types of loggers in a single translation unit. It's my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.
 
 ## Conclusion
 

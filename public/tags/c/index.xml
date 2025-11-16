@@ -6,16 +6,20 @@
     <description>Recent content in C on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 15 Nov 2025 12:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
     <atom:link href="http://localhost:1313/volatile-int-blog/tags/c/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Dependency inversion in C: struct-of-function-pointers and building libraries</title>
       <link>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</link>
-      <pubDate>Sat, 15 Nov 2025 12:00:00 -0800</pubDate>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
       <guid>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</guid>
-      <description>&lt;h1 id=&#34;dependency-inversion-in-embedded-c-without-runtime-polymorphism&#34;&gt;Dependency Inversion in Embedded C Without Runtime Polymorphism&lt;/h1&gt;
-&lt;p&gt;A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level semantics but different physical interfaces.&lt;/p&gt;
-&lt;p&gt;The solution is &lt;strong&gt;dependency inversion&lt;/strong&gt;: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the &lt;em&gt;dependencies&lt;/em&gt; flow upward—high-level code is unaware of how the interface is concretely implemented.&lt;/p&gt;</description>
+      <description>&lt;h1 id=&#34;dependency-inversion-in-c&#34;&gt;Dependency Inversion in C&lt;/h1&gt;
+&lt;p&gt;Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;An initialization function that accepts a module name to prepend to each log message.&lt;/li&gt;
+&lt;li&gt;A log function that accepts a message to log.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it&amp;rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
