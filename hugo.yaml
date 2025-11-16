@@ -1,0 +1,7 @@
+baseURL: https://sam-w-yellin.github.io/volatile-int-blog
+languageCode: en-us
+title: Volatile Int
+theme: ["PaperMod"]
+enableRobotsTXT: true
+paginaton: 
+  pager-size: 5
