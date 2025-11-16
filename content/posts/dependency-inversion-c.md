@@ -15,8 +15,6 @@ A common mistake in embedded software architecture is coupling hardware implemen
 
 The solution is **dependency inversion**: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward—high-level code is unaware of how the interface is concretely implemented.
 
-Languages with full runtime polymorphism natively support this. C does not. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers—something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
-
 Let’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
 {{< mermaid >}}
 graph TD
@@ -36,6 +34,8 @@ graph TD
 {{< /mermaid >}}
 
 It's worth a note that it is totally fine - and in fact expected - that `main` depends on the low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
+
+Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
 
 ## Defining the Interface
 So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
