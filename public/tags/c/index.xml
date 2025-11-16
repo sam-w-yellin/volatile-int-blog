@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>C on Volatile Int</title>
-    <link>https://sam-w-yellin.github.io/volatile-int-blog/tags/c/</link>
+    <link>http://localhost:1313/volatile-int-blog/tags/c/</link>
     <description>Recent content in C on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
-    <atom:link href="https://sam-w-yellin.github.io/volatile-int-blog/tags/c/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/volatile-int-blog/tags/c/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Dependency Inversion in C</title>
-      <link>https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/</link>
+      <link>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/</guid>
+      <guid>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</guid>
       <description>&lt;p&gt;Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;An initialization function that accepts a module name to prepend to each log message.&lt;/li&gt;
