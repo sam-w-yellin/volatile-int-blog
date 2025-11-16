@@ -76,7 +76,7 @@ Let's create a component that uses a logger. We'll make a generic worker that do
 {{<readfile "dependency-inversion-c/core/components/src/worker.c" >}}
 {{< /highlight >}}
 
-## Wiring together into an Application
+## Wiring Together into an Executable
 It's now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.
 
 {{< highlight c >}}
