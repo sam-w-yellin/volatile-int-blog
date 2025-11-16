@@ -1,5 +1,5 @@
 ---
-title: "Dependency inversion in C"
+title: "Dependency Inversion in C"
 date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
