@@ -44,7 +44,7 @@ So, let's define an abstract interface—implemented via function pointers and l
 {{< /highlight >}}
 
 ### Implementing Two Concrete Loggers
-Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger *interface*. Depending on a logger does **not** imply depending on a concrete transport.
+Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger interface. You'll see in a minute that components which do logging do not directly utilize either of these concrete implementations.
 
 #### stdout Logger
 {{< highlight c >}}
