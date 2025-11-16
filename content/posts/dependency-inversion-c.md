@@ -15,8 +15,6 @@ A common mistake in embedded software architecture is coupling hardware implemen
 
 The solution is **dependency inversion**: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward—high-level code is unaware of how the interface is concretely implemented.
 
-Languages with full runtime polymorphism natively support this. C does not. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers—something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
-
 Let’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
 {{< mermaid >}}
 graph TD
@@ -36,6 +34,8 @@ graph TD
 {{< /mermaid >}}
 
 It's worth a note that it is totally fine - and in fact expected - that `main` depends on the low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
+
+Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
 
 ## Defining the Interface
 So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
@@ -76,7 +76,7 @@ Let's create a component that uses a logger. We'll make a generic worker that do
 {{<readfile "dependency-inversion-c/core/components/src/worker.c" >}}
 {{< /highlight >}}
 
-## Wiring together into an Application
+## Wiring Together into an Executable
 It's now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.
 
 {{< highlight c >}}
@@ -111,7 +111,7 @@ nm worker
 While this abstraction is very low cost, it is not *zero* cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.
 
 ## Other Options
-What are the other options for tackling this sort of problem? There's a few options.
+What are the other options for tackling this sort of problem?
 
 1. Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc
 2. Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.
@@ -121,3 +121,5 @@ The first bullet is hitting the problem with a hammer - introduce tons of duplic
 ## Conclusion
 
 We’ve now walked through implementing dependency inversion in C without runtime polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.
+
+The full source code for this example is available on [GitHub](https://github.com/sam-w-yellin/dependency-inversion-c).
