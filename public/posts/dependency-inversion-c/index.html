@@ -345,6 +345,7 @@ graph TD
 <p>The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we&rsquo;ve made it impossible to instantiate multiple types of loggers in a single translation unit. It&rsquo;s my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.</p>
 <h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
 <p>We’ve now walked through implementing dependency inversion in C without runtime polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.</p>
+<p>The full source code for this example is available on <a href="https://github.com/sam-w-yellin/dependency-inversion-c">GitHub</a>.</p>
 
 
   </div>

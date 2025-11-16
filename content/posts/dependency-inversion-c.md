@@ -121,3 +121,5 @@ The first bullet is hitting the problem with a hammer - introduce tons of duplic
 ## Conclusion
 
 We’ve now walked through implementing dependency inversion in C without runtime polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.
+
+The full source code for this example is available on [GitHub](https://github.com/sam-w-yellin/dependency-inversion-c).
