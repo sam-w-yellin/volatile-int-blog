@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Volatile Int</title>
-    <link>http://localhost:1313/volatile-int-blog/</link>
-    <description>Recent content on Volatile Int</description>
+    <title>Architecture on Volatile Int</title>
+    <link>http://localhost:1313/volatile-int-blog/tags/architecture/</link>
+    <description>Recent content in Architecture on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 15 Nov 2025 12:00:00 -0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/volatile-int-blog/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/volatile-int-blog/tags/architecture/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Dependency inversion in C: struct-of-function-pointers and building libraries</title>
       <link>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</link>

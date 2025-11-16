@@ -1,3 +1,6 @@
 [submodule "themes/PaperMod"]
 	path = themes/PaperMod
 	url = https://github.com/adityatelange/hugo-PaperMod.git
+[submodule "dependency-inversion-c"]
+	path = dependency-inversion-c
+	url = git@github.com:sam-w-yellin/dependency-inversion-c.git

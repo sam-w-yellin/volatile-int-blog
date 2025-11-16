@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/volatile-int-blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=volatile-int-blog/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Dependency inversion in C: struct-of-function-pointers and building libraries | Volatile Int</title>
+<meta name="keywords" content="C, architecture, embedded">
+<meta name="description" content="Dependency Inversion in Embedded C Without Runtime Polymorphism
+A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level semantics but different physical interfaces.
+The solution is dependency inversion: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward—high-level code is unaware of how the interface is concretely implemented.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
+<link crossorigin="anonymous" href="/volatile-int-blog/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/volatile-int-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/volatile-int-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/volatile-int-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/volatile-int-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/volatile-int-blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/volatile-int-blog/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Dependency inversion in C: struct-of-function-pointers and building libraries
+    </h1>
+    <div class="post-meta"><span title='2025-11-15 12:00:00 -0800 PST'>November 15, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="dependency-inversion-in-embedded-c-without-runtime-polymorphism">Dependency Inversion in Embedded C Without Runtime Polymorphism<a hidden class="anchor" aria-hidden="true" href="#dependency-inversion-in-embedded-c-without-runtime-polymorphism">#</a></h1>
+<p>A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level semantics but different physical interfaces.</p>
+<p>The solution is <strong>dependency inversion</strong>: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the <em>dependencies</em> flow upward—high-level code is unaware of how the interface is concretely implemented.</p>
+<p>Languages with full runtime polymorphism natively support this. C does not. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers—something C <em>can</em> express. So in C, we provide our own layer of indirection using structs of function pointers.</p>
+<p>Let’s ground this in an example.</p>
+<hr>
+<h2 id="a-simple-logging-interface">A Simple Logging Interface<a hidden class="anchor" aria-hidden="true" href="#a-simple-logging-interface">#</a></h2>
+<p>Suppose we’re designing a logging facility. The system needs two APIs:</p>
+<ol>
+<li>An initialization function that accepts a module name to prepend to each log message.</li>
+<li>A log function that accepts a message to log.</li>
+</ol>
+<p>A naïve embedded implementation might tightly couple these to a serial port:</p>
+<p>&lt; Tightly Coupled Implementation of Logging Interface &gt;</p>
+<p>Any code depending on this logger would now be untestable on platforms without a serial port. Instead, we define an abstract interface—implemented via function pointers—and let high-level code depend only on that.</p>
+<hr>
+<h2 id="defining-the-interface">Defining the Interface<a hidden class="anchor" aria-hidden="true" href="#defining-the-interface">#</a></h2>
+<p>&lt; Function typedefs &amp; Struct of function pointers &gt;</p>
+<hr>
+<h2 id="implementing-two-concrete-loggers">Implementing Two Concrete Loggers<a hidden class="anchor" aria-hidden="true" href="#implementing-two-concrete-loggers">#</a></h2>
+<h3 id="stdout-logger">stdout Logger<a hidden class="anchor" aria-hidden="true" href="#stdout-logger">#</a></h3>
+<p>&lt; stdout logger implementation &gt;</p>
+<h3 id="serial-port-logger">Serial Port Logger<a hidden class="anchor" aria-hidden="true" href="#serial-port-logger">#</a></h3>
+<p>&lt; serial port logger implementation &gt;</p>
+<p>Notice that these low-level components depend only on the <em>interface</em>, not on the high-level logger itself. Depending on a logger does <strong>not</strong> imply depending on a concrete transport.</p>
+<hr>
+<h2 id="high-level-logger-policy-layer">High-Level Logger (Policy Layer)<a hidden class="anchor" aria-hidden="true" href="#high-level-logger-policy-layer">#</a></h2>
+<p>Consumers of the logger should not depend on any specific implementation. The question is: how does the high-level logger know which implementation to use?</p>
+<p>Two strategies:</p>
+<ol>
+<li>Pass the interface struct pointer into every logging function.</li>
+<li>Pass the interface only into the initialization function, which stores it in a file-scope static variable.</li>
+</ol>
+<p>The first approach pollutes function signatures.<br>
+The second is cleaner but requires careful linking discipline and is not thread-safe.</p>
+<h3 id="strategy-1-passing-the-pointer-to-each-api">Strategy 1: Passing the Pointer to Each API<a hidden class="anchor" aria-hidden="true" href="#strategy-1-passing-the-pointer-to-each-api">#</a></h3>
+<p>&lt; pointer to struct in each API &gt;</p>
+<h3 id="strategy-2-storing-the-pointer-only-during-initialization">Strategy 2: Storing the Pointer Only During Initialization<a hidden class="anchor" aria-hidden="true" href="#strategy-2-storing-the-pointer-only-during-initialization">#</a></h3>
+<p>&lt; pointer to struct only in init function &gt;</p>
+<hr>
+<h2 id="using-the-logger">Using the Logger<a hidden class="anchor" aria-hidden="true" href="#using-the-logger">#</a></h2>
+<p>Here’s an example using the stdout implementation:</p>
+<p>&lt; stdout example &gt;</p>
+<p>Compile and run:</p>
+<p>&lt; compile + execution &gt;</p>
+<hr>
+<h2 id="verifying-dependency-inversion">Verifying Dependency Inversion<a hidden class="anchor" aria-hidden="true" href="#verifying-dependency-inversion">#</a></h2>
+<p>To confirm our high-level logger has <strong>no dependency</strong> on any concrete implementation, compile it into a static library:</p>
+<p>&lt; compiler .a for high-level logger &gt;</p>
+<p>Inspect the symbol table with <code>nm</code>:</p>
+<p>&lt; commands and output of nm &gt;</p>
+<p>You should see dependencies only on the abstract interface symbols.</p>
+<hr>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>We’ve now walked through implementing dependency inversion in C without runtime polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/volatile-int-blog/tags/c/">C</a></li>
+      <li><a href="http://localhost:1313/volatile-int-blog/tags/architecture/">Architecture</a></li>
+      <li><a href="http://localhost:1313/volatile-int-blog/tags/embedded/">Embedded</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/volatile-int-blog/">Volatile Int</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

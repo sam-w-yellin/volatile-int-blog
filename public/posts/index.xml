@@ -6,6 +6,16 @@
     <description>Recent content in Posts on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
+    <lastBuildDate>Sat, 15 Nov 2025 12:00:00 -0800</lastBuildDate>
     <atom:link href="http://localhost:1313/volatile-int-blog/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dependency inversion in C: struct-of-function-pointers and building libraries</title>
+      <link>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</link>
+      <pubDate>Sat, 15 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</guid>
+      <description>&lt;h1 id=&#34;dependency-inversion-in-embedded-c-without-runtime-polymorphism&#34;&gt;Dependency Inversion in Embedded C Without Runtime Polymorphism&lt;/h1&gt;
+&lt;p&gt;A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level semantics but different physical interfaces.&lt;/p&gt;
+&lt;p&gt;The solution is &lt;strong&gt;dependency inversion&lt;/strong&gt;: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the &lt;em&gt;dependencies&lt;/em&gt; flow upward—high-level code is unaware of how the interface is concretely implemented.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>
