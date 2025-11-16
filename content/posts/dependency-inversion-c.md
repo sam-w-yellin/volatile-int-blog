@@ -1,8 +1,8 @@
 ---
 title: "Dependency inversion in C: struct-of-function-pointers and building libraries"
-date: 2025-11-15T12:00:00-08:00
+date: 2025-11-16T12:00:00-08:00
 draft: false
-tags: ["C","architecture","embedded"]
+tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
 
 # Dependency Inversion in Embedded C Without Runtime Polymorphism
@@ -22,203 +22,88 @@ Suppose we’re designing a logging facility. The system needs two APIs:
 1. An initialization function that accepts a module name to prepend to each log message.
 2. A log function that accepts a message to log.
 
-A naïve embedded implementation might tightly couple these to a serial port:
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-// Hypothetical serial driver
-#include "serial.h"
-
-static char g_module_name[32];
-
-void init_logger(const char *module_name, size_t name_len) {
-    serial_init(115200);
-    size_t copy_len = name_len < (sizeof(g_module_name) - 1)
-                        ? name_len
-                        : (sizeof(g_module_name) - 1);
-
-    memcpy(g_module_name, module_name, copy_len);
-    g_module_name[copy_len] = '\0';
-}
-
-void log(const char *msg) {
-    serial_write("[", 1);
-    serial_write(g_module_name, strlen(g_module_name));
-    serial_write("] ", 2);
-    serial_write(msg, strlen(msg));
-    serial_write("\n", 1);
-}
-```
-
-Any code depending on this logger would now be untestable on platforms without a serial port.
+A naïve embedded implementation might tightly couple these to a specific implementation - such as logging to stdout. But this has a serious drawback - its very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? The indirection through an interface provides this flexibility.
 
 ## Defining the Interface
-Instead, we define an abstract interface—implemented via function pointers—and let high-level code depend only on that.
-```c
-#include <stddef.h>
-
-typedef void (*logger_init_fn)(const char *module_name, size_t name_len);
-
-typedef void (*logger_log_fn)(const char *msg);
-
-// Struct representing a logger interface (vtable-like)
-typedef struct {
-    logger_init_fn init;
-    logger_log_fn log;
-} logger_interface_t;
-```
+So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/core/include/logger_interface.h" >}}
+{{< /highlight >}}
 
 ### Implementing Two Concrete Loggers
 Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger *interface*. Depending on a logger does **not** imply depending on a concrete transport.
 
 #### stdout Logger
-```c
-#include <stdio.h>
-#include <string.h>
-#include "logger_interface.h"
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/plugins/stdout_logger/include/stdout_logger.h" >}}
+{{< /highlight >}}
 
-static char stdout_module_name[32];
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/plugins/stdout_logger/src/stdout_logger.c" >}}
+{{< /highlight >}}
 
-void stdout_logger_init(const char *module_name, size_t name_len) {
-    size_t copy_len = name_len < (sizeof(stdout_module_name) - 1)
-                        ? name_len
-                        : (sizeof(stdout_module_name) - 1);
+#### File Logger
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/plugins/file_logger/include/file_logger.h" >}}
+{{< /highlight >}}
 
-    memcpy(stdout_module_name, module_name, copy_len);
-    stdout_module_name[copy_len] = '\0';
-}
-
-void stdout_logger_log(const char *msg) {
-    printf("[%s] %s\n", stdout_module_name, msg);
-}
-
-logger_interface_t stdout_logger = {
-    .init = stdout_logger_init,
-    .log  = stdout_logger_log
-};
-```
-
-#### Serial Port Logger
-```c
-#include <string.h>
-#include "logger_interface.h"
-#include "serial.h"
-
-static char serial_module_name[32];
-
-void serial_logger_init(const char *module_name, size_t name_len) {
-    serial_init(115200);
-
-    size_t copy_len = name_len < (sizeof(serial_module_name) - 1)
-                        ? name_len
-                        : (sizeof(serial_module_name) - 1);
-
-    memcpy(serial_module_name, module_name, copy_len);
-    serial_module_name[copy_len] = '\0';
-}
-
-void serial_logger_log(const char *msg) {
-    serial_write("[", 1);
-    serial_write(serial_module_name, strlen(serial_module_name));
-    serial_write("] ", 2);
-    serial_write(msg, strlen(msg));
-    serial_write("\n", 1);
-}
-
-logger_interface_t serial_logger = {
-    .init = serial_logger_init,
-    .log  = serial_logger_log
-};
-```
-
-## High-Level Logger (Policy Layer)
-
-Consumers of the logger should not depend on any specific implementation. The question is: how does the high-level logger know which implementation to use?
-
-Two strategies:
-
-1. Pass the interface struct pointer into every logging function.
-2. Pass the interface only into the initialization function, which stores it in a file-scope static variable.
-
-The first approach pollutes function signatures.  
-The second is cleaner but requires careful linking discipline and is not thread-safe.
-
-### Strategy 1: Passing the Pointer to Each API
-```c
-#include "logger_interface.h"
-
-void log(const logger_interface_t *logger, const char *msg) {
-    logger->log(msg);
-}
-
-void init_logger(const logger_interface_t *logger, const char *module_name, size_t name_len) {
-    logger->init(module_name, name_len);
-}
-```
-
-### Strategy 2: Storing the Pointer Only During Initialization
-```c
-#include "logger_interface.h"
-
-static logger_interface_t *active_logger = NULL;
-
-void log(const char *msg) {
-    if (active_logger != NULL) {
-        active_logger->log(msg);
-    }
-}
-
-void init_logger(const logger_interface_t *logger, const char *module_name, size_t name_len) {
-    active_logger = logger;
-    active_logger->init(module_name, name_len);
-}
-```
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/plugins/file_logger/src/file_logger.c" >}}
+{{< /highlight >}}
 
 ## Using the Logger
 
-Let's look at how we can use these 
-```c
-#include "logger_interface.h"
-#include "logger.h"     // High-level logger
-#include "logger_stdout.h"  // Logger implementation
+Let's create a component that uses a logger. We'll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging *interface* and not a particular logger.
 
-int main(void) {
-    init_logger(&stdout_logger, "MAIN", 4);
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/core/components/include/worker.h" >}}
+{{< /highlight >}}
 
-    log("Hello, World!");
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/core/components/src/worker.c" >}}
+{{< /highlight >}}
 
-    return 0;
-}
-```
-Compile and run:
+## Pulling it all together
+Its now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file.
+
+{{< highlight c >}}
+{{<readfile "dependency-inversion-c/app/main.c" >}}
+{{< /highlight >}}
+
+If we compile this all together and run, we should see the two stdout loggers emit their messages on the console, and the file logger's output in `log.txt`. The makefile in the source code for this example defines the required target.
 ```bash
-gcc -Wall -Wextra \
-    main.c \
-    logger.c \
-    logger_stdout.c \
-    -o logger_example
-
-./logger_example
+make > /dev/null
+./demo
+[stdout_logger_1] Component did some work
+[stdout_logger_2] Component did some work
+cat log.txt
+[file_logger] Component did some work
 ```
 
 ## Verifying Dependency Inversion
 
-To confirm our high-level logger has*no dependency on any concrete implementation, compile it into a static library:
+To confirm our high-level logger has*no dependency on any concrete implementation, let's investigate the `worker.o` file created for the worker component. Run `make worker.o` to create the object file for our worker component. We can then use `nm` to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!
 ```bash
-gcc -c logger.c -o logger.o
-ar rcs liblogger.a logger.o
+make worker.o
+nm worker
+0000000000000030 T _component_do_work
+0000000000000000 T _component_init
+000000000000006c s l_.str
+0000000000000000 t ltmp0
+000000000000006c s ltmp1
+0000000000000088 s ltmp2
 ```
-Inspect the symbol table with `nm`:
-```bash
-nm liblogger_top.a
-00000000 T init_logger
-00000010 T log
-                 U logger_init_fn
-                 U logger_log_fn
-```
-We see dependencies only on the abstract interface symbols.
+
+## The Cost of Indirection
+While this abstraction is very low cost, it is not *zero* cost. We need to dereferenc our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligable.
+
+## Other Options
+What are the other options for tackling this sort of problem? There's a few options.
+
+1. Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc
+2. Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.
+
+The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we've made it impossible to instantiate multiple types of loggers in a single translation unit. Its my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time.
 
 ## Conclusion
 
