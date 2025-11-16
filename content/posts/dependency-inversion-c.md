@@ -111,7 +111,7 @@ nm worker
 While this abstraction is very low cost, it is not *zero* cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.
 
 ## Other Options
-What are the other options for tackling this sort of problem? There's a few options.
+What are the other options for tackling this sort of problem?
 
 1. Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc
 2. Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.
