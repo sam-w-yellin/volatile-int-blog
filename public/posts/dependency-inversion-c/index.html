@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto" data-theme="auto">
 
-<head><script src="/volatile-int-blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=volatile-int-blog/livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
-<title>Dependency inversion in C | Volatile Int</title>
+<meta name="robots" content="index, follow">
+<title>Dependency Inversion in C | Volatile Int</title>
 <meta name="keywords" content="C, architecture, embedded, dependency, inversion">
 <meta name="description" content="Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
 
@@ -14,16 +14,16 @@ A log function that accepts a message to log.
 
 A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it&rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
+<link rel="canonical" href="https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/">
 <link crossorigin="anonymous" href="/volatile-int-blog/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/volatile-int-blog/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/volatile-int-blog/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/volatile-int-blog/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/volatile-int-blog/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/volatile-int-blog/safari-pinned-tab.svg">
+<link rel="icon" href="https://sam-w-yellin.github.io/volatile-int-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sam-w-yellin.github.io/volatile-int-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sam-w-yellin.github.io/volatile-int-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sam-w-yellin.github.io/volatile-int-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://sam-w-yellin.github.io/volatile-int-blog/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
+<link rel="alternate" hreflang="en" href="https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/">
 <noscript>
     <style>
         #theme-toggle,
@@ -75,13 +75,86 @@ A naïve implementation might couple the logger directly to a specific output, l
         document.querySelector("html").dataset.theme = 'light';
     }
 
+</script><meta property="og:url" content="https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/">
+  <meta property="og:site_name" content="Volatile Int">
+  <meta property="og:title" content="Dependency Inversion in C">
+  <meta property="og:description" content="Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
+An initialization function that accepts a module name to prepend to each log message. A log function that accepts a message to log. A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it’s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-16T12:00:00-08:00">
+    <meta property="article:modified_time" content="2025-11-16T12:00:00-08:00">
+    <meta property="article:tag" content="C">
+    <meta property="article:tag" content="Architecture">
+    <meta property="article:tag" content="Embedded">
+    <meta property="article:tag" content="Dependency">
+    <meta property="article:tag" content="Inversion">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dependency Inversion in C">
+<meta name="twitter:description" content="Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
+
+An initialization function that accepts a module name to prepend to each log message.
+A log function that accepts a message to log.
+
+A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it&rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://sam-w-yellin.github.io/volatile-int-blog/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Dependency Inversion in C",
+      "item": "https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Dependency Inversion in C",
+  "name": "Dependency Inversion in C",
+  "description": "Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:\nAn initialization function that accepts a module name to prepend to each log message. A log function that accepts a message to log. A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it\u0026rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?\n",
+  "keywords": [
+    "C", "architecture", "embedded", "dependency", "inversion"
+  ],
+  "articleBody": "Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:\nAn initialization function that accepts a module name to prepend to each log message. A log function that accepts a message to log. A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it’s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?\nA common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level logic but differences in the presentation layer.\nThe solution is dependency inversion: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward—high-level code is unaware of how the interface is concretely implemented.\nLet’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation: graph TD Main --\u003e Worker Worker --\u003e StdoutLogger Dependency inversion frees components from needing to know the details of how logging is implemented. The resulting architecture looks as follows: graph TD Main --\u003e Worker Main --\u003e StdoutLogger Main --\u003e FileLogger Worker --\u003e LoggerInterface StdoutLogger --\u003e LoggerInterface FileLogger --\u003e LoggerInterface It’s worth a note that it is totally fine - and in fact expected - that main depends on the low-level details. Ideally, main - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.\nLanguages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C can express. So in C, we provide our own layer of indirection using structs of function pointers.\nDefining the Interface So, let’s define an abstract interface—implemented via function pointers and let the high-level component code depend only on that. #pragma once #include typedef struct logger_interface { void (*init)(void *self, char *buffer, size_t buffer_len, const char *name); void (*log)(void *self, const char *msg); } logger_interface_t;\nImplementing Two Concrete Loggers Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger interface. You’ll see in a minute that components which do logging do not directly utilize either of these concrete implementations.\nstdout Logger #pragma once #include #include \"logger_interface.h\" typedef struct { char *buffer; size_t buffer_len; size_t idx; const char *name; } stdout_logger_t; extern const logger_interface_t STDOUT_LOGGER_INTERFACE; #include #include #include \"stdout_logger.h\" static void stdout_logger_init( void *self, char *buffer, size_t buffer_len, const char *name) { stdout_logger_t *logger = (stdout_logger_t *)self; logger-\u003ebuffer = buffer; logger-\u003ebuffer_len = buffer_len; logger-\u003eidx = 0; logger-\u003ename = name; snprintf(buffer, buffer_len, \"[%s] init\\n\", name); } static void stdout_logger_log(void *self, const char *msg) { stdout_logger_t *logger = (stdout_logger_t *)self; printf(\"[%s] %s\\n\", logger-\u003ename, msg); } const logger_interface_t STDOUT_LOGGER_INTERFACE = { .init = stdout_logger_init, .log = stdout_logger_log }; File Logger #pragma once #include #include #include \"logger_interface.h\" typedef struct { FILE *file; char *buffer; size_t buffer_len; size_t idx; const char *name; } file_logger_t; extern const logger_interface_t FILE_LOGGER_INTERFACE; #include #include #include \"file_logger.h\" static void file_logger_init( void *self, char *buffer, size_t buffer_len, const char *name) { file_logger_t *logger = (file_logger_t *)self; logger-\u003efile = fopen(\"log.txt\", \"a\"); logger-\u003ebuffer = buffer; logger-\u003ebuffer_len = buffer_len; logger-\u003eidx = 0; logger-\u003ename = name; } static void file_logger_log(void *self, const char *msg) { file_logger_t *logger = (file_logger_t *)self; if (logger-\u003efile) { fprintf(logger-\u003efile, \"[%s] %s\\n\", logger-\u003ename, msg); fflush(logger-\u003efile); } } const logger_interface_t FILE_LOGGER_INTERFACE = { .init = file_logger_init, .log = file_logger_log }; Using the Logger in a Component Let’s create a component that uses a logger. We’ll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging interface and not a particular logger.\n#pragma once #include \"logger_interface.h\" typedef struct { const logger_interface_t *logger; void *logger_instance; } worker_t; void worker_init(worker_t *w, const logger_interface_t *logger, void *logger_instance); void worker_do_work(worker_t *w); #include #include \"worker.h\" void worker_init(worker_t *w, const logger_interface_t *logger, void *logger_instance) { w-\u003elogger = logger; w-\u003elogger_instance = logger_instance; } void worker_do_work(worker_t *w) { w-\u003elogger-\u003elog(w-\u003elogger_instance, \"Worker did some work\"); } Wiring Together into an Executable It’s now trivial to create a main which instantiates a few different workers, and flexibly select which logger to use. We’ll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.\n#include #include \"worker.h\" #include \"stdout_logger.h\" #include \"file_logger.h\" int main(void) { char logger_name_buffers[3][128]; const size_t name_buf_size = sizeof(logger_name_buffers[0]); stdout_logger_t stdout1; stdout_logger_t stdout2; file_logger_t file1; STDOUT_LOGGER_INTERFACE.init(\u0026stdout1, logger_name_buffers[0], name_buf_size, \"stdout_logger_1\"); STDOUT_LOGGER_INTERFACE.init(\u0026stdout2, logger_name_buffers[1], name_buf_size, \"stdout_logger_2\"); FILE_LOGGER_INTERFACE.init(\u0026file1, logger_name_buffers[2], name_buf_size, \"file_logger\"); worker_t w1, w2, w3; worker_init(\u0026w1, \u0026STDOUT_LOGGER_INTERFACE, \u0026stdout1); worker_init(\u0026w2, \u0026STDOUT_LOGGER_INTERFACE, \u0026stdout2); worker_init(\u0026w3, \u0026FILE_LOGGER_INTERFACE, \u0026file1); worker_do_work(\u0026w1); worker_do_work(\u0026w2); worker_do_work(\u0026w3); return 0; } If we compile this all together and run, we should see the two stdout loggers emit their messages on the console, and the file logger’s output in log.txt. The makefile in the source code for this example defines the required target.\nmake \u003e /dev/null ./demo [stdout_logger_1] Worker did some work [stdout_logger_2] Worker did some work cat log.txt [file_logger] Worker did some work Verifying Dependency Inversion To confirm the components implementing business logic - like worker - have no dependency on any concrete implementation, let’s investigate the worker object file. If we run make worker.o to create the object file for our worker component, we can then use nm to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!\nmake worker.o nm worker 0000000000000030 T _worker_do_work 0000000000000000 T _worker_init 000000000000006c s l_.str 0000000000000000 t ltmp0 000000000000006c s ltmp1 0000000000000088 s ltmp2 The Cost of Indirection While this abstraction is very low cost, it is not zero cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.\nOther Options What are the other options for tackling this sort of problem?\nDefine entirely separate worker components for each logger type: worker-file, worker-stdout, etc Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration. The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we’ve made it impossible to instantiate multiple types of loggers in a single translation unit. It’s my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.\nConclusion We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.\nThe full source code for this example is available on GitHub.\n",
+  "wordCount" : "1337",
+  "inLanguage": "en",
+  "datePublished": "2025-11-16T12:00:00-08:00",
+  "dateModified": "2025-11-16T12:00:00-08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sam-w-yellin.github.io/volatile-int-blog/posts/dependency-inversion-c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Volatile Int",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sam-w-yellin.github.io/volatile-int-blog/favicon.ico"
+    }
+  }
+}
 </script>
 </head>
 <body id="top">
     <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/volatile-int-blog/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <a href="https://sam-w-yellin.github.io/volatile-int-blog/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -115,7 +188,7 @@ A naïve implementation might couple the logger directly to a specific output, l
   <header class="post-header">
     
     <h1 class="post-title entry-hint-parent">
-      Dependency inversion in C
+      Dependency Inversion in C
     </h1>
     <div class="post-meta"><span title='2025-11-16 12:00:00 -0800 PST'>November 16, 2025</span>
 
@@ -129,7 +202,6 @@ A naïve implementation might couple the logger directly to a specific output, l
 <p>A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it&rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?</p>
 <p>A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level logic but differences in the presentation layer.</p>
 <p>The solution is <strong>dependency inversion</strong>: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the <em>dependencies</em> flow upward—high-level code is unaware of how the interface is concretely implemented.</p>
-<p>Languages with full runtime polymorphism natively support this. C does not. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers—something C <em>can</em> express. So in C, we provide our own layer of indirection using structs of function pointers.</p>
 <p>Let’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
 <div class="mermaid">
     
@@ -151,6 +223,7 @@ graph TD
 
 </div></p>
 <p>It&rsquo;s worth a note that it is totally fine - and in fact expected - that <code>main</code> depends on the low-level details. Ideally, <code>main</code> - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.</p>
+<p>Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C <em>can</em> express. So in C, we provide our own layer of indirection using structs of function pointers.</p>
 <h2 id="defining-the-interface">Defining the Interface<a hidden class="anchor" aria-hidden="true" href="#defining-the-interface">#</a></h2>
 <p>So, let&rsquo;s define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
@@ -165,7 +238,7 @@ graph TD
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>log)(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>self, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>msg);
 </span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">logger_interface_t</span>;</span></span></code></pre></div></p>
 <h3 id="implementing-two-concrete-loggers">Implementing Two Concrete Loggers<a hidden class="anchor" aria-hidden="true" href="#implementing-two-concrete-loggers">#</a></h3>
-<p>Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger <em>interface</em>. Depending on a logger does <strong>not</strong> imply depending on a concrete transport.</p>
+<p>Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger interface. You&rsquo;ll see in a minute that components which do logging do not directly utilize either of these concrete implementations.</p>
 <h4 id="stdout-logger">stdout Logger<a hidden class="anchor" aria-hidden="true" href="#stdout-logger">#</a></h4>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
@@ -284,7 +357,7 @@ graph TD
 </span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    w<span style="color:#f92672">-&gt;</span>logger<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">log</span>(w<span style="color:#f92672">-&gt;</span>logger_instance, <span style="color:#e6db74">&#34;Worker did some work&#34;</span>);
 </span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
-<h2 id="wiring-together-into-an-application">Wiring together into an Application<a hidden class="anchor" aria-hidden="true" href="#wiring-together-into-an-application">#</a></h2>
+<h2 id="wiring-together-into-an-executable">Wiring Together into an Executable<a hidden class="anchor" aria-hidden="true" href="#wiring-together-into-an-executable">#</a></h2>
 <p>It&rsquo;s now trivial to create a <code>main</code> which instantiates a few different workers, and flexibly select which logger to use. We&rsquo;ll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;worker.h&#34;</span><span style="color:#75715e">
@@ -337,14 +410,14 @@ graph TD
 </span></span></code></pre></div><h2 id="the-cost-of-indirection">The Cost of Indirection<a hidden class="anchor" aria-hidden="true" href="#the-cost-of-indirection">#</a></h2>
 <p>While this abstraction is very low cost, it is not <em>zero</em> cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.</p>
 <h2 id="other-options">Other Options<a hidden class="anchor" aria-hidden="true" href="#other-options">#</a></h2>
-<p>What are the other options for tackling this sort of problem? There&rsquo;s a few options.</p>
+<p>What are the other options for tackling this sort of problem?</p>
 <ol>
 <li>Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc</li>
 <li>Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.</li>
 </ol>
 <p>The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we&rsquo;ve made it impossible to instantiate multiple types of loggers in a single translation unit. It&rsquo;s my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.</p>
 <h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
-<p>We’ve now walked through implementing dependency inversion in C without runtime polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.</p>
+<p>We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.</p>
 <p>The full source code for this example is available on <a href="https://github.com/sam-w-yellin/dependency-inversion-c">GitHub</a>.</p>
 
 
@@ -352,11 +425,11 @@ graph TD
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/c/">C</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/architecture/">Architecture</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/embedded/">Embedded</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/dependency/">Dependency</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/inversion/">Inversion</a></li>
+      <li><a href="https://sam-w-yellin.github.io/volatile-int-blog/tags/c/">C</a></li>
+      <li><a href="https://sam-w-yellin.github.io/volatile-int-blog/tags/architecture/">Architecture</a></li>
+      <li><a href="https://sam-w-yellin.github.io/volatile-int-blog/tags/embedded/">Embedded</a></li>
+      <li><a href="https://sam-w-yellin.github.io/volatile-int-blog/tags/dependency/">Dependency</a></li>
+      <li><a href="https://sam-w-yellin.github.io/volatile-int-blog/tags/inversion/">Inversion</a></li>
     </ul>
   </footer>
 </article>
