@@ -4,9 +4,11 @@ date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
-The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware configurations grow linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually the organization becomes resistant to improving its own product because the software architecture can’t absorb change.
+The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
 
-This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). It allows embedded systems to adapt quickly and cheaply to new hardware iterations without rewriting core logic.
+This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.
+
+Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a struct of function pointers - something C expresses naturally. So in C, we provide our own layer of indirection using structs of function pointers.
 
 In this post, we explore dependency inversion in C through a concrete, practical example: designing a flexible logging interface.
 
@@ -14,21 +16,21 @@ In this post, we explore dependency inversion in C through a concrete, practical
 
 Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
 
-1. An initialization function that accepts a module name to prepend to each log message.
+1. An initialization function to set up any resources required by the logger.
 2. A log function that accepts a message to log.
 
-A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it's very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?
+A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change *how* a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?
 
-The solution is **dependency inversion**: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward—high-level code is unaware of how the interface is concretely implemented.
+The solution is **dependency inversion**: 
 
-Let’s dig into our logger example. The naive implementation might be a structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
+Let’s dig into our logger example. The naïve implementation might look like this: the component depends directly or transitively on a specific logger implementation.
 {{< mermaid >}}
 graph TD
     Main --> Worker
     Worker --> StdoutLogger
 {{< /mermaid >}}
 
-Dependency inversion frees components from needing to know the details of how logging is implemented. The resulting architecture looks as follows:
+Dependency inversion frees components from needing to know the details of how logging is implemented. It also leads to sparser build dependency graphs - components that depend only on the interface don’t need to be recompiled when implementations change. The resulting architecture looks as follows:
 {{< mermaid >}}
 graph TD
     Main --> Worker
@@ -39,11 +41,9 @@ graph TD
     FileLogger --> LoggerInterface
 {{< /mermaid >}}
 
-It's worth a note that it is totally fine - and in fact expected - that `main` depends on the low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
+It’s worth noting that it is not only acceptable but expected that main depends on low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
 
-Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
-
-## Defining the Interface
+## Defining the Logger Interface
 So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we'll just log a simple string for simplicity.
 
 **File**: `core/components/logger/include/logger_interface.h`
@@ -74,7 +74,7 @@ Now, we create two low-level implementations of the high-level logger interface.
 {{<readfile "dependency-inversion-c/plugins/file_logger/src/file_logger.c" >}}
 {{< /highlight >}}
 
-## Using the Logger in a Component
+## Using the Logger in a High-Level Component
 
 Let's create a component that uses a logger. We'll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging *interface* and not a particular logger.
 
@@ -108,7 +108,8 @@ cat log.txt
 
 ## Verifying Dependency Inversion
 
-To confirm the components implementing business logic - like `worker` - have no dependency on any concrete implementation, let's investigate the `worker` object file. If we run `make worker.o` to create the object file for our worker component, we can then use `nm` to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!
+To confirm the components implementing business logic - like `worker` - have no dependency on any concrete implementation, let's investigate the `worker` object file. If we run `make worker.o` to create the object file for our worker component, we can then use `nm` to prove there are no undefined symbols. This demonstrates the dependency inversion worked: the worker component has zero dependency on any concrete logger implementation.
+
 ```bash
 make worker.o
 nm worker.o
