@@ -1,9 +1,17 @@
 ---
-title: "Dependency Inversion in C"
+title: "Dependency Inversion in C: A Technique for Extensible Embedded Software"
 date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
+The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware configurations grow linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually the organization becomes resistant to improving its own product because the software architecture can’t absorb change.
+
+This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). It allows embedded systems to adapt quickly and cheaply to new hardware iterations without rewriting core logic.
+
+In this post, we explore dependency inversion in C through a concrete, practical example: designing a flexible logging interface.
+
+## A Simple Logger
+
 Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:
 
 1. An initialization function that accepts a module name to prepend to each log message.
@@ -11,11 +19,9 @@ Suppose we’re developing a system in need of a logging facility. The logger ne
 
 A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it's very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?
 
-A common mistake in embedded software architecture is coupling hardware implementation details too closely to the business rules of the application. This creates brittle code that is difficult to port to new systems with identical high-level logic but differences in the presentation layer.
-
 The solution is **dependency inversion**: high-level policies should not depend on low-level details. This topic has been covered extensively elsewhere, so here’s the short version: lower-level components must conform to an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward—high-level code is unaware of how the interface is concretely implemented.
 
-Let’s dig into our logger example. The naive implementation might be structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
+Let’s dig into our logger example. The naive implementation might be a structure like this, with the a component utilizing a logger containing a direct or transitive dependency on a specific logger implementation:
 {{< mermaid >}}
 graph TD
     Main --> Worker
@@ -38,28 +44,32 @@ It's worth a note that it is totally fine - and in fact expected - that `main` d
 Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a table of function pointers — something C *can* express. So in C, we provide our own layer of indirection using structs of function pointers.
 
 ## Defining the Interface
-So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that.
+So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we'll just log a simple string for simplicity.
+
+**File**: `core/components/logger/include/logger_interface.h`
 {{< highlight c >}}
-{{<readfile "dependency-inversion-c/core/include/logger_interface.h" >}}
+{{<readfile "dependency-inversion-c/core/components/logger/include/logger_interface.h" >}}
 {{< /highlight >}}
 
 ### Implementing Two Concrete Loggers
-Now, we create two low-level implementations of the high-level logger interface. Note how they depend on the logger interface. You'll see in a minute that components which do logging do not directly utilize either of these concrete implementations.
+Now, we create two low-level implementations of the high-level logger interface. Notice how they depend on the logger interface. Components which do logging do not directly utilize either of these concrete implementations.
 
 #### stdout Logger
+**File**: `plugins/stdout_logger/include/stdout_logger.h`
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/plugins/stdout_logger/include/stdout_logger.h" >}}
 {{< /highlight >}}
-
+**File**: `plugins/stdout_logger/src/stdout_logger.c`
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/plugins/stdout_logger/src/stdout_logger.c" >}}
 {{< /highlight >}}
 
 #### File Logger
+**File**: `plugins/file_logger/include/file_logger.h`
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/plugins/file_logger/include/file_logger.h" >}}
 {{< /highlight >}}
-
+**File**: `plugins/file_logger/src/file_logger.c`
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/plugins/file_logger/src/file_logger.c" >}}
 {{< /highlight >}}
@@ -68,17 +78,20 @@ Now, we create two low-level implementations of the high-level logger interface.
 
 Let's create a component that uses a logger. We'll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging *interface* and not a particular logger.
 
+**File**: `core/components/worker/include/worker.h`
 {{< highlight c >}}
-{{<readfile "dependency-inversion-c/core/components/include/worker.h" >}}
+{{<readfile "dependency-inversion-c/core/components/worker/include/worker.h" >}}
 {{< /highlight >}}
 
+**File**: `core/components/worker/src/worker.c`
 {{< highlight c >}}
-{{<readfile "dependency-inversion-c/core/components/src/worker.c" >}}
+{{<readfile "dependency-inversion-c/core/components/worker/src/worker.c" >}}
 {{< /highlight >}}
 
 ## Wiring Together into an Executable
 It's now trivial to create a `main` which instantiates a few different workers, and flexibly select which logger to use. We'll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.
 
+**File**: `app/main.c`
 {{< highlight c >}}
 {{<readfile "dependency-inversion-c/app/main.c" >}}
 {{< /highlight >}}
@@ -98,7 +111,7 @@ cat log.txt
 To confirm the components implementing business logic - like `worker` - have no dependency on any concrete implementation, let's investigate the `worker` object file. If we run `make worker.o` to create the object file for our worker component, we can then use `nm` to prove there are no undefined symbols. This demonstrates our dependency inversion worked - our high-level component has no dependency on a specific implementation of the logger!
 ```bash
 make worker.o
-nm worker
+nm worker.o
 0000000000000030 T _worker_do_work
 0000000000000000 T _worker_init
 000000000000006c s l_.str
@@ -122,4 +135,4 @@ The first bullet is hitting the problem with a hammer - introduce tons of duplic
 
 We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.
 
-The full source code for this example is available on [GitHub](https://github.com/sam-w-yellin/dependency-inversion-c).
+The full source code for this example is available on [GitHub](https://github.com/sam-w-yellin/dependency-inversion-c). If you’d like to discuss this pattern or how it might apply to your system, feel free to reach out: sam.w.yellin@gmail.com.

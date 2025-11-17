@@ -9,16 +9,12 @@
     <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
     <atom:link href="http://localhost:1313/volatile-int-blog/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Dependency Inversion in C</title>
+      <title>Dependency Inversion in C: A Technique for Extensible Embedded Software</title>
       <link>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
       <guid>http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/</guid>
-      <description>&lt;p&gt;Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;An initialization function that accepts a module name to prepend to each log message.&lt;/li&gt;
-&lt;li&gt;A log function that accepts a message to log.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback - it&amp;rsquo;s very difficult to change the logging interface for a given component. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?&lt;/p&gt;</description>
+      <description>&lt;p&gt;The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware configurations grow linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually the organization becomes resistant to improving its own product because the software architecture can’t absorb change.&lt;/p&gt;
+&lt;p&gt;This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is &lt;a href=&#34;https://en.wikipedia.org/wiki/Dependency_inversion_principle&#34;&gt;dependency inversion&lt;/a&gt;. It allows embedded systems to adapt quickly and cheaply to new hardware iterations without rewriting core logic.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
