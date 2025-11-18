@@ -4,7 +4,7 @@ date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
-The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
+The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
 
 This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.
 
@@ -19,11 +19,9 @@ Suppose we’re developing a system in need of a logging facility. The logger ne
 1. An initialization function to set up any resources required by the logger.
 2. A log function that accepts a message to log.
 
-A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change *how* a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?
+A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change *how* a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface? The solution is dependency inversion.
 
-The solution is **dependency inversion**: 
-
-Let’s dig into our logger example. The naïve implementation might look like this: the component depends directly or transitively on a specific logger implementation.
+Let’s dig into our logger example. The tightly-coupled implementation might look like this, where the the component depends directly or transitively on a specific logger implementation:
 {{< mermaid >}}
 graph TD
     Main --> Worker
@@ -44,7 +42,7 @@ graph TD
 It’s worth noting that it is not only acceptable but expected that main depends on low-level details. Ideally, `main` - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.
 
 ## Defining the Logger Interface
-So, let's define an abstract interface—implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we'll just log a simple string for simplicity.
+So, let's define an abstract interface - implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we'll just log a string for simplicity.
 
 **File**: `core/components/logger/include/logger_interface.h`
 {{< highlight c >}}
