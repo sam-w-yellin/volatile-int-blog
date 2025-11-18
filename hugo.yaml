@@ -1,4 +1,6 @@
 baseURL: https://volatileint.dev/
+relativeURLs: false
+canonifyURLs: true
 languageCode: en-us
 title: Volatile Int
 theme: ["PaperMod"]
