@@ -101,7 +101,7 @@ If we compile this all together and run, we should see the two stdout loggers em
 make > /dev/null
 ./demo
 [stdout1] Worker did some work
-[stdout1] Worker did some work
+[stdout2] Worker did some work
 cat log.txt
 [file1] Worker did some work
 ```
