@@ -100,10 +100,10 @@ If we compile this all together and run, we should see the two stdout loggers em
 ```bash
 make > /dev/null
 ./demo
-[stdout_logger_1] Worker did some work
-[stdout_logger_2] Worker did some work
+[stdout1] Worker did some work
+[stdout1] Worker did some work
 cat log.txt
-[file_logger] Worker did some work
+[file1] Worker did some work
 ```
 
 ## Verifying Dependency Inversion
