@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto" data-theme="auto">
 
-<head><script src="/volatile-int-blog/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=volatile-int-blog/livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 <title>Dependency Inversion in C: A Technique for Extensible Embedded Software | Volatile Int</title>
 <meta name="keywords" content="C, architecture, embedded, dependency, inversion">
 <meta name="description" content="The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
 This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
-<link crossorigin="anonymous" href="/volatile-int-blog/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/volatile-int-blog/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/volatile-int-blog/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/volatile-int-blog/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/volatile-int-blog/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/volatile-int-blog/safari-pinned-tab.svg">
+<link rel="canonical" href="https://volatileint.dev/posts/dependency-inversion-c/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://volatileint.dev/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://volatileint.dev/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://volatileint.dev/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://volatileint.dev/apple-touch-icon.png">
+<link rel="mask-icon" href="https://volatileint.dev/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/volatile-int-blog/posts/dependency-inversion-c/">
+<link rel="alternate" hreflang="en" href="https://volatileint.dev/posts/dependency-inversion-c/">
 <noscript>
     <style>
         #theme-toggle,
@@ -71,13 +71,82 @@ This risk is avoidable. By intentionally separating the high-level business rule
         document.querySelector("html").dataset.theme = 'light';
     }
 
+</script><meta property="og:url" content="https://volatileint.dev/posts/dependency-inversion-c/">
+  <meta property="og:site_name" content="Volatile Int">
+  <meta property="og:title" content="Dependency Inversion in C: A Technique for Extensible Embedded Software">
+  <meta property="og:description" content="The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
+This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-16T12:00:00-08:00">
+    <meta property="article:modified_time" content="2025-11-16T12:00:00-08:00">
+    <meta property="article:tag" content="C">
+    <meta property="article:tag" content="Architecture">
+    <meta property="article:tag" content="Embedded">
+    <meta property="article:tag" content="Dependency">
+    <meta property="article:tag" content="Inversion">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dependency Inversion in C: A Technique for Extensible Embedded Software">
+<meta name="twitter:description" content="The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
+This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://volatileint.dev/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Dependency Inversion in C: A Technique for Extensible Embedded Software",
+      "item": "https://volatileint.dev/posts/dependency-inversion-c/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Dependency Inversion in C: A Technique for Extensible Embedded Software",
+  "name": "Dependency Inversion in C: A Technique for Extensible Embedded Software",
+  "description": "The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.\nThis risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.\n",
+  "keywords": [
+    "C", "architecture", "embedded", "dependency", "inversion"
+  ],
+  "articleBody": "The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.\nThis risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.\nLanguages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a struct of function pointers - something C expresses naturally. So in C, we provide our own layer of indirection using structs of function pointers.\nIn this post, we explore dependency inversion in C through a concrete, practical example: designing a flexible logging interface.\nA Simple Logger Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:\nAn initialization function to set up any resources required by the logger. A log function that accepts a message to log. A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change how a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface?\nThe solution is dependency inversion:\nLet’s dig into our logger example. The naïve implementation might look like this: the component depends directly or transitively on a specific logger implementation. graph TD Main --\u003e Worker Worker --\u003e StdoutLogger Dependency inversion frees components from needing to know the details of how logging is implemented. It also leads to sparser build dependency graphs - components that depend only on the interface don’t need to be recompiled when implementations change. The resulting architecture looks as follows: graph TD Main --\u003e Worker Main --\u003e StdoutLogger Main --\u003e FileLogger Worker --\u003e LoggerInterface StdoutLogger --\u003e LoggerInterface FileLogger --\u003e LoggerInterface It’s worth noting that it is not only acceptable but expected that main depends on low-level details. Ideally, main - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.\nDefining the Logger Interface So, let’s define an abstract interface—implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we’ll just log a simple string for simplicity.\nFile: core/components/logger/include/logger_interface.h #pragma once #include typedef struct logger_interface { void (*init)(void); void (*log)(const char* logger_name, const char *msg); const char* name; } logger_interface_t;\nImplementing Two Concrete Loggers Now, we create two low-level implementations of the high-level logger interface. Notice how they depend on the logger interface. Components which do logging do not directly utilize either of these concrete implementations.\nstdout Logger File: plugins/stdout_logger/include/stdout_logger.h #pragma once #include #include \"logger_interface.h\" logger_interface_t mk_stdout_logger(const char* name); File: plugins/stdout_logger/src/stdout_logger.c #include #include #include \"stdout_logger.h\" static void stdout_logger_init() { } static void stdout_logger_log(const char* logger_name, const char *msg) { printf(\"[%s] %s\\n\", logger_name, msg); } logger_interface_t mk_stdout_logger(const char* name) { logger_interface_t logger; logger.name = name; logger.init = stdout_logger_init; logger.log = stdout_logger_log; return logger; }\nFile Logger File: plugins/file_logger/include/file_logger.h #pragma once #include #include #include \"logger_interface.h\" logger_interface_t mk_file_logger(const char* name); File: plugins/file_logger/src/file_logger.c #include #include #include \"file_logger.h\" static char* logname = \"log.txt\"; static void file_logger_init() { FILE* f = fopen(logname, \"w\"); if (f != NULL) { fclose(f); } } static void file_logger_log(const char* logger_name, const char *msg) { FILE* f = fopen(logname, \"a\"); if (f != NULL) { fprintf(f, \"[%s] %s\\n\", logger_name, msg); fflush(f); fclose(f); } } logger_interface_t mk_file_logger(const char* name) { logger_interface_t logger; logger.name = name; logger.init = file_logger_init; logger.log = file_logger_log; return logger; }\nUsing the Logger in a High-Level Component Let’s create a component that uses a logger. We’ll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging interface and not a particular logger.\nFile: core/components/worker/include/worker.h #pragma once #include \"logger_interface.h\" typedef struct { const logger_interface_t *logger; } worker_t; void worker_init(worker_t *w, const logger_interface_t *logger); void worker_do_work(worker_t *w);\nFile: core/components/worker/src/worker.c #include #include \"worker.h\" void worker_init(worker_t *w, const logger_interface_t *logger) { w-\u003elogger = logger; w-\u003elogger-\u003einit(); } void worker_do_work(worker_t *w) { w-\u003elogger-\u003elog(w-\u003elogger-\u003ename, \"Worker did some work\"); }\nWiring Together into an Executable It’s now trivial to create a main which instantiates a few different workers, and flexibly select which logger to use. We’ll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.\nFile: app/main.c #include #include \"worker.h\" #include \"stdout_logger.h\" #include \"file_logger.h\" int main(void) { logger_interface_t stdout1 = mk_stdout_logger(\"stdout1\"); logger_interface_t stdout2 = mk_stdout_logger(\"stdout2\"); logger_interface_t file1 = mk_file_logger(\"file1\"); worker_t w1, w2, w3; worker_init(\u0026w1, \u0026stdout1); worker_init(\u0026w2, \u0026stdout2); worker_init(\u0026w3, \u0026file1); worker_do_work(\u0026w1); worker_do_work(\u0026w2); worker_do_work(\u0026w3); return 0; }\nIf we compile this all together and run, we should see the two stdout loggers emit their messages on the console, and the file logger’s output in log.txt. The makefile in the source code for this example defines the required target.\nmake \u003e /dev/null ./demo [stdout_logger_1] Worker did some work [stdout_logger_2] Worker did some work cat log.txt [file_logger] Worker did some work Verifying Dependency Inversion To confirm the components implementing business logic - like worker - have no dependency on any concrete implementation, let’s investigate the worker object file. If we run make worker.o to create the object file for our worker component, we can then use nm to prove there are no undefined symbols. This demonstrates the dependency inversion worked: the worker component has zero dependency on any concrete logger implementation.\nmake worker.o nm worker.o 0000000000000030 T _worker_do_work 0000000000000000 T _worker_init 000000000000006c s l_.str 0000000000000000 t ltmp0 000000000000006c s ltmp1 0000000000000088 s ltmp2 The Cost of Indirection While this abstraction is very low cost, it is not zero cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.\nOther Options What are the other options for tackling this sort of problem?\nDefine entirely separate worker components for each logger type: worker-file, worker-stdout, etc Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration. The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we’ve made it impossible to instantiate multiple types of loggers in a single translation unit. It’s my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.\nConclusion We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.\nThe full source code for this example is available on GitHub. If you’d like to discuss this pattern or how it might apply to your system, feel free to reach out: sam.w.yellin@gmail.com.\n",
+  "wordCount" : "1384",
+  "inLanguage": "en",
+  "datePublished": "2025-11-16T12:00:00-08:00",
+  "dateModified": "2025-11-16T12:00:00-08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://volatileint.dev/posts/dependency-inversion-c/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Volatile Int",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://volatileint.dev/favicon.ico"
+    }
+  }
+}
 </script>
 </head>
 <body id="top">
     <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/volatile-int-blog/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <a href="https://volatileint.dev/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -103,7 +172,7 @@ This risk is avoidable. By intentionally separating the high-level business rule
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/volatile-int-blog/about/" title="About">
+                <a href="https://volatileint.dev/about/" title="About">
                     <span>About</span>
                 </a>
             </li>
@@ -331,18 +400,18 @@ graph TD
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/c/">C</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/architecture/">Architecture</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/embedded/">Embedded</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/dependency/">Dependency</a></li>
-      <li><a href="http://localhost:1313/volatile-int-blog/tags/inversion/">Inversion</a></li>
+      <li><a href="https://volatileint.dev/tags/c/">C</a></li>
+      <li><a href="https://volatileint.dev/tags/architecture/">Architecture</a></li>
+      <li><a href="https://volatileint.dev/tags/embedded/">Embedded</a></li>
+      <li><a href="https://volatileint.dev/tags/dependency/">Dependency</a></li>
+      <li><a href="https://volatileint.dev/tags/inversion/">Inversion</a></li>
     </ul>
   </footer>
 </article>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/volatile-int-blog/">Volatile Int</a></span> · 
+        <span>&copy; 2025 <a href="https://volatileint.dev/">Volatile Int</a></span> · 
 
     <span>
         Powered by
