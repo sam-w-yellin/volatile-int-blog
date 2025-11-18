@@ -1,4 +1,4 @@
-baseURL: https://volatileint.dev/
+baseURL: "https://volatileint.dev/"
 relativeURLs: false
 canonifyURLs: true
 languageCode: en-us
@@ -14,3 +14,5 @@ menu:
       name: "About"
       url: "/about/"
       weight: 10
+enableRSS: true
+rssURI: "index.xml"
