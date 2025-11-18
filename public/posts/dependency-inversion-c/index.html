@@ -245,7 +245,8 @@ graph TD
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stddef.h&gt;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> logger_interface {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> logger_interface 
+</span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>init)(<span style="color:#66d9ef">void</span>);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>log)(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> logger_name, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>msg);
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name;
@@ -274,7 +275,8 @@ graph TD
 </span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;[%s] %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, logger_name, msg);
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) 
+</span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> logger;
 </span></span><span style="display:flex;"><span>    logger.name <span style="color:#f92672">=</span> name;
 </span></span><span style="display:flex;"><span>    logger.init <span style="color:#f92672">=</span> stdout_logger_init;
@@ -315,7 +317,8 @@ graph TD
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_file_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_file_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) 
+</span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> logger;
 </span></span><span style="display:flex;"><span>    logger.name <span style="color:#f92672">=</span> name;
 </span></span><span style="display:flex;"><span>    logger.init <span style="color:#f92672">=</span> file_logger_init;
@@ -329,7 +332,8 @@ graph TD
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;logger_interface.h&#34;</span><span style="color:#75715e">
 </span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> 
+</span></span><span style="display:flex;"><span>{
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">logger_interface_t</span> <span style="color:#f92672">*</span>logger;
 </span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">worker_t</span>;
 </span></span><span style="display:flex;"><span>
