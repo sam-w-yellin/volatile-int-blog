@@ -16,3 +16,4 @@ menu:
       weight: 10
 enableRSS: true
 rssURI: "index.xml"
+googleAnalytics: "G-N81PSXWFLZ"

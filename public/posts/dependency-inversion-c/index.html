@@ -71,7 +71,21 @@ This risk is avoidable. By intentionally separating the high-level business rule
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="https://volatileint.dev/posts/dependency-inversion-c/">
+</script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N81PSXWFLZ"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-N81PSXWFLZ');
+        }
+      </script><meta property="og:url" content="https://volatileint.dev/posts/dependency-inversion-c/">
   <meta property="og:site_name" content="Volatile Int">
   <meta property="og:title" content="Dependency Inversion in C: A Technique for Extensible Embedded Software">
   <meta property="og:description" content="The core value proposition of software is flexibility—but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
