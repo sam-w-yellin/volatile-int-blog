@@ -8,14 +8,14 @@
         {{- end }}
         {{- print " · "}}
     {{- end }}
-
-    {{- with site.Params.footer.text }}
-        {{ . | markdownify }}
-        {{- print " · "}}
-    {{- end }}
     <span>
         <a href="/index.xml">Subscribe via RSS</a>
     </span>
+    {{- print " · "}}
+    <span>
+        <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
+    </span>
+    {{- print " · "}}
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &

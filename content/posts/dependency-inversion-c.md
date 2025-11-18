@@ -135,3 +135,5 @@ The first bullet is hitting the problem with a hammer - introduce tons of duplic
 We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.
 
 The full source code for this example is available on [GitHub](https://github.com/sam-w-yellin/dependency-inversion-c). If you’d like to discuss this pattern or how it might apply to your system, feel free to reach out: sam@volatileint.dev
+
+If you found this article valuable, consider subscribing to the [newsletter](https://volatileint.dev/newsletter) to hear about new posts!
