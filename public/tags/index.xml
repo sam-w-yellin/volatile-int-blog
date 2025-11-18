@@ -2,45 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on Volatile Int</title>
-    <link>https://volatileint.dev/tags/</link>
+    <link>https://www.volatileint.dev/tags/</link>
     <description>Recent content in Tags on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
-    <atom:link href="https://volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Architecture</title>
-      <link>https://volatileint.dev/tags/architecture/</link>
+      <link>https://www.volatileint.dev/tags/architecture/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://volatileint.dev/tags/architecture/</guid>
+      <guid>https://www.volatileint.dev/tags/architecture/</guid>
       <description></description>
     </item>
     <item>
       <title>C</title>
-      <link>https://volatileint.dev/tags/c/</link>
+      <link>https://www.volatileint.dev/tags/c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://volatileint.dev/tags/c/</guid>
+      <guid>https://www.volatileint.dev/tags/c/</guid>
       <description></description>
     </item>
     <item>
       <title>Dependency</title>
-      <link>https://volatileint.dev/tags/dependency/</link>
+      <link>https://www.volatileint.dev/tags/dependency/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://volatileint.dev/tags/dependency/</guid>
+      <guid>https://www.volatileint.dev/tags/dependency/</guid>
       <description></description>
     </item>
     <item>
       <title>Embedded</title>
-      <link>https://volatileint.dev/tags/embedded/</link>
+      <link>https://www.volatileint.dev/tags/embedded/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://volatileint.dev/tags/embedded/</guid>
+      <guid>https://www.volatileint.dev/tags/embedded/</guid>
       <description></description>
     </item>
     <item>
       <title>Inversion</title>
-      <link>https://volatileint.dev/tags/inversion/</link>
+      <link>https://www.volatileint.dev/tags/inversion/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://volatileint.dev/tags/inversion/</guid>
+      <guid>https://www.volatileint.dev/tags/inversion/</guid>
       <description></description>
     </item>
   </channel>
