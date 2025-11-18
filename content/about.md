@@ -10,4 +10,5 @@ I've spent my career developing embedded software systems. I have code executing
 If you have any questions or would like input on your software system or architecture, please reach out!
 
 Email: sam.w.yellin@gmail.com
+
 LinkedIn: https://www.linkedin.com/in/sam-yellin-73a382105/
