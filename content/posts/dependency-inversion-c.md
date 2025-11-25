@@ -4,6 +4,7 @@ date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]
 ---
+
 The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
 
 This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is [dependency inversion](https://en.wikipedia.org/wiki/Dependency_inversion_principle). In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the *dependencies* flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.
