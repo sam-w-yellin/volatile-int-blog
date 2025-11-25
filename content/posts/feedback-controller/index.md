@@ -8,8 +8,7 @@ build:
 tags: ["C++","setpoint", "concept", "embedded", "template", "lambda"]
 ---
 
-# A Case Study in Software Evolution
-In this post, we're going to implement a generic C++ component capable of implementing a wide variety of closed-loop control systems. We'll end with a controller capable of implementing whatever algorithm you'd want, with configurable setpoints, consistent error handling, and support for logging using modern C++ concepts. 
+In this post, we're going to implement a generic interface capable of implementing a wide variety of closed-loop control systems. We'll end with a controller capable of implementing whatever algorithm you'd want, with configurable setpoints, consistent error handling, and support for logging using modern C++ concepts. 
 
 Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
 
@@ -22,9 +21,7 @@ Picture yourself as an embedded software engineer working at a scrappy startup d
 - A thermocouple connected to the device being cooled to sense the temperature.
 - A microcontroller wired to control the TEC using the thermocouple as feedback.
 
-< add chart >
-
-The thermal engineer explains that the requirements here are really simple. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. The component generates heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.
+The thermal engineer explains the straightoforward control algorithm requirements.. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. The component generates heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.
 
 You write a very minimal program:
 ```c++
@@ -108,9 +105,9 @@ flowchart LR
 
 Let's ground this in our TEC example. The ADC is the feedback. ADCs read a voltage. The control law for a TEC is going to deal with temperatures in degrees C, so the voltage must be converted to degrees. The control law emits a boolean - the TEC is on or off. For the bang-bang controller discussed earlier, the output GPIO uses the same data type as the controller output.
 
-It is now clear that the data types for input and output from the control law *constrain* the feedback and actuator components.. The control law cannot provide its own adapters - or we ahve violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.
+It is now clear that the data types for input and output from the control law *constrain* the feedback and actuator components.. The control law cannot provide its own adapters - or we have violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.
 
-Template concepts - introduced in C++20 - are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a `concept`.
+Template concepts introduced in C++20 are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a `concept`.
  
 #### ControlLaw Interface
 Let's start out writing a concept for our most abstract component - the `ControlLaw`. The concept requires that each law defines its input and output types - `Measurement` and `Command` respectively. Laws must also define a `State` type.
@@ -242,7 +239,7 @@ First - we need to create concrete implementations of our ADC feedback, GPIO act
 
 **File**: `example/components/feedback_controller/plugins/laws/include/bangbang.hpp`
 {{< highlight c >}}
-{{<readfile "feedback-controller/example/components/feedback_controller/plugins/actuators/include/gpio_actuator.hpp" >}}
+{{<readfile "feedback-controller/example/components/feedback_controller/plugins/laws/include/bangbang.hpp" >}}
 {{< /highlight >}}
 
 It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller.
@@ -301,7 +298,7 @@ The following code utilizes the bang-bang controller - instantiated through our 
 
 **File**: `example/bangbang_sim/main.cpp`
 {{< highlight c >}}
-{{<readfile "feedback-controller/example/components/feedback_controller/plugins/actuators/include/gpio_actuator.hpp" >}}
+{{<readfile "feedback-controller/example/bangbang_sim/main.cpp" >}}
 {{< /highlight >}}
 
 After building and executing this simulation, and running the included `graph_log.py` script - you'll see an output like this:
