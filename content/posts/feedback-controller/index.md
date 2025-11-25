@@ -11,7 +11,8 @@ tags: ["C++","setpoint", "concept", "embedded", "template", "lambda"]
 # A Case Study in Software Evolution
 In this post, we're going to implement a generic C++ component capable of implementing a wide variety of closed-loop control systems. We'll end with a controller capable of implementing whatever algorithm you'd want, with configurable setpoints, consistent error handling, and support for logging using modern C++ concepts. 
 
-Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff. That being said, this approach is **not** a one-size-fits-all solution.  hWhile this approach
+Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
+
 First, let's kick things off with a scenario.
 
 ## A Simple Bang-Bang Controller
