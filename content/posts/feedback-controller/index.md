@@ -33,7 +33,7 @@ You write a very minimal program:
 #include "gpio.hpp"
 #include "adc.hpp"
 
-void control_tec(Gpio& tec, Adc& thermocouple) {
+void control_tec() {
     Gpio tec{ 1 }; // TEC is on pin 1
     Adc thermocouple{ 2 }; // thermocouple on pin 2
 
