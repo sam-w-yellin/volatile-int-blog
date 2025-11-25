@@ -8,6 +8,12 @@
     <loc>http://localhost:1313/tags/c/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/tags/c&#43;&#43;/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/concept/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/tags/dependency/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
@@ -20,10 +26,19 @@
     <loc>http://localhost:1313/tags/inversion/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/tags/lambda/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/posts/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/tags/setpoint/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/tags/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/template/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>

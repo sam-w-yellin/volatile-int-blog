@@ -4,3 +4,6 @@
 [submodule "dependency-inversion-c"]
 	path = dependency-inversion-c
 	url = git@github.com:sam-w-yellin/dependency-inversion-c.git
+[submodule "feedback-controller"]
+	path = feedback-controller
+	url = git@github.com:sam-w-yellin/feedback-controller.git

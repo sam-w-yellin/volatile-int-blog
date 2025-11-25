@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Implementing a Generic Closed-Loop Controller in Modern C&#43;&#43; | Volatile Int</title>
+<meta name="keywords" content="C&#43;&#43;, setpoint, concept, embedded, template, lambda">
+<meta name="description" content="A Case Study in Software Evolution
+In this post, we&rsquo;re going to implement a generic C&#43;&#43; component capable of implementing a wide variety of closed-loop control systems. We&rsquo;ll end with a controller capable of implementing whatever algorithm you&rsquo;d want, with configurable setpoints, consistent error handling, and support for logging using modern C&#43;&#43; concepts.
+Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff. That being said, this approach is not a one-size-fits-all solution.  hWhile this approach
+First, let&rsquo;s kick things off with a scenario.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/feedback-controller/feedback-controller/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/feedback-controller/feedback-controller/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/newsletter/" title="Newsletter">
+                    <span>Newsletter</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Implementing a Generic Closed-Loop Controller in Modern C&#43;&#43;
+    </h1>
+    <div class="post-meta"><span title='2025-11-16 12:00:00 -0800 PST'>November 16, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="a-case-study-in-software-evolution">A Case Study in Software Evolution<a hidden class="anchor" aria-hidden="true" href="#a-case-study-in-software-evolution">#</a></h1>
+<p>In this post, we&rsquo;re going to implement a generic C++ component capable of implementing a wide variety of closed-loop control systems. We&rsquo;ll end with a controller capable of implementing whatever algorithm you&rsquo;d want, with configurable setpoints, consistent error handling, and support for logging using modern C++ concepts.</p>
+<p>Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff. That being said, this approach is <strong>not</strong> a one-size-fits-all solution.  hWhile this approach
+First, let&rsquo;s kick things off with a scenario.</p>
+<h2 id="a-simple-bang-bang-controller">A Simple Bang-Bang Controller<a hidden class="anchor" aria-hidden="true" href="#a-simple-bang-bang-controller">#</a></h2>
+<p>Picture yourself as an embedded software engineer working at a scrappy startup designing a revolutionary new technology with a healthy mix of hardware and software co-development. Your co-worker - a thermal engineer responsible for maintaining the health of a temperature-sensitive component of the system - approaches you, asking for software to regulate the temperature of their system:</p>
+<ul>
+<li>A thermoelectric cooler (henceforth referred to as a TEC) connected to the component that needs to be cooled. The engineer connected this to a simple switch which will apply either 0 or 100% power.</li>
+<li>A thermocouple connected to the device being cooled to sense the temperature.</li>
+<li>A microcontroller wired to control the TEC using the thermocouple as feedback.</li>
+</ul>
+<p>&lt; add chart &gt;</p>
+<p>The thermal engineer explains that the requirements here are really simple. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. The component generates heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.</p>
+<p>You write a very minimal program:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">raw_adc_to_deg_uc</span>(<span style="color:#66d9ef">uint16_t</span> raw) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Simple conversion example
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">float</span><span style="color:#f92672">&gt;</span>(raw) <span style="color:#f92672">*</span> <span style="color:#ae81ff">0.1f</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">control_tec</span>(Gpio<span style="color:#f92672">&amp;</span> tec, Adc<span style="color:#f92672">&amp;</span> thermocouple) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> raw_temp_adc <span style="color:#f92672">=</span> thermocouple.read();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> temp_uc <span style="color:#f92672">=</span> raw_adc_to_deg_uc(raw_temp_adc);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">80</span>) {
+</span></span><span style="display:flex;"><span>        tec.Set(true);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">20</span>) {
+</span></span><span style="display:flex;"><span>        tec.Set(false);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Gpio tec{ <span style="color:#ae81ff">1</span> }; <span style="color:#75715e">// TEC is on pin 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Adc thermocouple{ <span style="color:#ae81ff">2</span> }; <span style="color:#75715e">// thermocouple on pin 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    tec.Configure(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>    thermocouple.Configure();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span>(true) {
+</span></span><span style="display:flex;"><span>        control_tec(tec, thermocouple);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>minutes(<span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This implementation is functional, but it has a number of problems.</p>
+<h2 id="implementing-controller-scaffolding">Implementing Controller Scaffolding<a hidden class="anchor" aria-hidden="true" href="#implementing-controller-scaffolding">#</a></h2>
+<p>What happens when the control law needs to change? What about when the GPIO is changed for a PWM output, or when the on-chip ADC is replaced with a more accurate off-chip device?</p>
+<p>And what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the controls team expected to maintain simulation infrastructure for hardware to iterate on control laws?</p>
+<p>How do we make sure this code actually serves all our purposes? It doesn&rsquo;t appear to handle errors. It doesn&rsquo;t provide insight into the status of the controller. It doesn&rsquo;t have any sense of configuration - the bounds are hard-coded. We have no facilities to log state, or understand if our feedback or actuation mechanisms have failed to accomplish their tasks.</p>
+<p>Finally, what about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they&rsquo;re all implemented in a consistent way? consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways.</p>
+<p>These problems can be addressed by providing <em>scaffolding</em> for the domain of control law implementations.</p>
+<h3 id="requirements-for-a-generic-controller">Requirements for a Generic Controller<a hidden class="anchor" aria-hidden="true" href="#requirements-for-a-generic-controller">#</a></h3>
+<p>Requirements for the scaffolding can be derived from the above use cases:</p>
+<ol>
+<li>Control laws shall be independently testable from any specific hardware configuration.</li>
+<li>Controller feedback and actuation mechanisms shall explicitly handle all IO and configuration errors.</li>
+<li>Controllers shall emit representations of their current state suitable for logging.</li>
+<li>The data flow between the feedback, control law, and actuation mechanism shall be explicitly defined in order to enforce consistency.</li>
+</ol>
+<p>We also have these design goals:</p>
+<ol>
+<li>It should be <em>easy</em> to write control laws that abide by the requirements.</li>
+<li>To the extent possible the constraints imposed by the requirements should be checked at compile-time.</li>
+</ol>
+<h3 id="components-of-a-controller">Components of a Controller<a hidden class="anchor" aria-hidden="true" href="#components-of-a-controller">#</a></h3>
+<p>The controller consists of three logically distinct components:</p>
+<ol>
+<li>A purely mathematical control law that receives inputs and computes outputs in order to achieve some goal.</li>
+<li>A feedback mechanism which interacts with some external interface to collect measurements.</li>
+<li>An output mechanism which effects the values commanded by the control law into the world.</li>
+</ol>
+<p>In a given step of the controller data flows first into the feedback component. Then, the data is converted to a format useable by the control law which uses the feedback to calculate the next output value. The output value from the controller is converted to the required data type to emit to a physical component.</p>
+<p>Let&rsquo;s ground this in our TEC example. The ADC is the feedback. ADCs read a voltage. The control law for a TEC is going to deal with temperatures in degrees C, so the voltage must be converted to degrees. The control law emits a boolean - the TEC is on or off. For the bang-bang controller discussed earlier, the output GPIO uses the same data type as the controller output.</p>
+<p>It is now clear that the data types for input and output from the control law <em>constrain</em> the feedback and actuator components.. The control law cannot provide its own adapters - or we ahve violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.</p>
+<p>Template concepts - introduced in C++20 - are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a <code>concept</code>.</p>
+<h4 id="controllaw-interface">ControlLaw Interface<a hidden class="anchor" aria-hidden="true" href="#controllaw-interface">#</a></h4>
+<p>Let&rsquo;s start out writing a concept for our most abstract component - the <code>ControlLaw</code>. The concept requires that each law defines its input and output types - <code>Measurement</code> and <code>Command</code> respectively. Laws must also define a <code>State</code> type.</p>
+<p>There are two required APIs for a <code>ControlLaw</code>:</p>
+<ol>
+<li><code>Initialize</code> configures the internal <code>ControlLaw</code> state. It must return the initialized state, or a string in the case of an error.</li>
+<li><code>Compute</code> takes in a measurement, and returns a tuple of the next <code>Command</code> and its current <code>State</code>.</li>
+</ol>
+<p>These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> C<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">concept</span> ControlLaw <span style="color:#f92672">=</span> <span style="color:#66d9ef">requires</span>(C law, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>Measurement<span style="color:#f92672">&amp;</span> m) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>Measurement;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>Command;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>State;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { law.Initialize() } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        law.Compute(m)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>Command, <span style="color:#66d9ef">typename</span> C<span style="color:#f92672">::</span>State<span style="color:#f92672">&gt;</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>Notice that the controller is completely independent of the actuator and feedback mechanisms. This decoupling enables our testability requirement - a class abiding by the <code>ControlLaw</code> concept can be instantiated independent of the larger controller infrastructure.</p>
+<h4 id="external-interfaces">External Interfaces<a hidden class="anchor" aria-hidden="true" href="#external-interfaces">#</a></h4>
+<p>Now let&rsquo;s implement our Feedback and Actuator concepts. As discussed earlier, these interfaces are dependent on the <code>ControlLaw</code>&rsquo;s defined data types. This is represented in our concepts as a template parameter for the <code>ControlLaw</code>, from which we extract the <code>Measurement</code> and <code>Command</code> data types:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FB, <span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">concept</span> Feedback <span style="color:#f92672">=</span> ControlLaw<span style="color:#f92672">&lt;</span>Law<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">requires</span>(FB fb) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typename</span> FB<span style="color:#f92672">::</span>State;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { fb.Configure() } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        fb.Read()
+</span></span><span style="display:flex;"><span>    } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Measurement, <span style="color:#66d9ef">typename</span> FB<span style="color:#f92672">::</span>State<span style="color:#f92672">&gt;</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { fb.Convert(std<span style="color:#f92672">::</span>declval<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> FB<span style="color:#f92672">::</span>Raw<span style="color:#f92672">&gt;</span>()) } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Measurement<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> AC, <span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">concept</span> Actuator <span style="color:#f92672">=</span> ControlLaw<span style="color:#f92672">&lt;</span>Law<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#66d9ef">requires</span>(AC ac, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Command<span style="color:#f92672">&amp;</span> cmd) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">typename</span> AC<span style="color:#f92672">::</span>State;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { ac.Configure() } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { ac.Write(cmd) } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> AC<span style="color:#f92672">::</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    { ac.Convert(std<span style="color:#f92672">::</span>declval<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Command<span style="color:#f92672">&gt;</span>()) } <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>same_as<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> AC<span style="color:#f92672">::</span>State<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>These concepts closely mirror each other. They are designed to encapsulate external-facing dependencies and abstract away conversion to the <code>ControlLaw</code>types. The interface entails:</p>
+<ol>
+<li>A <code>Configure</code> function that ensures the output interfaces are ready for control and returns a string on error.</li>
+<li>A function to interface with the external world - <code>Read</code> and <code>Write</code> for the <code>Feedback</code> and <code>Actuator</code> interfaces respectively.</li>
+<li>A <code>Convert</code> function that goes from the respective internal type to the data type expected by the template <code>ControlLaw</code>.</li>
+</ol>
+<p>Just as in the <code>ControlLaw</code> concept, <code>std::expected</code> and <code>std::optional</code> return types are used to enforce error handling and state reporting.</p>
+<h4 id="integrated-controller">Integrated Controller<a hidden class="anchor" aria-hidden="true" href="#integrated-controller">#</a></h4>
+<p>Finally, we implement an integrated <code>Controller</code> class. This class is templated on a specific set of <code>Actuator</code>, <code>Feedback</code>, and <code>ControlLaw</code> concept implementations. It orchestrates the dataflow between components and exposes the external interface to the represented controller.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span>ControlLaw Law, Feedback<span style="color:#f92672">&lt;</span>Law<span style="color:#f92672">&gt;</span> FB, Actuator<span style="color:#f92672">&lt;</span>Law<span style="color:#f92672">&gt;</span> ACT<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Controller</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Measurement <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Measurement;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Command <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>Command;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Controller(FB<span style="color:#f92672">&amp;</span> feedback, ACT<span style="color:#f92672">&amp;</span> actuator, Law<span style="color:#f92672">&amp;</span> law) <span style="color:#f92672">:</span> fb_(feedback), act_(actuator), law_(law) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> Law<span style="color:#f92672">::</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> Initialize()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">auto</span> err <span style="color:#f92672">=</span> fb_.Configure()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(<span style="color:#f92672">*</span>err);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">auto</span> err <span style="color:#f92672">=</span> act_.Configure()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(<span style="color:#f92672">*</span>err);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> law_state <span style="color:#f92672">=</span> law_.Initialize();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>law_state.has_value()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(law_state.error());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> law_state.value();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>ControllerState<span style="color:#f92672">&lt;</span>FB, Law, ACT<span style="color:#f92672">&gt;</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> Step()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> fb_result <span style="color:#f92672">=</span> fb_.Read();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>fb_result.has_value()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(fb_result.error());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> [measurement, fb_state] <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>fb_result;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> law_result <span style="color:#f92672">=</span> law_.Compute(measurement);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>law_result.has_value()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(law_result.error());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> [command, law_state] <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>law_result;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> act_result <span style="color:#f92672">=</span> act_.Write(command);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>act_result.has_value()) <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected(act_result.error());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> act_state <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>act_result;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        ControllerState<span style="color:#f92672">&lt;</span>FB, Law, ACT<span style="color:#f92672">&gt;</span> state{
+</span></span><span style="display:flex;"><span>            .feedback_state <span style="color:#f92672">=</span> fb_state, .control_state <span style="color:#f92672">=</span> law_state, .actuator_state <span style="color:#f92672">=</span> act_state};
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> state;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>   <span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    FB<span style="color:#f92672">&amp;</span> fb_;
+</span></span><span style="display:flex;"><span>    ACT<span style="color:#f92672">&amp;</span> act_;
+</span></span><span style="display:flex;"><span>    Law<span style="color:#f92672">&amp;</span> law_;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><h2 id="revisiting-the-bang-bang-controller">Revisiting the Bang-Bang Controller<a hidden class="anchor" aria-hidden="true" href="#revisiting-the-bang-bang-controller">#</a></h2>
+<p>All the pieces are now in place to implement controllers using our generic template scaffolding. The following example implements the simple bang-bang controller for a TEC discussed earlier.</p>
+<p>First - we need to create concrete implementations of our ADC feedback, GPIO actuation, and bang-bang control law concepts. The implementations are included below without much exposition - they are fairly straightforward components.</p>
+<p><strong>File</strong>: <code>example/components/feedback_controller/plugins/feedback/include/adc_feedback.hpp</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_controller_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>template <span style="color:#f92672">&lt;</span>ControlLaw LAW, <span style="color:#66d9ef">typename</span> Converter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> AdcFeedback
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    using Measurement <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> LAW<span style="color:#f92672">::</span>Measurement;
+</span></span><span style="display:flex;"><span>    using Raw <span style="color:#f92672">=</span> <span style="color:#66d9ef">uint16_t</span>;
+</span></span><span style="display:flex;"><span>    using State <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span>Measurement, Raw<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">AdcFeedback</span>(Adc<span style="color:#f92672">&amp;</span> adc, Converter converter) <span style="color:#f92672">:</span> <span style="color:#a6e22e">adc_</span>(adc), <span style="color:#a6e22e">Convert</span>(converter) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>pair<span style="color:#f92672">&lt;</span>Measurement, State<span style="color:#f92672">&gt;</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Read</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>Raw, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> maybe_raw <span style="color:#f92672">=</span> adc_.<span style="color:#a6e22e">ReadRaw</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>maybe_raw.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">unexpected</span>(maybe_raw.<span style="color:#a6e22e">error</span>());
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> raw <span style="color:#f92672">=</span> maybe_raw.<span style="color:#a6e22e">value</span>();
+</span></span><span style="display:flex;"><span>        Measurement m <span style="color:#f92672">=</span> <span style="color:#a6e22e">Convert</span>(raw);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>pair{m, std<span style="color:#f92672">::</span>pair{m, raw}};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Configure</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> configure_result <span style="color:#f92672">=</span> adc_.<span style="color:#a6e22e">Configure</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (configure_result.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">make_optional</span>(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;ADC configure failed: {}&#34;</span>, configure_result.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Converter Convert;
+</span></span><span style="display:flex;"><span>   private:
+</span></span><span style="display:flex;"><span>    Adc<span style="color:#f92672">&amp;</span> adc_;
+</span></span><span style="display:flex;"><span>};</span></span></code></pre></div></p>
+<p><strong>File</strong>: <code>example/components/feedback_controller/plugins/actuators/include/gpio_actuator.hpp</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_controller_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>template <span style="color:#f92672">&lt;</span>ControlLaw LAW, <span style="color:#66d9ef">typename</span> Converter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>class GpioActuator
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>   public:
+</span></span><span style="display:flex;"><span>    using Command <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> LAW<span style="color:#f92672">::</span>Command;
+</span></span><span style="display:flex;"><span>    using State <span style="color:#f92672">=</span> <span style="color:#66d9ef">bool</span>; 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">GpioActuator</span>(Gpio<span style="color:#f92672">&amp;</span> gpio, Converter converter) <span style="color:#f92672">:</span> <span style="color:#a6e22e">gpio_</span>(gpio), <span style="color:#a6e22e">Convert</span>(converter) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Write</span>(<span style="color:#66d9ef">const</span> Command<span style="color:#f92672">&amp;</span> cmd)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        State gpio_state <span style="color:#f92672">=</span> <span style="color:#a6e22e">Convert</span>(cmd);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> err <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Set</span>(gpio_state);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (err.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">unexpected</span>(std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;Failed to set GPIO: {}&#34;</span>, err.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> gpio_state;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Configure</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> configure_result <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Configure</span>(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (configure_result.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">make_optional</span>(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;GPIO configure failed: {}&#34;</span>, configure_result.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Converter Convert;
+</span></span><span style="display:flex;"><span>   private:
+</span></span><span style="display:flex;"><span>    Gpio<span style="color:#f92672">&amp;</span> gpio_;
+</span></span><span style="display:flex;"><span>};</span></span></code></pre></div></p>
+<p><strong>File</strong>: <code>example/components/feedback_controller/plugins/laws/include/bangbang.hpp</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_controller_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>template <span style="color:#f92672">&lt;</span>ControlLaw LAW, <span style="color:#66d9ef">typename</span> Converter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>class GpioActuator
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>   public:
+</span></span><span style="display:flex;"><span>    using Command <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> LAW<span style="color:#f92672">::</span>Command;
+</span></span><span style="display:flex;"><span>    using State <span style="color:#f92672">=</span> <span style="color:#66d9ef">bool</span>; 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">GpioActuator</span>(Gpio<span style="color:#f92672">&amp;</span> gpio, Converter converter) <span style="color:#f92672">:</span> <span style="color:#a6e22e">gpio_</span>(gpio), <span style="color:#a6e22e">Convert</span>(converter) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Write</span>(<span style="color:#66d9ef">const</span> Command<span style="color:#f92672">&amp;</span> cmd)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        State gpio_state <span style="color:#f92672">=</span> <span style="color:#a6e22e">Convert</span>(cmd);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> err <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Set</span>(gpio_state);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (err.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">unexpected</span>(std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;Failed to set GPIO: {}&#34;</span>, err.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> gpio_state;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Configure</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> configure_result <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Configure</span>(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (configure_result.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">make_optional</span>(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;GPIO configure failed: {}&#34;</span>, configure_result.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Converter Convert;
+</span></span><span style="display:flex;"><span>   private:
+</span></span><span style="display:flex;"><span>    Gpio<span style="color:#f92672">&amp;</span> gpio_;
+</span></span><span style="display:flex;"><span>};</span></span></code></pre></div></p>
+<p>It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller.</p>
+<p>With these components - and the simulated concrete ADC and GPIO interfaces defined by the (linked GitHub repo)[https://github.com/sam-w-yellin/feedback-controller]  - we can actually instantiate and execute a controller. Instantiation is simple:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">// Simulated hardware
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>SimulatedAdc adc;
+</span></span><span style="display:flex;"><span>SimulatedGpio gpio;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Bang-bang control law
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>BangBangLaw <span style="color:#a6e22e">law</span>(<span style="color:#ae81ff">20</span> <span style="color:#75715e">/* min */</span>, <span style="color:#ae81ff">80</span> <span style="color:#75715e">/* max */</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ADC Feedback
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">auto</span> convert_adc <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">uint16_t</span> raw) <span style="color:#f92672">-&gt;</span> BangBangLaw<span style="color:#f92672">::</span>Measurement
+</span></span><span style="display:flex;"><span>{ <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span>BangBangLaw<span style="color:#f92672">::</span>Measurement<span style="color:#f92672">&gt;</span>(raw) <span style="color:#f92672">/</span> <span style="color:#ae81ff">10</span>; };
+</span></span><span style="display:flex;"><span>AdcFeedback<span style="color:#f92672">&lt;</span>BangBangLaw, <span style="color:#66d9ef">decltype</span>(convert_adc)<span style="color:#f92672">&gt;</span> feedback(adc, convert_adc);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// GPIO Actuator
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">auto</span> convert_gpio <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">bool</span> cmd) <span style="color:#f92672">-&gt;</span> BangBangLaw<span style="color:#f92672">::</span>Command { <span style="color:#66d9ef">return</span> cmd; };
+</span></span><span style="display:flex;"><span>GpioActuator<span style="color:#f92672">&lt;</span>BangBangLaw, <span style="color:#66d9ef">decltype</span>(convert_gpio)<span style="color:#f92672">&gt;</span> actuator(gpio, convert_gpio);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Integrated controller
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>Controller<span style="color:#f92672">&lt;</span>BangBangLaw, <span style="color:#66d9ef">decltype</span>(feedback), <span style="color:#66d9ef">decltype</span>(actuator)<span style="color:#f92672">&gt;</span> controller(feedback, actuator,
+</span></span><span style="display:flex;"><span>                                                                            law);
+</span></span></code></pre></div><p>We can now use the <code>controller</code> object to enact our control - first using the <code>Initialize</code> API to setup the hardware and control laws, and then the <code>Step</code> function to read inputs into and write outputs from the control law.</p>
+<p>Let&rsquo;s briefly explore what kinds of errors we get if we violate our concepts. One of the constraints is that our <code>Convert</code> functions map to the types expected by the templated <code>ControlLaw</code>. So, instead of converting the ADC read to an <code>int32_t</code> (implicit through the <code>BangBangLaw::Measurement</code>), let&rsquo;s try converting to a <code>float</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> convert_adc <span style="color:#f92672">=</span> [](<span style="color:#66d9ef">uint16_t</span> raw) <span style="color:#f92672">-&gt;</span> <span style="color:#66d9ef">float</span>
+</span></span><span style="display:flex;"><span>{ <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">float</span><span style="color:#f92672">&gt;</span>(raw) <span style="color:#f92672">/</span> <span style="color:#ae81ff">10</span>; };
+</span></span><span style="display:flex;"><span>AdcFeedback<span style="color:#f92672">&lt;</span>BangBangLaw, <span style="color:#66d9ef">decltype</span>(convert_adc)<span style="color:#f92672">&gt;</span> feedback(adc, convert_adc);
+</span></span></code></pre></div><p>We&rsquo;re going to get a compile-time error - and if you&rsquo;re used to C++ templates you&rsquo;ll agree this error is <em>much</em> nicer than errors you get without concepts:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>/Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:85:5: error: constraints not satisfied <span style="color:#66d9ef">for</span> class template <span style="color:#e6db74">&#39;Controller&#39;</span> <span style="color:#f92672">[</span>with Law <span style="color:#f92672">=</span> BangBangLaw, FB <span style="color:#f92672">=</span> AdcFeedback&lt;BangBangLaw, <span style="color:#f92672">(</span>lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:76:24<span style="color:#f92672">)</span>&gt;, ACT <span style="color:#f92672">=</span> GpioActuator&lt;BangBangLaw, <span style="color:#f92672">(</span>lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:81:25<span style="color:#f92672">)</span>&gt;<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">85</span> |     Controller&lt;BangBangLaw, decltype<span style="color:#f92672">(</span>feedback<span style="color:#f92672">)</span>, decltype<span style="color:#f92672">(</span>actuator<span style="color:#f92672">)</span>&gt; controller<span style="color:#f92672">(</span>feedback, actuator,
+</span></span><span style="display:flex;"><span>      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+</span></span><span style="display:flex;"><span>/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:56:27: note: because <span style="color:#e6db74">&#39;Feedback&lt;AdcFeedback&lt;BangBangLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:76:24)&gt;, BangBangLaw&gt;&#39;</span> evaluated to false
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">56</span> | template &lt;ControlLaw Law, Feedback&lt;Law&gt; FB, Actuator&lt;Law&gt; ACT&gt;
+</span></span><span style="display:flex;"><span>      |                           ^
+</span></span><span style="display:flex;"><span>/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:42:57: note: because type constraint <span style="color:#e6db74">&#39;std::same_as&lt;float, typename BangBangLaw::Measurement&gt;&#39;</span> was not satisfied:
+</span></span><span style="display:flex;"><span>   <span style="color:#ae81ff">42</span> |     <span style="color:#f92672">{</span> fb.Convert<span style="color:#f92672">(</span>std::declval&lt;typename FB::Raw&gt;<span style="color:#f92672">())</span> <span style="color:#f92672">}</span> -&gt; std::same_as&lt;typename Law::Measurement&gt;;
+</span></span></code></pre></div><p>We are told <em>exactly</em> what is wrong - our <code>Convert</code> function return type of <code>float</code> is not equal to <code>BangBangLaw::Measurement</code>. Similar errors will occur if any other aspect of the contract is violated. So we have achieved the design goals - we both have compile-time checks that we are well formed, and the code is easy to debug when done incorrectly.</p>
+<h2 id="a-control-simulation">A Control Simulation<a hidden class="anchor" aria-hidden="true" href="#a-control-simulation">#</a></h2>
+<p>The following code utilizes the bang-bang controller - instantiated through our scaffolding - to run 1000 steps of the control simulation. This example demonstrates all our requirements - error handling, loggability, strict enforcement at compile-time.</p>
+<p><strong>File</strong>: <code>example/bangbang_sim/main.cpp</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_controller_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio_interface.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>template <span style="color:#f92672">&lt;</span>ControlLaw LAW, <span style="color:#66d9ef">typename</span> Converter<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>class GpioActuator
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>   public:
+</span></span><span style="display:flex;"><span>    using Command <span style="color:#f92672">=</span> <span style="color:#66d9ef">typename</span> LAW<span style="color:#f92672">::</span>Command;
+</span></span><span style="display:flex;"><span>    using State <span style="color:#f92672">=</span> <span style="color:#66d9ef">bool</span>; 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">GpioActuator</span>(Gpio<span style="color:#f92672">&amp;</span> gpio, Converter converter) <span style="color:#f92672">:</span> <span style="color:#a6e22e">gpio_</span>(gpio), <span style="color:#a6e22e">Convert</span>(converter) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span>State, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Write</span>(<span style="color:#66d9ef">const</span> Command<span style="color:#f92672">&amp;</span> cmd)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        State gpio_state <span style="color:#f92672">=</span> <span style="color:#a6e22e">Convert</span>(cmd);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> err <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Set</span>(gpio_state);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (err.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">unexpected</span>(std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;Failed to set GPIO: {}&#34;</span>, err.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> gpio_state;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">Configure</span>()
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> configure_result <span style="color:#f92672">=</span> gpio_.<span style="color:#a6e22e">Configure</span>(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (configure_result.<span style="color:#a6e22e">has_value</span>())
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span><span style="color:#a6e22e">make_optional</span>(
+</span></span><span style="display:flex;"><span>                std<span style="color:#f92672">::</span><span style="color:#a6e22e">format</span>(<span style="color:#e6db74">&#34;GPIO configure failed: {}&#34;</span>, configure_result.<span style="color:#a6e22e">value</span>()));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Converter Convert;
+</span></span><span style="display:flex;"><span>   private:
+</span></span><span style="display:flex;"><span>    Gpio<span style="color:#f92672">&amp;</span> gpio_;
+</span></span><span style="display:flex;"><span>};</span></span></code></pre></div></p>
+<p>After building and executing this simulation, and running the included <code>graph_log.py</code> script - you&rsquo;ll see an output like this:</p>
+<p><img alt="bang-bang controller output" loading="lazy" src="bangbang-graph.png"></p>
+<h2 id="exercises-for-the-reader">Exercises for the Reader<a hidden class="anchor" aria-hidden="true" href="#exercises-for-the-reader">#</a></h2>
+<p>I encourage you to try extending this functionality yourself! Consider these two challenges:</p>
+<ol>
+<li>Implement the <code>Convert</code> function at compile-time rather than as a lambda passed into the constructor.</li>
+<li>Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.</li>
+</ol>
+<p>These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>The design we&rsquo;ve implemented demonstrates all the requirements and design goals we set out to achieve. If you are operating in an ecosystem of control laws, this pattern is almost certainly useful. I have implemented similar patterns at multiple organizations and reaped the benefits of consistent control interfaces and implementations at scale. The benefits of cleanly defined component boundaries and separate responsibilities, enforced error checking and state exposure, and swappable feedback/actuator/law implementations come at the cost of complexity. Not only is this implementation more verbose than the simple controller we saw at the beginning - it is undoubtedly more complex. Understanding this implementation fully demands quite a lot from the code maintainers. To reaffirm - this solution makes sense in an <em>ecosystem</em> of controllers.</p>
+<p>I hope the patterns reviewed here are useable in your own code. The feedback controller interface is available on <a href="https://github.com/sam-w-yellin/feedback-controller">GitHub</a> as a single-header to anyone who wants to use it or try out the exercises outlined above. The simulation framework included in the repo also could prove useful to anyone iterating on controllers.</p>
+<p>If you found this article valuable, consider subscribing to the <a href="https://volatileint.dev/newsletter">newsletter</a> to hear about new posts! If you have any feedback or questions, reach out to me at <a href="mailto:sam@volatileint.dev">sam@volatileint.dev</a>!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="http://localhost:1313/tags/setpoint/">Setpoint</a></li>
+      <li><a href="http://localhost:1313/tags/concept/">Concept</a></li>
+      <li><a href="http://localhost:1313/tags/embedded/">Embedded</a></li>
+      <li><a href="http://localhost:1313/tags/template/">Template</a></li>
+      <li><a href="http://localhost:1313/tags/lambda/">Lambda</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Volatile Int</a></span> · 
+    <span>
+        <a href="http://localhost:1313/index.xml">Subscribe via RSS</a>
+    </span> · 
+    <span>
+        <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
+    </span> · 
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true });
+</script>
+</body>
+</html>

@@ -23,6 +23,20 @@
       <description></description>
     </item>
     <item>
+      <title>C&#43;&#43;</title>
+      <link>http://localhost:1313/tags/c&#43;&#43;/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Concept</title>
+      <link>http://localhost:1313/tags/concept/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/tags/concept/</guid>
+      <description></description>
+    </item>
+    <item>
       <title>Dependency</title>
       <link>http://localhost:1313/tags/dependency/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
@@ -41,6 +55,27 @@
       <link>http://localhost:1313/tags/inversion/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
       <guid>http://localhost:1313/tags/inversion/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Lambda</title>
+      <link>http://localhost:1313/tags/lambda/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/tags/lambda/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Setpoint</title>
+      <link>http://localhost:1313/tags/setpoint/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/tags/setpoint/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Template</title>
+      <link>http://localhost:1313/tags/template/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/tags/template/</guid>
       <description></description>
     </item>
   </channel>
