@@ -33,33 +33,29 @@ You write a very minimal program:
 #include "gpio.hpp"
 #include "adc.hpp"
 
-int32_t raw_adc_to_deg_uc(uint16_t raw) {
-        // Simple conversion example
-        return static_cast<float>(raw) * 0.1f;
-}
-
 void control_tec(Gpio& tec, Adc& thermocouple) {
-    const auto raw_temp_adc = thermocouple.read();
-    const auto temp_uc = raw_adc_to_deg_uc(raw_temp_adc);
-
-    if (temp_uc >= 80) {
-        tec.Set(true);
-    } else if (temp_uc <= 20) {
-        tec.Set(false);
-    }
-}
-
-int main() {
     Gpio tec{ 1 }; // TEC is on pin 1
     Adc thermocouple{ 2 }; // thermocouple on pin 2
 
     tec.Configure(Gpio::Output);
     thermocouple.Configure();
 
-    while(true) {
-        control_tec(tec, thermocouple);
+    while (true) {
+        const auto raw_temp_adc = thermocouple.read();
+        const auto temp_uc = static_cast<float>(raw) * 0.1f;
+
+        if (temp_uc >= 80) {
+            tec.Set(true);
+        } else if (temp_uc <= 20) {
+            tec.Set(false);
+        }
         std::this_thread::sleep_for(std::chrono::minutes(1));
     }
+
+}
+
+int main() {
+    control_tec();
 }
 ```
 
