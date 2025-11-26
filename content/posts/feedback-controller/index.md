@@ -1,10 +1,7 @@
 ---
 title: "A Template For Feedback Controllers in Modern C++"
-date: 2025-11-16T12:00:00-08:00
+date: 2025-11-26T11:00:00-08:00
 draft: false
-build:
-  list: false
-  publishResources: true
 tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]
 ---
 
@@ -315,7 +312,7 @@ I encourage you to try extending this functionality yourself! Consider these two
 
 1. Implement the `Convert` function at compile-time rather than as a lambda passed into the constructor.
 2. Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.
-3. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State`s.
+3. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State` objects.
 
 These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.
 

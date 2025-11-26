@@ -2,64 +2,67 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.volatileint.dev/tags/actuator/</loc>
+    <loc>http://localhost:53365/posts/feedback-controller/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/actuator/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/c&#43;&#43;/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/concept/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/control/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/embedded/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/feedback/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/lambda/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/law/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/logging/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/posts/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/template/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/</loc>
+    <lastmod>2025-11-26T11:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:53365/tags/architecture/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/architecture/</loc>
+    <loc>http://localhost:53365/tags/c/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/c/</loc>
+    <loc>http://localhost:53365/tags/dependency/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/c&#43;&#43;/</loc>
+    <loc>http://localhost:53365/posts/dependency-inversion-c/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/concept/</loc>
+    <loc>http://localhost:53365/tags/inversion/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/control/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+    <loc>http://localhost:53365/about/</loc>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/dependency/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+    <loc>http://localhost:53365/categories/</loc>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/dependency-inversion-c/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/embedded/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/feedback/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/inversion/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/lambda/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/law/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/logging/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/posts/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/tags/template/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/</loc>
-    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
-  </url><url>
-    <loc>https://www.volatileint.dev/about/</loc>
-  </url><url>
-    <loc>https://www.volatileint.dev/categories/</loc>
-  </url><url>
-    <loc>https://www.volatileint.dev/newsletter/</loc>
+    <loc>http://localhost:53365/newsletter/</loc>
   </url>
 </urlset>

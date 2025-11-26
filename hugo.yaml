@@ -21,3 +21,7 @@ menu:
 enableRSS: true
 rssURI: "index.xml"
 googleAnalytics: "G-N81PSXWFLZ"
+params:
+  ShowShareButtons: true
+  ShowToc: true
+  ShowCodeCopyButtons: true

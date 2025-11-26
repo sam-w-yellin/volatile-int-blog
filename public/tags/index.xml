@@ -2,108 +2,108 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on Volatile Int</title>
-    <link>https://www.volatileint.dev/tags/</link>
+    <link>http://localhost:53365/tags/</link>
     <description>Recent content in Tags on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 26 Nov 2025 11:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:53365/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Actuator</title>
-      <link>https://www.volatileint.dev/tags/actuator/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/actuator/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Architecture</title>
-      <link>https://www.volatileint.dev/tags/architecture/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/architecture/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>C</title>
-      <link>https://www.volatileint.dev/tags/c/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/c/</guid>
+      <link>http://localhost:53365/tags/actuator/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/actuator/</guid>
       <description></description>
     </item>
     <item>
       <title>C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/c&#43;&#43;/</guid>
+      <link>http://localhost:53365/tags/c&#43;&#43;/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
       <title>Concept</title>
-      <link>https://www.volatileint.dev/tags/concept/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/concept/</guid>
+      <link>http://localhost:53365/tags/concept/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/concept/</guid>
       <description></description>
     </item>
     <item>
       <title>Control</title>
-      <link>https://www.volatileint.dev/tags/control/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/control/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Dependency</title>
-      <link>https://www.volatileint.dev/tags/dependency/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/dependency/</guid>
+      <link>http://localhost:53365/tags/control/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/control/</guid>
       <description></description>
     </item>
     <item>
       <title>Embedded</title>
-      <link>https://www.volatileint.dev/tags/embedded/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/embedded/</guid>
+      <link>http://localhost:53365/tags/embedded/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/embedded/</guid>
       <description></description>
     </item>
     <item>
       <title>Feedback</title>
-      <link>https://www.volatileint.dev/tags/feedback/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/feedback/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Inversion</title>
-      <link>https://www.volatileint.dev/tags/inversion/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/inversion/</guid>
+      <link>http://localhost:53365/tags/feedback/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/feedback/</guid>
       <description></description>
     </item>
     <item>
       <title>Lambda</title>
-      <link>https://www.volatileint.dev/tags/lambda/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/lambda/</guid>
+      <link>http://localhost:53365/tags/lambda/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/lambda/</guid>
       <description></description>
     </item>
     <item>
       <title>Law</title>
-      <link>https://www.volatileint.dev/tags/law/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/law/</guid>
+      <link>http://localhost:53365/tags/law/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/law/</guid>
       <description></description>
     </item>
     <item>
       <title>Logging</title>
-      <link>https://www.volatileint.dev/tags/logging/</link>
-      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/logging/</guid>
+      <link>http://localhost:53365/tags/logging/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/logging/</guid>
       <description></description>
     </item>
     <item>
       <title>Template</title>
-      <link>https://www.volatileint.dev/tags/template/</link>
+      <link>http://localhost:53365/tags/template/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/template/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Architecture</title>
+      <link>http://localhost:53365/tags/architecture/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/template/</guid>
+      <guid>http://localhost:53365/tags/architecture/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C</title>
+      <link>http://localhost:53365/tags/c/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/c/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Dependency</title>
+      <link>http://localhost:53365/tags/dependency/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/dependency/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Inversion</title>
+      <link>http://localhost:53365/tags/inversion/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/tags/inversion/</guid>
       <description></description>
     </item>
   </channel>

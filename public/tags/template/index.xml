@@ -2,11 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Template on Volatile Int</title>
-    <link>https://www.volatileint.dev/tags/template/</link>
+    <link>http://localhost:53365/tags/template/</link>
     <description>Recent content in Template on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate></lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/tags/template/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 26 Nov 2025 11:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:53365/tags/template/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Template For Feedback Controllers in Modern C&#43;&#43;</title>
+      <link>http://localhost:53365/posts/feedback-controller/</link>
+      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
+      <guid>http://localhost:53365/posts/feedback-controller/</guid>
+      <description>&lt;p&gt;In this post, we&amp;rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&amp;rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&amp;rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging using modern C++ concepts.&lt;/p&gt;
+&lt;p&gt;Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>
