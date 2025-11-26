@@ -2,108 +2,108 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Tags on Volatile Int</title>
-    <link>http://localhost:53365/tags/</link>
+    <link>https://www.volatileint.dev/tags/</link>
     <description>Recent content in Tags on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 26 Nov 2025 11:00:00 -0800</lastBuildDate>
-    <atom:link href="http://localhost:53365/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Actuator</title>
-      <link>http://localhost:53365/tags/actuator/</link>
+      <link>https://www.volatileint.dev/tags/actuator/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/actuator/</guid>
+      <guid>https://www.volatileint.dev/tags/actuator/</guid>
       <description></description>
     </item>
     <item>
       <title>C&#43;&#43;</title>
-      <link>http://localhost:53365/tags/c&#43;&#43;/</link>
+      <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/c&#43;&#43;/</guid>
+      <guid>https://www.volatileint.dev/tags/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
       <title>Concept</title>
-      <link>http://localhost:53365/tags/concept/</link>
+      <link>https://www.volatileint.dev/tags/concept/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/concept/</guid>
+      <guid>https://www.volatileint.dev/tags/concept/</guid>
       <description></description>
     </item>
     <item>
       <title>Control</title>
-      <link>http://localhost:53365/tags/control/</link>
+      <link>https://www.volatileint.dev/tags/control/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/control/</guid>
+      <guid>https://www.volatileint.dev/tags/control/</guid>
       <description></description>
     </item>
     <item>
       <title>Embedded</title>
-      <link>http://localhost:53365/tags/embedded/</link>
+      <link>https://www.volatileint.dev/tags/embedded/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/embedded/</guid>
+      <guid>https://www.volatileint.dev/tags/embedded/</guid>
       <description></description>
     </item>
     <item>
       <title>Feedback</title>
-      <link>http://localhost:53365/tags/feedback/</link>
+      <link>https://www.volatileint.dev/tags/feedback/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/feedback/</guid>
+      <guid>https://www.volatileint.dev/tags/feedback/</guid>
       <description></description>
     </item>
     <item>
       <title>Lambda</title>
-      <link>http://localhost:53365/tags/lambda/</link>
+      <link>https://www.volatileint.dev/tags/lambda/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/lambda/</guid>
+      <guid>https://www.volatileint.dev/tags/lambda/</guid>
       <description></description>
     </item>
     <item>
       <title>Law</title>
-      <link>http://localhost:53365/tags/law/</link>
+      <link>https://www.volatileint.dev/tags/law/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/law/</guid>
+      <guid>https://www.volatileint.dev/tags/law/</guid>
       <description></description>
     </item>
     <item>
       <title>Logging</title>
-      <link>http://localhost:53365/tags/logging/</link>
+      <link>https://www.volatileint.dev/tags/logging/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/logging/</guid>
+      <guid>https://www.volatileint.dev/tags/logging/</guid>
       <description></description>
     </item>
     <item>
       <title>Template</title>
-      <link>http://localhost:53365/tags/template/</link>
+      <link>https://www.volatileint.dev/tags/template/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/template/</guid>
+      <guid>https://www.volatileint.dev/tags/template/</guid>
       <description></description>
     </item>
     <item>
       <title>Architecture</title>
-      <link>http://localhost:53365/tags/architecture/</link>
+      <link>https://www.volatileint.dev/tags/architecture/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/architecture/</guid>
+      <guid>https://www.volatileint.dev/tags/architecture/</guid>
       <description></description>
     </item>
     <item>
       <title>C</title>
-      <link>http://localhost:53365/tags/c/</link>
+      <link>https://www.volatileint.dev/tags/c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/c/</guid>
+      <guid>https://www.volatileint.dev/tags/c/</guid>
       <description></description>
     </item>
     <item>
       <title>Dependency</title>
-      <link>http://localhost:53365/tags/dependency/</link>
+      <link>https://www.volatileint.dev/tags/dependency/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/dependency/</guid>
+      <guid>https://www.volatileint.dev/tags/dependency/</guid>
       <description></description>
     </item>
     <item>
       <title>Inversion</title>
-      <link>http://localhost:53365/tags/inversion/</link>
+      <link>https://www.volatileint.dev/tags/inversion/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>http://localhost:53365/tags/inversion/</guid>
+      <guid>https://www.volatileint.dev/tags/inversion/</guid>
       <description></description>
     </item>
   </channel>

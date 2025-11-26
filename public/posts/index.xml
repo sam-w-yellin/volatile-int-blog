@@ -2,25 +2,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on Volatile Int</title>
-    <link>http://localhost:1313/posts/</link>
+    <link>https://www.volatileint.dev/posts/</link>
     <description>Recent content in Posts on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 26 Nov 2025 11:00:00 -0800</lastBuildDate>
-    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.volatileint.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A Template For Feedback Controllers in Modern C&#43;&#43;</title>
-      <link>http://localhost:1313/posts/feedback-controller/</link>
+      <link>https://www.volatileint.dev/posts/feedback-controller/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>http://localhost:1313/posts/feedback-controller/</guid>
+      <guid>https://www.volatileint.dev/posts/feedback-controller/</guid>
       <description>&lt;p&gt;In this post, we&amp;rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&amp;rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&amp;rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging using modern C++ concepts.&lt;/p&gt;
 &lt;p&gt;Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Dependency Inversion in C: A Technique for Extensible Embedded Software</title>
-      <link>http://localhost:1313/posts/dependency-inversion-c/</link>
+      <link>https://www.volatileint.dev/posts/dependency-inversion-c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>http://localhost:1313/posts/dependency-inversion-c/</guid>
+      <guid>https://www.volatileint.dev/posts/dependency-inversion-c/</guid>
       <description>&lt;p&gt;The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.&lt;/p&gt;
 &lt;p&gt;This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is &lt;a href=&#34;https://en.wikipedia.org/wiki/Dependency_inversion_principle&#34;&gt;dependency inversion&lt;/a&gt;. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the &lt;em&gt;dependencies&lt;/em&gt; flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.&lt;/p&gt;</description>
     </item>

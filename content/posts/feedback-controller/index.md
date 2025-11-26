@@ -141,7 +141,7 @@ template <typename FB, typename Law>
 concept Feedback = ControlLaw<Law> && requires(FB fb) {
     typename FB::State;
 
-    { fb.Configure() } -> std::same_as<std::optional<std::string>>;
+    { fb.Configure() } -> std::same_as<std::expected<void, std::string>>;
 
     {
         fb.Read()
@@ -155,7 +155,7 @@ template <typename AC, typename Law>
 concept Actuator = ControlLaw<Law> && requires(AC ac, const typename Law::Command& cmd) {
     typename AC::State;
 
-    { ac.Configure() } -> std::same_as<std::optional<std::string>>;
+    { ac.Configure() } -> std::same_as<std::expected<void, std::string>>;
 
     { ac.Write(cmd) } -> std::same_as<std::expected<typename AC::State, std::string>>;
 
@@ -168,7 +168,7 @@ These concepts closely mirror each other. They are designed to encapsulate exter
 2. A function to interface with the external world - `Read` and `Write` for the `Feedback` and `Actuator` interfaces respectively. 
 3. A `Convert` function that goes from the respective internal type to the data type expected by the template `ControlLaw`.
 
-Just as in the `ControlLaw` concept, `std::expected` and `std::optional` return types are used to enforce error handling and state reporting.
+Just as in the `ControlLaw` concept, `std::expected` is used to enforce error handling and state reporting.
 
 #### Integrated Controller
 Finally, we implement an integrated `Controller` class. This class is templated on a specific set of `Actuator`, `Feedback`, and `ControlLaw` concept implementations. It orchestrates the dataflow between components and exposes the external interface to the represented controller.
