@@ -1,5 +1,5 @@
 ---
-title: "Implememting a Framework For Closed-Loop Controllers in Modern C++"
+title: "Implementing a Framework For Closed-Loop Controllers in Modern C++"
 date: 2025-11-26T11:00:00-08:00
 draft: false
 tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]
