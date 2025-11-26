@@ -1,14 +1,14 @@
 ---
-title: "Implementing a Generic Closed-Loop Controller in Modern C++"
+title: "A Template For Feedback Controllers in Modern C++"
 date: 2025-11-16T12:00:00-08:00
 draft: false
 build:
   list: false
   publishResources: true
-tags: ["C++","setpoint", "concept", "embedded", "template", "lambda"]
+tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]
 ---
 
-In this post, we're going to implement a generic interface capable of implementing a wide variety of closed-loop control systems. We'll end with a controller capable of implementing whatever algorithm you'd want, with configurable setpoints, consistent error handling, and support for logging using modern C++ concepts. 
+In this post, we're going to implement a generic interface for creating a wide variety of closed-loop control systems. We'll end with a flexible template library capable of implementing whatever control algorithm you'd want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging using modern C++ concepts. 
 
 Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
 
@@ -58,7 +58,6 @@ int main() {
 
 This implementation is functional, but it has a number of problems. 
 
-## Implementing Controller Scaffolding
 What happens when the control law needs to change? What about when the GPIO is changed for a PWM output, or when the on-chip ADC is replaced with a more accurate off-chip device?
 
 And what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the controls team expected to maintain simulation infrastructure for hardware to iterate on control laws?
@@ -107,14 +106,14 @@ Let's ground this in our TEC example. The ADC is the feedback. ADCs read a volta
 
 It is now clear that the data types for input and output from the control law *constrain* the feedback and actuator components.. The control law cannot provide its own adapters - or we have violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.
 
-Template concepts introduced in C++20 are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a `concept`.
+Template `concept`s introduced in C++20 are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a `concept`.
  
 #### ControlLaw Interface
 Let's start out writing a concept for our most abstract component - the `ControlLaw`. The concept requires that each law defines its input and output types - `Measurement` and `Command` respectively. Laws must also define a `State` type.
 
 There are two required APIs for a `ControlLaw`:
 
-1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized state, or a string in the case of an error.
+1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized state, or a string in the case of an error. This is where the config for the law can be validated and return an error if necessary.
 2. `Compute` takes in a measurement, and returns a tuple of the next `Command` and its current `State`. 
 
 These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller. 
@@ -237,14 +236,20 @@ First - we need to create concrete implementations of our ADC feedback, GPIO act
 {{<readfile "feedback-controller/example/components/feedback_controller/plugins/actuators/include/gpio_actuator.hpp" >}}
 {{< /highlight >}}
 
-**File**: `example/components/feedback_controller/plugins/laws/include/bangbang.hpp`
+**File**: `example/components/feedback_controller/plugins/laws/include/bangbang_range.hpp`
 {{< highlight c >}}
-{{<readfile "feedback-controller/example/components/feedback_controller/plugins/laws/include/bangbang.hpp" >}}
+{{<readfile "feedback-controller/example/components/feedback_controller/plugins/laws/include/bangbang_range.hpp" >}}
 {{< /highlight >}}
 
-It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller.
+It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller.  Let's also create another version of our bangbang control law which controls to a specific setpoint instead of a range. We'll use this later to demonstrate swapping parts of the controller.
 
-With these components - and the simulated concrete ADC and GPIO interfaces defined by the (linked GitHub repo)[https://github.com/sam-w-yellin/feedback-controller]  - we can actually instantiate and execute a controller. Instantiation is simple:
+**File**: `example/components/feedback_controller/plugins/laws/include/bangbang_setpoint.hpp`
+{{< highlight c >}}
+{{<readfile "feedback-controller/example/components/feedback_controller/plugins/laws/include/bangbang_setpoint.hpp" >}}
+{{< /highlight >}}
+
+
+With these components - and the simulated ADC and GPIO interface implementations defined by the [linked GitHub repo](https://github.com/sam-w-yellin/feedback-controller)  - we can actually instantiate and execute a controller. Instantiation is simple:
 
 ```c++
 // Simulated hardware
@@ -252,25 +257,26 @@ SimulatedAdc adc;
 SimulatedGpio gpio;
 
 // Bang-bang control law
-BangBangLaw law(20 /* min */, 80 /* max */);
+BangBangRangeLaw law(20 /* min */, 80 /* max */);
 
 // ADC Feedback
 auto convert_adc = [](uint16_t raw) -> BangBangLaw::Measurement
-{ return static_cast<BangBangLaw::Measurement>(raw) / 10; };
-AdcFeedback<BangBangLaw, decltype(convert_adc)> feedback(adc, convert_adc);
+{ return static_cast<BangBangRangeLaw::Measurement>(raw) / 10; };
+AdcFeedback<BangBangRangeLaw, decltype(convert_adc)> feedback(adc, convert_adc);
 
 // GPIO Actuator
 auto convert_gpio = [](bool cmd) -> BangBangLaw::Command { return cmd; };
-GpioActuator<BangBangLaw, decltype(convert_gpio)> actuator(gpio, convert_gpio);
+GpioActuator<BangBangRangeLaw, decltype(convert_gpio)> actuator(gpio, convert_gpio);
 
 // Integrated controller
-Controller<BangBangLaw, decltype(feedback), decltype(actuator)> controller(feedback, actuator,
+Controller<BangBangRangeLaw, decltype(feedback), decltype(actuator)> controller(feedback, actuator,
                                                                             law);
 ```
 
 We can now use the `controller` object to enact our control - first using the `Initialize` API to setup the hardware and control laws, and then the `Step` function to read inputs into and write outputs from the control law.
 
-Let's briefly explore what kinds of errors we get if we violate our concepts. One of the constraints is that our `Convert` functions map to the types expected by the templated `ControlLaw`. So, instead of converting the ADC read to an `int32_t` (implicit through the `BangBangLaw::Measurement`), let's try converting to a `float`:
+## Compile-Time Checks
+Let's briefly explore what kinds of errors we get if we violate our concepts. One of the constraints is that our `Convert` functions map to the types expected by the templated `ControlLaw`. So, instead of converting the ADC read to an `int32_t` (implicit through the `BangBangRangeLaw::Measurement`), let's try converting to a `float`:
 
 ```c++
 auto convert_adc = [](uint16_t raw) -> float
@@ -281,35 +287,35 @@ AdcFeedback<BangBangLaw, decltype(convert_adc)> feedback(adc, convert_adc);
 We're going to get a compile-time error - and if you're used to C++ templates you'll agree this error is *much* nicer than errors you get without concepts:
 
 ```bash
-/Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:85:5: error: constraints not satisfied for class template 'Controller' [with Law = BangBangLaw, FB = AdcFeedback<BangBangLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:76:24)>, ACT = GpioActuator<BangBangLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:81:25)>]
-   85 |     Controller<BangBangLaw, decltype(feedback), decltype(actuator)> controller(feedback, actuator,
+/Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:85:5: error: constraints not satisfied for class template 'Controller' [with Law = BangBangRangeLaw, FB = AdcFeedback<BangBangRangeLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_range_sim/main.cpp:76:24)>, ACT = GpioActuator<BangBangRangeLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_range_sim/main.cpp:81:25)>]
+   85 |     Controller<BangBangRangeLaw, decltype(feedback), decltype(actuator)> controller(feedback, actuator,
       |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:56:27: note: because 'Feedback<AdcFeedback<BangBangLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:76:24)>, BangBangLaw>' evaluated to false
+/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:56:27: note: because 'Feedback<AdcFeedback<BangBangRangeLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_range_sim/main.cpp:76:24)>, BangBangRangeLaw>' evaluated to false
    56 | template <ControlLaw Law, Feedback<Law> FB, Actuator<Law> ACT>
       |                           ^
-/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:42:57: note: because type constraint 'std::same_as<float, typename BangBangLaw::Measurement>' was not satisfied:
+/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:42:57: note: because type constraint 'std::same_as<float, typename BangBangRangeLaw::Measurement>' was not satisfied:
    42 |     { fb.Convert(std::declval<typename FB::Raw>()) } -> std::same_as<typename Law::Measurement>;
 ```
 
-We are told *exactly* what is wrong - our `Convert` function return type of `float` is not equal to `BangBangLaw::Measurement`. Similar errors will occur if any other aspect of the contract is violated. So we have achieved the design goals - we both have compile-time checks that we are well formed, and the code is easy to debug when done incorrectly.
+We are told *exactly* what is wrong - our `Convert` function return type of `float` is not equal to `BangBangRangeLaw::Measurement`. Similar errors will occur if any other aspect of the contract is violated. So we have achieved the design goals - we both have compile-time checks that we are well formed, and the code is easy to debug when done incorrectly.
 
-## A Control Simulation
+## Easily Swappable Components
 The following code utilizes the bang-bang controller - instantiated through our scaffolding - to run 1000 steps of the control simulation. This example demonstrates all our requirements - error handling, loggability, strict enforcement at compile-time.
-
-**File**: `example/bangbang_sim/main.cpp`
-{{< highlight c >}}
-{{<readfile "feedback-controller/example/bangbang_sim/main.cpp" >}}
-{{< /highlight >}}
 
 After building and executing this simulation, and running the included `graph_log.py` script - you'll see an output like this:
 
-![bang-bang controller output](bangbang-graph.png)
+![bang-bang range-based controller output](bangbang-range.png)
+
+Let's demonstrate our ability to change controller components independently. If we swap the control law implementations we can create different control behavior without ever touching code related to actuation or feedback. When we run the sim using the setpoint control law, we get the following output:
+
+![bang-bang setpoint-based controller output](bangbang-setpoint.png)
 
 ## Exercises for the Reader
 I encourage you to try extending this functionality yourself! Consider these two challenges:
 
 1. Implement the `Convert` function at compile-time rather than as a lambda passed into the constructor.
 2. Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.
+3. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State`s.
 
 These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.
 

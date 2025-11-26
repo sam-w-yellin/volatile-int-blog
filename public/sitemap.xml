@@ -2,6 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://www.volatileint.dev/tags/actuator/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>https://www.volatileint.dev/tags/architecture/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
@@ -14,6 +17,9 @@
     <loc>https://www.volatileint.dev/tags/concept/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
+    <loc>https://www.volatileint.dev/tags/control/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>https://www.volatileint.dev/tags/dependency/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
@@ -23,16 +29,22 @@
     <loc>https://www.volatileint.dev/tags/embedded/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
+    <loc>https://www.volatileint.dev/tags/feedback/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
     <loc>https://www.volatileint.dev/tags/inversion/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
     <loc>https://www.volatileint.dev/tags/lambda/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/</loc>
+    <loc>https://www.volatileint.dev/tags/law/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/setpoint/</loc>
+    <loc>https://www.volatileint.dev/tags/logging/</loc>
+    <lastmod>2025-11-16T12:00:00-08:00</lastmod>
+  </url><url>
+    <loc>https://www.volatileint.dev/posts/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
     <loc>https://www.volatileint.dev/tags/</loc>
