@@ -5,7 +5,7 @@ draft: false
 tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]
 ---
 
-In this post, we're going to implement a generic interface for creating a wide variety of closed-loop control systems. We'll end with a flexible template library capable of implementing whatever control algorithm you'd want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging using modern C++ concepts. 
+In this post, we're going to implement a generic interface for creating a wide variety of closed-loop control systems. We'll end with a flexible template library capable of implementing whatever control algorithm you'd want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template `concept`s,  `std::expected`, and lambdas.
 
 Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
 
