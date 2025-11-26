@@ -57,11 +57,11 @@ This implementation is functional, but it has a number of problems.
 
 What happens when the control law needs to change? What about when the GPIO is changed for a PWM output, or when the on-chip ADC is replaced with a more accurate off-chip device?
 
-And what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the controls team expected to maintain simulation infrastructure for hardware to iterate on control laws?
-
 How do we make sure this code actually serves all our purposes? It doesn't appear to handle errors. It doesn't provide insight into the status of the controller. It doesn't have any sense of configuration - the bounds are hard-coded. We have no facilities to log state, or understand if our feedback or actuation mechanisms have failed to accomplish their tasks.
 
-Finally, what about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways.
+What about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways.
+
+And finally - what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the control team expected to maintain simulation infrastructure for hardware to iterate on control laws? Are they bound in experimenting with new control algorithms by the existant hardware drivers and hardware simulation infrastructure?
 
 These problems can be addressed by providing *scaffolding* for the domain of control law implementations. 
 
