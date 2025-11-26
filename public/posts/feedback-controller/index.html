@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto" data-theme="auto">
-<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+<link rel="stylesheet" href="https://www.volatileint.dev/css/custom.css">
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
 <title>Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; | Volatile Int</title>
 <meta name="keywords" content="C&#43;&#43;, feedback, control, law, actuator, concept, embedded, template, lambda, logging">
-<meta name="description" content="In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts,  std::expected, and lambdas.
+<meta name="description" content="In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts,  std::expected, and lambda functions.
 Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/posts/feedback-controller/">
-<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="canonical" href="https://www.volatileint.dev/posts/feedback-controller/">
+<link crossorigin="anonymous" href="https://www.volatileint.dev/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.volatileint.dev/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.volatileint.dev/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.volatileint.dev/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.volatileint.dev/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.volatileint.dev/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/feedback-controller/">
+<link rel="alternate" hreflang="en" href="https://www.volatileint.dev/posts/feedback-controller/">
 <noscript>
     <style>
         #theme-toggle,
@@ -72,12 +72,96 @@ Before we dive in, note that the final code is not simple. In the course of read
     }
 
 </script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N81PSXWFLZ"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-N81PSXWFLZ');
+        }
+      </script><meta property="og:url" content="https://www.volatileint.dev/posts/feedback-controller/">
+  <meta property="og:site_name" content="Volatile Int">
+  <meta property="og:title" content="Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43;">
+  <meta property="og:description" content="In this post, we’re going to implement a generic interface for creating a wide variety of closed-loop control systems. We’ll end with a flexible template library capable of implementing whatever control algorithm you’d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts, std::expected, and lambda functions.
+Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-26T11:00:00-08:00">
+    <meta property="article:modified_time" content="2025-11-26T11:00:00-08:00">
+    <meta property="article:tag" content="C&#43;&#43;">
+    <meta property="article:tag" content="Feedback">
+    <meta property="article:tag" content="Control">
+    <meta property="article:tag" content="Law">
+    <meta property="article:tag" content="Actuator">
+    <meta property="article:tag" content="Concept">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43;">
+<meta name="twitter:description" content="In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts,  std::expected, and lambda functions.
+Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://www.volatileint.dev/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Implememting a Framework For Closed-Loop Controllers in Modern C++",
+      "item": "https://www.volatileint.dev/posts/feedback-controller/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Implememting a Framework For Closed-Loop Controllers in Modern C++",
+  "name": "Implememting a Framework For Closed-Loop Controllers in Modern C\u002b\u002b",
+  "description": "In this post, we\u0026rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We\u0026rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you\u0026rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template concepts, std::expected, and lambda functions.\nBefore we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.\n",
+  "keywords": [
+    "C++", "feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"
+  ],
+  "articleBody": "In this post, we’re going to implement a generic interface for creating a wide variety of closed-loop control systems. We’ll end with a flexible template library capable of implementing whatever control algorithm you’d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template concepts, std::expected, and lambda functions.\nBefore we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.\nFirst, let’s kick things off with a scenario.\nA Simple Bang-Bang Controller Picture yourself as an embedded software engineer working at a scrappy startup designing a revolutionary new technology with a healthy mix of hardware and software co-development. Your co-worker - a thermal engineer responsible for maintaining the health of a temperature-sensitive component of the system - approaches you, asking for software to regulate the temperature of their system:\nA thermoelectric cooler (henceforth referred to as a TEC) connected to the component that needs to be cooled. The engineer connected this to a simple switch which will apply either 0 or 100% power. A thermocouple connected to the device being cooled to sense the temperature. A microcontroller wired to control the TEC using the thermocouple as feedback. The thermal engineer explains the straightoforward control algorithm requirements.. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. The component generates heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.\nYou write a very minimal program:\n#include #include #include \"gpio.hpp\" #include \"adc.hpp\" void control_tec() { Gpio tec{ 1 }; // TEC is on pin 1 Adc thermocouple{ 2 }; // thermocouple on pin 2 tec.Configure(Gpio::Output); thermocouple.Configure(); while (true) { const auto raw_temp_adc = thermocouple.read(); const auto temp_uc = static_cast\u003cfloat\u003e(raw) * 0.1f; if (temp_uc \u003e= 80) { tec.Set(true); } else if (temp_uc \u003c= 20) { tec.Set(false); } std::this_thread::sleep_for(std::chrono::minutes(1)); } } int main() { control_tec(); } This implementation is functional, but it has a number of problems.\nWhat happens when the control law needs to change? What about when the GPIO is changed for a PWM output, or when the on-chip ADC is replaced with a more accurate off-chip device?\nAnd what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the controls team expected to maintain simulation infrastructure for hardware to iterate on control laws?\nHow do we make sure this code actually serves all our purposes? It doesn’t appear to handle errors. It doesn’t provide insight into the status of the controller. It doesn’t have any sense of configuration - the bounds are hard-coded. We have no facilities to log state, or understand if our feedback or actuation mechanisms have failed to accomplish their tasks.\nFinally, what about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they’re all implemented in a consistent way? consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways.\nThese problems can be addressed by providing scaffolding for the domain of control law implementations.\nRequirements for a Generic Controller Requirements for the scaffolding can be derived from the above use cases:\nControl laws shall be independently testable from any specific hardware configuration. Controller feedback and actuation mechanisms shall explicitly handle all IO and configuration errors. Controllers shall emit representations of their current state suitable for logging. The data flow between the feedback, control law, and actuation mechanism shall be explicitly defined in order to enforce consistency. We also have these design goals:\nIt should be easy to write control laws that abide by the requirements. To the extent possible the constraints imposed by the requirements should be checked at compile-time. Components of a Controller The controller consists of three logically distinct components:\nA purely mathematical control law that receives inputs and computes outputs in order to achieve some goal. A feedback mechanism which interacts with some external interface to collect measurements. An output mechanism which effects the values commanded by the control law into the world. In a given step of the controller data flows first into the feedback component. Then, the data is converted to a format useable by the control law which uses the feedback to calculate the next output value. The output value from the controller is converted to the required data type to emit to a physical component.\nflowchart LR S[Feedback Sensor] FB[Feedback Componente.g., AdcFeedback] LAW[Control Lawe.g., BangBangLaw] ACT[Actuator Componente.g., GpioActuator] AHW[Actuator Hardware] S --\u003e|Raw measurement| FB FB --\u003e|Converted measurement| LAW LAW --\u003e|Command / control output| ACT ACT --\u003e|Actuation signal| AHW Let’s ground this in our TEC example. The ADC is the feedback. ADCs read a voltage. The control law for a TEC is going to deal with temperatures in degrees C, so the voltage must be converted to degrees. The control law emits a boolean - the TEC is on or off. For the bang-bang controller discussed earlier, the output GPIO uses the same data type as the controller output.\nIt is now clear that the data types for input and output from the control law constrain the feedback and actuator components.. The control law cannot provide its own adapters - or we have violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.\nTemplate concepts introduced in C++20 are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a concept.\nControlLaw Interface Let’s start out writing a concept for our most abstract component - the ControlLaw. The concept requires that each law defines its input and output types - Measurement and Command respectively. Laws must also define a State type.\nThere are two required APIs for a ControlLaw:\nInitialize configures the internal ControlLaw state. It must return the initialized state, or a string in the case of an error. This is where the config for the law can be validated and return an error if necessary. Compute takes in a measurement, and returns a tuple of the next Command and its current State. These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller.\ntemplate \u003ctypename C\u003e concept ControlLaw = requires(C law, const typename C::Measurement\u0026 m) { typename C::Measurement; typename C::Command; typename C::State; { law.Initialize() } -\u003e std::same_as\u003cstd::expected\u003ctypename C::State, std::string\u003e\u003e; { law.Compute(m) } -\u003e std::same_as\u003cstd::expected\u003cstd::pair\u003ctypename C::Command, typename C::State\u003e, std::string\u003e\u003e; }; Notice that the controller is completely independent of the actuator and feedback mechanisms. This decoupling enables our testability requirement - a class abiding by the ControlLaw concept can be instantiated independent of the larger controller infrastructure.\nExternal Interfaces Now let’s implement our Feedback and Actuator concepts. As discussed earlier, these interfaces are dependent on the ControlLaw’s defined data types. This is represented in our concepts as a template parameter for the ControlLaw, from which we extract the Measurement and Command data types:\ntemplate \u003ctypename FB, typename Law\u003e concept Feedback = ControlLaw\u003cLaw\u003e \u0026\u0026 requires(FB fb) { typename FB::State; { fb.Configure() } -\u003e std::same_as\u003cstd::expected\u003cvoid, std::string\u003e\u003e; { fb.Read() } -\u003e std::same_as\u003c std::expected\u003cstd::pair\u003ctypename Law::Measurement, typename FB::State\u003e, std::string\u003e\u003e; { fb.Convert(std::declval\u003ctypename FB::Raw\u003e()) } -\u003e std::same_as\u003ctypename Law::Measurement\u003e; }; template \u003ctypename AC, typename Law\u003e concept Actuator = ControlLaw\u003cLaw\u003e \u0026\u0026 requires(AC ac, const typename Law::Command\u0026 cmd) { typename AC::State; { ac.Configure() } -\u003e std::same_as\u003cstd::expected\u003cvoid, std::string\u003e\u003e; { ac.Write(cmd) } -\u003e std::same_as\u003cstd::expected\u003ctypename AC::State, std::string\u003e\u003e; { ac.Convert(std::declval\u003ctypename Law::Command\u003e()) } -\u003e std::same_as\u003ctypename AC::State\u003e; }; These concepts closely mirror each other. They are designed to encapsulate external-facing dependencies and abstract away conversion to the ControlLawtypes. The interface entails:\nA Configure function that ensures the output interfaces are ready for control and returns a string on error. A function to interface with the external world - Read and Write for the Feedback and Actuator interfaces respectively. A Convert function that goes from the respective internal type to the data type expected by the template ControlLaw. Just as in the ControlLaw concept, std::expected is used to enforce error handling and state reporting.\nIntegrated Controller Finally, we implement an integrated Controller class. This class is templated on a specific set of Actuator, Feedback, and ControlLaw concept implementations. It orchestrates the dataflow between components and exposes the external interface to the represented controller.\ntemplate \u003cControlLaw Law, Feedback\u003cLaw\u003e FB, Actuator\u003cLaw\u003e ACT\u003e class Controller { public: using Measurement = typename Law::Measurement; using Command = typename Law::Command; Controller(FB\u0026 feedback, ACT\u0026 actuator, Law\u0026 law) : fb_(feedback), act_(actuator), law_(law) {} std::expected\u003ctypename Law::State, std::string\u003e Initialize() { if (auto err = fb_.Configure()) return std::unexpected(*err); if (auto err = act_.Configure()) return std::unexpected(*err); auto law_state = law_.Initialize(); if (!law_state.has_value()) return std::unexpected(law_state.error()); return law_state.value(); } std::expected\u003cControllerState\u003cFB, Law, ACT\u003e, std::string\u003e Step() { auto fb_result = fb_.Read(); if (!fb_result.has_value()) return std::unexpected(fb_result.error()); auto [measurement, fb_state] = *fb_result; auto law_result = law_.Compute(measurement); if (!law_result.has_value()) return std::unexpected(law_result.error()); auto [command, law_state] = *law_result; auto act_result = act_.Write(command); if (!act_result.has_value()) return std::unexpected(act_result.error()); auto act_state = *act_result; ControllerState\u003cFB, Law, ACT\u003e state{ .feedback_state = fb_state, .control_state = law_state, .actuator_state = act_state}; return state; } private: FB\u0026 fb_; ACT\u0026 act_; Law\u0026 law_; }; Revisiting the Bang-Bang Controller All the pieces are now in place to implement controllers using our generic template scaffolding. The following example implements the simple bang-bang controller for a TEC discussed earlier.\nFirst - we need to create concrete implementations of our ADC feedback, GPIO actuation, and bang-bang control law concepts. The implementations are included below without much exposition - they are fairly straightforward components.\nFile: example/components/feedback_controller/plugins/feedback/include/adc_feedback.hpp #pragma once #include \"adc_interface.hpp\" #include \"feedback_controller_interface.hpp\" template \u003cControlLaw LAW, typename Converter\u003e struct AdcFeedback { using Measurement = typename LAW::Measurement; using Raw = uint16_t; using State = std::pair\u003cMeasurement, Raw\u003e; AdcFeedback(Adc\u0026 adc, Converter converter) : adc_(adc), Convert(converter) {} std::expected\u003cstd::pair\u003cMeasurement, State\u003e, std::string\u003e Read() { std::expected\u003cRaw, std::string\u003e maybe_raw = adc_.ReadRaw(); if (!maybe_raw.has_value()) { return std::unexpected(maybe_raw.error()); } const auto\u0026 raw = maybe_raw.value(); Measurement m = Convert(raw); return std::pair{m, std::pair{m, raw}}; } std::expected\u003cvoid, std::string\u003e Configure() { const auto configure_result = adc_.Configure(); if (!configure_result) { return std::unexpected( std::format(\"ADC configure failed: {}\", configure_result.error())); } return {}; } Converter Convert; private: Adc\u0026 adc_; };\nFile: example/components/feedback_controller/plugins/actuators/include/gpio_actuator.hpp #pragma once #include \"feedback_controller_interface.hpp\" #include \"gpio_interface.hpp\" template \u003cControlLaw LAW, typename Converter\u003e class GpioActuator { public: using Command = typename LAW::Command; using State = bool; GpioActuator(Gpio\u0026 gpio, Converter converter) : gpio_(gpio), Convert(converter) {} std::expected\u003cState, std::string\u003e Write(const Command\u0026 cmd) { State gpio_state = Convert(cmd); const auto result = gpio_.Set(gpio_state); if (!result) { return std::unexpected(std::format(\"Failed to set GPIO: {}\", result.error())); } return gpio_state; } std::expected\u003cvoid, std::string\u003e Configure() { const auto configure_result = gpio_.Configure(Gpio::Output); if (!configure_result) { return std::unexpected( std::format(\"GPIO configure failed: {}\", configure_result.error())); } return {}; } Converter Convert; private: Gpio\u0026 gpio_; };\nFile: example/components/feedback_controller/plugins/laws/include/bangbang_range.hpp #pragma once #include \"feedback_controller_interface.hpp\" struct BangBangRangeLaw { using Measurement = int32_t; using Command = bool; struct State { Command last_command{}; }; struct Config { Measurement min_threshold; Measurement max_threshold; }; BangBangRangeLaw(Measurement min_th, Measurement max_th) { config_.min_threshold = min_th; config_.max_threshold = max_th; } std::expected\u003cState, std::string\u003e Initialize() { State s{}; s.last_command = false; return s; } std::expected\u003cstd::pair\u003cCommand, State\u003e, std::string\u003e Compute(const Measurement\u0026 m) { if (m \u003e= config_.max_threshold) { state_.last_command = true; } else if (m \u003c= config_.min_threshold) { state_.last_command = false; } return std::make_pair(state_.last_command, state_); } State state_; Config config_; };\nIt is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller. Let’s also create another version of our bangbang control law which controls to a specific setpoint instead of a range. We’ll use this later to demonstrate swapping parts of the controller.\nFile: example/components/feedback_controller/plugins/laws/include/bangbang_setpoint.hpp #pragma once #include \"feedback_controller_interface.hpp\" struct BangBangSetpointLaw { using Measurement = int32_t; using Command = bool; struct State { Command last_command{}; }; struct Config { Measurement setpoint; }; BangBangSetpointLaw(Measurement setpoint) { config_.setpoint = setpoint; } std::expected\u003cState, std::string\u003e Initialize() { State s{}; s.last_command = false; return s; } std::expected\u003cstd::pair\u003cCommand, State\u003e, std::string\u003e Compute(const Measurement\u0026 m) { if (m \u003e= config_.setpoint) { state_.last_command = true; } else { state_.last_command = false; } return std::make_pair(state_.last_command, state_); } State state_; Config config_; };\nWith these components - and the simulated ADC and GPIO interface implementations defined by the linked GitHub repo - we can actually instantiate and execute a controller. Instantiation is simple:\n// Simulated hardware SimulatedAdc adc; SimulatedGpio gpio; // Bang-bang control law BangBangRangeLaw law(20 /* min */, 80 /* max */); // ADC Feedback auto convert_adc = [](uint16_t raw) -\u003e BangBangLaw::Measurement { return static_cast\u003cBangBangRangeLaw::Measurement\u003e(raw) / 10; }; AdcFeedback\u003cBangBangRangeLaw, decltype(convert_adc)\u003e feedback(adc, convert_adc); // GPIO Actuator auto convert_gpio = [](bool cmd) -\u003e BangBangLaw::Command { return cmd; }; GpioActuator\u003cBangBangRangeLaw, decltype(convert_gpio)\u003e actuator(gpio, convert_gpio); // Integrated controller Controller\u003cBangBangRangeLaw, decltype(feedback), decltype(actuator)\u003e controller(feedback, actuator, law); We can now use the controller object to enact our control - first using the Initialize API to setup the hardware and control laws, and then the Step function to read inputs into and write outputs from the control law.\nCompile-Time Checks Let’s briefly explore what kinds of errors we get if we violate our concepts. One of the constraints is that our Convert functions map to the types expected by the templated ControlLaw. So, instead of converting the ADC read to an int32_t (implicit through the BangBangRangeLaw::Measurement), let’s try converting to a float:\nauto convert_adc = [](uint16_t raw) -\u003e float { return static_cast\u003cfloat\u003e(raw) / 10; }; AdcFeedback\u003cBangBangLaw, decltype(convert_adc)\u003e feedback(adc, convert_adc); We’re going to get a compile-time error - and if you’re used to C++ templates you’ll agree this error is much nicer than errors you get without concepts:\n/Users/syellin/blog/examples/feedback-controller/example/bangbang_sim/main.cpp:85:5: error: constraints not satisfied for class template 'Controller' [with Law = BangBangRangeLaw, FB = AdcFeedback",
+  "wordCount" : "2922",
+  "inLanguage": "en",
+  "datePublished": "2025-11-26T11:00:00-08:00",
+  "dateModified": "2025-11-26T11:00:00-08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.volatileint.dev/posts/feedback-controller/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Volatile Int",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.volatileint.dev/favicon.ico"
+    }
+  }
+}
+</script>
 </head>
 <body id="top">
     <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <a href="https://www.volatileint.dev/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -103,12 +187,12 @@ Before we dive in, note that the final code is not simple. In the course of read
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/about/" title="About">
+                <a href="https://www.volatileint.dev/about/" title="About">
                     <span>About</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/newsletter/" title="Newsletter">
+                <a href="https://www.volatileint.dev/newsletter/" title="Newsletter">
                     <span>Newsletter</span>
                 </a>
             </li>
@@ -165,7 +249,7 @@ Before we dive in, note that the final code is not simple. In the course of read
     </details>
 </div>
 
-  <div class="post-content"><p>In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template <code>concept</code>s,  <code>std::expected</code>, and lambdas.</p>
+  <div class="post-content"><p>In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template <code>concept</code>s,  <code>std::expected</code>, and lambda functions.</p>
 <p>Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.</p>
 <p>First, let&rsquo;s kick things off with a scenario.</p>
 <h2 id="a-simple-bang-bang-controller">A Simple Bang-Bang Controller<a hidden class="anchor" aria-hidden="true" href="#a-simple-bang-bang-controller">#</a></h2>
@@ -569,9 +653,9 @@ flowchart LR
 <h2 id="easily-swappable-components">Easily Swappable Components<a hidden class="anchor" aria-hidden="true" href="#easily-swappable-components">#</a></h2>
 <p>The following code utilizes the bang-bang controller - instantiated through our scaffolding - to run 1000 steps of the control simulation. This example demonstrates all our requirements - error handling, loggability, strict enforcement at compile-time.</p>
 <p>After building and executing this simulation, and running the included <code>graph_log.py</code> script - you&rsquo;ll see an output like this:</p>
-<p><img alt="bang-bang range-based controller output" loading="lazy" src="http://localhost:1313/posts/feedback-controller/bangbang-range.png"></p>
+<p><img alt="bang-bang range-based controller output" loading="lazy" src="https://www.volatileint.dev/posts/feedback-controller/bangbang-range.png"></p>
 <p>Let&rsquo;s demonstrate our ability to change controller components independently. If we swap the control law implementations we can create different control behavior without ever touching code related to actuation or feedback. When we run the sim using the setpoint control law, we get the following output:</p>
-<p><img alt="bang-bang setpoint-based controller output" loading="lazy" src="http://localhost:1313/posts/feedback-controller/bangbang-setpoint.png"></p>
+<p><img alt="bang-bang setpoint-based controller output" loading="lazy" src="https://www.volatileint.dev/posts/feedback-controller/bangbang-setpoint.png"></p>
 <h2 id="exercises-for-the-reader">Exercises for the Reader<a hidden class="anchor" aria-hidden="true" href="#exercises-for-the-reader">#</a></h2>
 <p>I encourage you to try extending this functionality yourself! Consider these two challenges:</p>
 <ol>
@@ -590,22 +674,22 @@ flowchart LR
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
-      <li><a href="http://localhost:1313/tags/feedback/">Feedback</a></li>
-      <li><a href="http://localhost:1313/tags/control/">Control</a></li>
-      <li><a href="http://localhost:1313/tags/law/">Law</a></li>
-      <li><a href="http://localhost:1313/tags/actuator/">Actuator</a></li>
-      <li><a href="http://localhost:1313/tags/concept/">Concept</a></li>
-      <li><a href="http://localhost:1313/tags/embedded/">Embedded</a></li>
-      <li><a href="http://localhost:1313/tags/template/">Template</a></li>
-      <li><a href="http://localhost:1313/tags/lambda/">Lambda</a></li>
-      <li><a href="http://localhost:1313/tags/logging/">Logging</a></li>
+      <li><a href="https://www.volatileint.dev/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="https://www.volatileint.dev/tags/feedback/">Feedback</a></li>
+      <li><a href="https://www.volatileint.dev/tags/control/">Control</a></li>
+      <li><a href="https://www.volatileint.dev/tags/law/">Law</a></li>
+      <li><a href="https://www.volatileint.dev/tags/actuator/">Actuator</a></li>
+      <li><a href="https://www.volatileint.dev/tags/concept/">Concept</a></li>
+      <li><a href="https://www.volatileint.dev/tags/embedded/">Embedded</a></li>
+      <li><a href="https://www.volatileint.dev/tags/template/">Template</a></li>
+      <li><a href="https://www.volatileint.dev/tags/lambda/">Lambda</a></li>
+      <li><a href="https://www.volatileint.dev/tags/logging/">Logging</a></li>
     </ul>
 
 <ul class="share-buttons">
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on x"
-            href="https://x.com/intent/tweet/?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f&amp;hashtags=C%2b%2b%2cfeedback%2ccontrol%2claw%2cactuator%2cconcept%2cembedded%2ctemplate%2clambda%2clogging">
+            href="https://x.com/intent/tweet/?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f&amp;hashtags=C%2b%2b%2cfeedback%2ccontrol%2claw%2cactuator%2cconcept%2cembedded%2ctemplate%2clambda%2clogging">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -614,7 +698,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f&amp;title=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;summary=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f">
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f&amp;title=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;summary=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;source=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -623,7 +707,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on reddit"
-            href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f&title=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b">
+            href="https://reddit.com/submit?url=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f&title=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
@@ -632,7 +716,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on facebook"
-            href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f">
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
@@ -641,7 +725,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on whatsapp"
-            href="https://api.whatsapp.com/send?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b%20-%20http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f">
+            href="https://api.whatsapp.com/send?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b%20-%20https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
@@ -650,7 +734,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on telegram"
-            href="https://telegram.me/share/url?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f">
+            href="https://telegram.me/share/url?text=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f">
             <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
@@ -659,7 +743,7 @@ flowchart LR
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share Implememting a Framework For Closed-Loop Controllers in Modern C&#43;&#43; on ycombinator"
-            href="https://news.ycombinator.com/submitlink?t=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&u=http%3a%2f%2flocalhost%3a1313%2fposts%2ffeedback-controller%2f">
+            href="https://news.ycombinator.com/submitlink?t=Implememting%20a%20Framework%20For%20Closed-Loop%20Controllers%20in%20Modern%20C%2b%2b&u=https%3a%2f%2fwww.volatileint.dev%2fposts%2ffeedback-controller%2f">
             <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
                 xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
                 <path
@@ -674,9 +758,9 @@ flowchart LR
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/">Volatile Int</a></span> · 
+        <span>&copy; 2025 <a href="https://www.volatileint.dev/">Volatile Int</a></span> · 
     <span>
-        <a href="http://localhost:1313/index.xml">Subscribe via RSS</a>
+        <a href="https://www.volatileint.dev/index.xml">Subscribe via RSS</a>
     </span> · 
     <span>
         <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
