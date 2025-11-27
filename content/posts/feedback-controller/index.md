@@ -1,5 +1,5 @@
 ---
-title: "Implementing a Framework For Closed-Loop Controllers in Modern C++"
+title: "Implementings a Framework For Closed-Loop Controllers in Modern C++"
 date: 2025-11-26T11:00:00-08:00
 draft: false
 tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]
@@ -18,7 +18,7 @@ Picture yourself as an embedded software engineer working at a scrappy startup d
 - A thermocouple connected to the device being cooled to sense the temperature.
 - A microcontroller wired to control the TEC using the thermocouple as feedback.
 
-The thermal engineer explains the straightoforward control algorithm requirements.. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. The component generates heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.
+The system generates heat during operation, so the only active element necessary is a cooler. Analysis shows that component needs to be kept between 20 and 80 degrees Celsius. Every minute the temperature should be checked. If the reported temperature is 80 degrees of above then the TEC should be turned on until the temperature hits the lower bound of 20 degrees.
 
 You write a very minimal program:
 ```c++
@@ -53,19 +53,20 @@ int main() {
 }
 ```
 
-This implementation is functional, but it has a number of problems. 
+This implementation is functional, but fails to address important long-term considerations for production systems. 
 
 What happens when the control law needs to change? What about when the GPIO is changed for a PWM output, or when the on-chip ADC is replaced with a more accurate off-chip device?
 
 How do we make sure this code actually serves all our purposes? It doesn't appear to handle errors. It doesn't provide insight into the status of the controller. It doesn't have any sense of configuration - the bounds are hard-coded. We have no facilities to log state, or understand if our feedback or actuation mechanisms have failed to accomplish their tasks.
 
-What about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways.
+What about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? Consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways. As written a second control algorithm would violate the DRY principle - the knowledge of *how control laws are structure* should be centralized.
 
-And finally - what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the control team expected to maintain simulation infrastructure for hardware to iterate on control laws? Are they bound in experimenting with new control algorithms by the existant hardware drivers and hardware simulation infrastructure?
+And finally - what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the control team expected to maintain simulation infrastructure for hardware to iterate on control laws? Are they bound in experimenting with new control algorithms by the existance of hardware drivers and hardware simulation infrastructure?
 
-These problems can be addressed by providing *scaffolding* for the domain of control law implementations. 
+These problems can be addressed - and enforced across all controllers implemented in the codebase - by providing *scaffolding* for the domain of control law implementations. 
 
-### Requirements for a Generic Controller
+## Defining a Framework for Closed-Loop Control Algorithms
+
 Requirements for the scaffolding can be derived from the above use cases:
 
 1. Control laws shall be independently testable from any specific hardware configuration.
@@ -88,9 +89,9 @@ In a given step of the controller data flows first into the feedback component. 
 {{< mermaid >}}
 flowchart LR
   S[Feedback Sensor]
-  FB[Feedback Component<br/>e.g., AdcFeedback]
-  LAW[Control Law<br/>e.g., BangBangLaw]
-  ACT[Actuator Component<br/>e.g., GpioActuator]
+  FB[Feedback Component<br/>e.g., ADC]
+  LAW[Control Law<br/>e.g., Bang-Bang]
+  ACT[Actuator Component<br/>e.g., GPIO]
   AHW[Actuator Hardware]
 
   S -->|Raw measurement| FB
@@ -101,16 +102,14 @@ flowchart LR
 
 Let's ground this in our TEC example. The ADC is the feedback. ADCs read a voltage. The control law for a TEC is going to deal with temperatures in degrees C, so the voltage must be converted to degrees. The control law emits a boolean - the TEC is on or off. For the bang-bang controller discussed earlier, the output GPIO uses the same data type as the controller output.
 
-It is now clear that the data types for input and output from the control law *constrain* the feedback and actuator components.. The control law cannot provide its own adapters - or we have violated the independent testability requirement. The components close to the hardware must implement their own conversion layers.
-
-Template `concept`s introduced in C++20 are naturally able to express these constraints. Each of these components - feedback, actuator, law - can be defined as a `concept`.
+The data types for input and output from the control law *constrain* the feedback and actuator components. The control law cannot provide its own adapters without violating the independent testability requirement. Feedback and actuator interfaces must define those conversions themselves. Template `concept`s introduced in C++20 are naturally able to express the relationship between the interface data types.
  
 #### ControlLaw Interface
 Let's start out writing a concept for our most abstract component - the `ControlLaw`. The concept requires that each law defines its input and output types - `Measurement` and `Command` respectively. Laws must also define a `State` type.
 
 There are two required APIs for a `ControlLaw`:
 
-1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized state, or a string in the case of an error. This is where the config for the law can be validated and return an error if necessary.
+1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized `State`, or a string in the case of an error. This is where the config for the law can be validated and return an error if necessary.
 2. `Compute` takes in a measurement, and returns a tuple of the next `Command` and its current `State`. 
 
 These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller. 
@@ -185,25 +184,28 @@ class Controller
 
     std::expected<typename Law::State, std::string> Initialize()
     {
-        if (auto err = fb_.Configure()) return std::unexpected(*err);
-        if (auto err = act_.Configure()) return std::unexpected(*err);
+        auto err = fb_.Configure();
+        if (!err) return std::unexpected(err.error());
+    
+        err = act_.Configure();
+        if (!err) return std::unexpected(err.error());
         auto law_state = law_.Initialize();
-        if (!law_state.has_value()) return std::unexpected(law_state.error());
+        if (!law_state) return std::unexpected(law_state.error());
         return law_state.value();
     }
 
     std::expected<ControllerState<FB, Law, ACT>, std::string> Step()
     {
         auto fb_result = fb_.Read();
-        if (!fb_result.has_value()) return std::unexpected(fb_result.error());
+        if (!fb_result) return std::unexpected(fb_result.error());
         auto [measurement, fb_state] = *fb_result;
 
         auto law_result = law_.Compute(measurement);
-        if (!law_result.has_value()) return std::unexpected(law_result.error());
+        if (!law_result) return std::unexpected(law_result.error());
         auto [command, law_state] = *law_result;
 
         auto act_result = act_.Write(command);
-        if (!act_result.has_value()) return std::unexpected(act_result.error());
+        if (!act_result) return std::unexpected(act_result.error());
         auto act_state = *act_result;
 
         ControllerState<FB, Law, ACT> state{
@@ -238,7 +240,7 @@ First - we need to create concrete implementations of our ADC feedback, GPIO act
 {{<readfile "feedback-controller/example/components/feedback_controller/plugins/laws/include/bangbang_range.hpp" >}}
 {{< /highlight >}}
 
-It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller.  Let's also create another version of our bangbang control law which controls to a specific setpoint instead of a range. We'll use this later to demonstrate swapping parts of the controller.
+It is worth noting the framework is flexible for whatever configuration any given aspect of the controller requires. In this case, we provide min and max thresholds for the bang-bang controller. Let's also create another version of our bangbang control law which controls to a specific setpoint instead of a range. We'll use this later to demonstrate swapping parts of the controller.
 
 **File**: `example/components/feedback_controller/plugins/laws/include/bangbang_setpoint.hpp`
 {{< highlight c >}}
@@ -299,6 +301,11 @@ We are told *exactly* what is wrong - our `Convert` function return type of `flo
 ## Easily Swappable Components
 The following code utilizes the bang-bang controller - instantiated through our scaffolding - to run 1000 steps of the control simulation. This example demonstrates all our requirements - error handling, loggability, strict enforcement at compile-time.
 
+**File**: `example/feedback-controller/example/bangbang_range_sim/main.cpp`
+{{< highlight c >}}
+{{<readfile "feedback-controller/example/bangbang_range_sim/main.cpp" >}}
+{{< /highlight >}}
+
 After building and executing this simulation, and running the included `graph_log.py` script - you'll see an output like this:
 
 ![bang-bang range-based controller output](bangbang-range.png)
@@ -308,11 +315,12 @@ Let's demonstrate our ability to change controller components independently. If 
 ![bang-bang setpoint-based controller output](bangbang-setpoint.png)
 
 ## Exercises for the Reader
-I encourage you to try extending this functionality yourself! Consider these two challenges:
+I encourage you to try extending this functionality yourself! Consider these challenges:
 
 1. Implement the `Convert` function at compile-time rather than as a lambda passed into the constructor.
 2. Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.
-3. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State` objects.
+3. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State` objects
+4. Use of `std::string` as an error type is useful in most context, but highly resource constrained systems may benefit from their own error types - such as an enumeration. Change the implementation to require a templatized error type. Hint: you may need to look at something like `std::variant` to bubble up the final returned error from the `Controller` class.
 
 These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.
 
