@@ -7,7 +7,7 @@ tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "t
 
 In this post, we're going to implement a generic interface for creating a wide variety of closed-loop control systems. We'll end with a flexible template library capable of implementing whatever control algorithm you'd want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template `concept`s,  `std::expected`, and lambda functions.
 
-Before we dive in, note that the final code is not simple. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully, the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or who need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
+Before we dive in, I want to acknowledge that the final code utilizes a good number of advanced C++ facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.
 
 First, let's kick things off with a scenario.
 
@@ -59,9 +59,9 @@ What happens when the control law needs to change? What about when the GPIO is c
 
 How do we make sure this code actually serves all our purposes? It doesn't appear to handle errors. It doesn't provide insight into the status of the controller. It doesn't have any sense of configuration - the bounds are hard-coded. We have no facilities to log state, or understand if our feedback or actuation mechanisms have failed to accomplish their tasks.
 
-What about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? Consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways. As written a second control algorithm would violate the DRY principle - the knowledge of *how control laws are structure* should be centralized.
+What about consistency across the codebase? If we are working in a system with lot of controllers - as many embedded systems and embedded software platforms must support - how do we make sure they're all implemented in a consistent way? Consistency is critically important for maintaining developer velocity in complex code bases, and so it is a matter of utmost importance that we do not arbitrarily do the same thing in wildly different ways. As written a second control algorithm would violate the DRY principle - the knowledge of *how control laws are structured* should be centralized.
 
-And finally - what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the control team expected to maintain simulation infrastructure for hardware to iterate on control laws? Are they bound in experimenting with new control algorithms by the existance of hardware drivers and hardware simulation infrastructure?
+And finally - what about testability? The folks who write these control laws are often not the embedded software teams. The control law is inextricably tied to the hardware used for gathering feedback and effecting output. Is the control team expected to maintain simulations for hardware in order to iterate on control laws? Are they bound in experimenting with new control algorithms by the existance of hardware drivers and hardware simulation infrastructure?
 
 These problems can be addressed - and enforced across all controllers implemented in the codebase - by providing *scaffolding* for the domain of control law implementations. 
 
@@ -223,7 +223,7 @@ class Controller
 ## Revisiting the Bang-Bang Controller
 All the pieces are now in place to implement controllers using our generic template scaffolding. The following example implements the simple bang-bang controller for a TEC discussed earlier.
 
-First - we need to create concrete implementations of our ADC feedback, GPIO actuation, and bang-bang control law concepts. We use an `auto` template parameter for the conversion functions so that the entire set of functionality is determined at compile time This approach is nice for embedded contexts where we really want to push as much work to compile-time as possible but does impose some limits on what your conversion function can do. If you need a capture in your conversion function for any reason, you could always pass the lambda into the constructor, or just hard-code it into your implementation if it won't change.
+First - we need to create concrete implementations of our ADC feedback, GPIO actuation, and bang-bang control law concepts. We use an `auto` template parameter for the conversion functions so that the entire set of functionality is determined at compile time. This approach is nice for embedded contexts where we really want to push as much work to compile-time as possible but does impose some limits on what your conversion function can do. If you need a capture in your conversion function for any reason, you could always pass the lambda into the constructor, or just hard-code it into your implementation if it won't change.
 
 **File**: `example/components/feedback_controller/plugins/feedback/include/adc_feedback.hpp`
 {{< highlight c >}}
@@ -300,9 +300,9 @@ Now if we try and build the sim:
 
 We are told *exactly* what is wrong - our `Configure` function has the wrong return type. Similar errors will occur if any other aspect of the contract is violated. 
 
-Its also worth taking a look at the lambda functions performing conversions. This is implementation dependent on your `Feedback` and `Actuator` interfaces, but in our case a mismatch between lambda return type with the `concept` dictated value it will be caught at compile time *as long as you compile with `-WConversion`*. Of course, you **are** compiling with `-Wconversion`, right?
+Its also worth taking a look at the lambda functions performing conversions. This is dependent on your particlar `Feedback` and `Actuator` interface implementations, but in our case a mismatch between the lambda return type and the `concept` dictated value will be caught at compile time *as long as you compile with `-WConversion`*. Of course, you **are** compiling with `-Wconversion`, right?
 
-So we have achieved the design goals - we both have compile-time checks that we are well formed, and the code is easy to debug when done incorrectly.
+So, we have achieved the design goals: We both have compile-time checks that our interfaces are well formed, and the code is easy to debug when they are not.
 
 ## Easily Swappable Components
 The following code utilizes the bang-bang controller - instantiated through our scaffolding - to run 1000 steps of the control simulation. This example demonstrates all our requirements - error handling, loggability, strict enforcement at compile-time.
@@ -320,35 +320,13 @@ Let's demonstrate our ability to change controller components independently. If 
 
 ![bang-bang setpoint-based controller output](bangbang-setpoint.png)
 
-The entire difference between these two simulations is constrained to details of the control law:
+The entire difference between these two simulations is constrained to details of the control law. This is the only functional difference:
 ```bash
-syellin@Sams-MacBook-Pro feedback-controller % diff example/bangbang_range_sim/main.cpp example/bangbang_setpoint_sim/main.cpp 
-6c6
-< #include "bangbang_range.hpp"
----
-> #include "bangbang_setpoint.hpp"
 73c73
 <     BangBangRangeLaw law(20 /* min */, 80 /* max */);
 ---
 >     BangBangSetpointLaw law(60 /* setpoint deg c */);
-76,77c76,77
-<     AdcFeedback<BangBangRangeLaw, [](uint16_t raw) -> BangBangRangeLaw::Measurement
-<                 { return static_cast<BangBangRangeLaw::Measurement>(raw) / 10; }>
----
->     AdcFeedback<BangBangSetpointLaw, [](uint16_t raw) -> BangBangSetpointLaw::Measurement
->                 { return static_cast<BangBangSetpointLaw::Measurement>(raw) / 10; }>
-81c81
-<     GpioActuator<BangBangRangeLaw, [](bool cmd) -> BangBangRangeLaw::Command { return cmd; }>
----
->     GpioActuator<BangBangSetpointLaw, [](bool cmd) -> BangBangSetpointLaw::Command { return cmd; }>
-85,86c85,86
-<     Controller<BangBangRangeLaw, decltype(feedback), decltype(actuator)> controller(feedback,
-<                                                                                     actuator, law);
----
->     Controller<BangBangSetpointLaw, decltype(feedback), decltype(actuator)> controller(
->         feedback, actuator, law);
 ```
-I kept the names separate for the sake of clarity in this example, but if we had consistent names for the control laws and used the build system to determine which to include, the changes would be isolated only to the control law constructor!
 
 ## Exercises for the Reader
 I encourage you to try extending this functionality yourself! Consider these challenges:
