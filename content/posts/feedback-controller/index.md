@@ -109,7 +109,7 @@ Let's start out writing a concept for our most abstract component - the `Control
 
 There are two required APIs for a `ControlLaw`:
 
-1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized `State`, or a string in the case of an error. This is where the config for the law can be validated and return an error if necessary.
+1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized `State`, or a string view in the case of an error. This is where the config for the law can be validated and return an error if necessary.
 2. `Compute` takes in a measurement, and returns a tuple of the next `Command` and its current `State`. 
 
 These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller. 
@@ -121,12 +121,12 @@ concept ControlLaw = requires(C law, const typename C::Measurement& m) {
     typename C::Command;
     typename C::State;
 
-    { law.Initialize() } -> std::same_as<std::expected<typename C::State, std::string>>;
+    { law.Initialize() } -> std::same_as<std::expected<typename C::State, std::string_view>>;
 
     {
         law.Compute(m)
     }
-    -> std::same_as<std::expected<std::pair<typename C::Command, typename C::State>, std::string>>;
+    -> std::same_as<std::expected<std::pair<typename C::Command, typename C::State>, std::string_view>>;
 };
 ```
 
@@ -140,12 +140,12 @@ template <typename FB, typename Law>
 concept Feedback = ControlLaw<Law> && requires(FB fb) {
     typename FB::State;
 
-    { fb.Configure() } -> std::same_as<std::expected<void, std::string>>;
+    { fb.Configure() } -> std::same_as<std::expected<void, std::string_view>>;
 
     {
         fb.Read()
     } -> std::same_as<
-        std::expected<std::pair<typename Law::Measurement, typename FB::State>, std::string>>;
+        std::expected<std::pair<typename Law::Measurement, typename FB::State>, std::string_view>>;
 
     { fb.Convert(std::declval<typename FB::Raw>()) } -> std::same_as<typename Law::Measurement>;
 };
@@ -154,16 +154,16 @@ template <typename AC, typename Law>
 concept Actuator = ControlLaw<Law> && requires(AC ac, const typename Law::Command& cmd) {
     typename AC::State;
 
-    { ac.Configure() } -> std::same_as<std::expected<void, std::string>>;
+    { ac.Configure() } -> std::same_as<std::expected<void, std::string_view>>;
 
-    { ac.Write(cmd) } -> std::same_as<std::expected<typename AC::State, std::string>>;
+    { ac.Write(cmd) } -> std::same_as<std::expected<typename AC::State, std::string_view>>;
 
     { ac.Convert(std::declval<typename Law::Command>()) } -> std::same_as<typename AC::State>;
 };
 ```
 
 These concepts closely mirror each other. They are designed to encapsulate external-facing dependencies and abstract away conversion to the `ControlLaw`types. The interface entails:
-1. A `Configure` function that ensures the output interfaces are ready for control and returns a string on error. 
+1. A `Configure` function that ensures the output interfaces are ready for control and returns a string view on error. 
 2. A function to interface with the external world - `Read` and `Write` for the `Feedback` and `Actuator` interfaces respectively. 
 3. A `Convert` function that goes from the respective internal type to the data type expected by the template `ControlLaw`.
 
@@ -182,30 +182,43 @@ class Controller
 
     Controller(FB& feedback, ACT& actuator, Law& law) : fb_(feedback), act_(actuator), law_(law) {}
 
-    std::expected<typename Law::State, std::string> Initialize()
+    std::expected<typename Law::State, std::string_view> Initialize()
     {
         auto err = fb_.Configure();
-        if (!err) return std::unexpected(err.error());
+        if (!err) {
+            return std::unexpected(err.error());
+        }
     
         err = act_.Configure();
-        if (!err) return std::unexpected(err.error());
+        if (!err) {
+            return std::unexpected(err.error());
+        }
+
         auto law_state = law_.Initialize();
-        if (!law_state) return std::unexpected(law_state.error());
+        if (!law_state) {
+            return std::unexpected(law_state.error());
+        }
         return law_state.value();
     }
 
-    std::expected<ControllerState<FB, Law, ACT>, std::string> Step()
+    std::expected<ControllerState<FB, Law, ACT>, std::string_view> Step()
     {
         auto fb_result = fb_.Read();
-        if (!fb_result) return std::unexpected(fb_result.error());
+        if (!fb_result) {
+            return std::unexpected(fb_result.error());
+        }
         auto [measurement, fb_state] = *fb_result;
 
         auto law_result = law_.Compute(measurement);
-        if (!law_result) return std::unexpected(law_result.error());
+        if (!law_result) {
+            return std::unexpected(law_result.error());
+        }
         auto [command, law_state] = *law_result;
 
         auto act_result = act_.Write(command);
-        if (!act_result) return std::unexpected(act_result.error());
+        if (!act_result) {
+            return std::unexpected(act_result.error());
+        }
         auto act_state = *act_result;
 
         ControllerState<FB, Law, ACT> state{
@@ -294,8 +307,8 @@ Now if we try and build the sim:
 /Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:55:27: note: because 'Feedback<AdcFeedback<BangBangSetpointLaw, (lambda at /Users/syellin/blog/examples/feedback-controller/example/bangbang_setpoint_sim/main.cpp:76:38){}>, BangBangSetpointLaw>' evaluated to false
    55 | template <ControlLaw Law, Feedback<Law> FB, Actuator<Law> ACT>
       |                           ^
-/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:34:27: note: because type constraint 'std::same_as<void, std::expected<void, std::string> >' was not satisfied:
-   34 |     { fb.Configure() } -> std::same_as<std::expected<void, std::string>>;
+/Users/syellin/blog/examples/feedback-controller/include/feedback_controller_interface.hpp:34:27: note: because type constraint 'std::same_as<void, std::expected<void, std::string_view> >' was not satisfied:
+   34 |     { fb.Configure() } -> std::same_as<std::expected<void, std::string_view>>;
 ```
 
 We are told *exactly* what is wrong - our `Configure` function has the wrong return type. Similar errors will occur if any other aspect of the contract is violated. 
@@ -333,7 +346,7 @@ I encourage you to try extending this functionality yourself! Consider these cha
 
 1. Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.
 2. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State` objects
-3. Use of `std::string` as an error type is useful in most context, but highly resource constrained systems may benefit from their own error types - such as an enumeration. Change the implementation to require a templatized error type. Hint: you may need to look at something like `std::variant` to bubble up the final returned error from the `Controller` class.
+3. Use of `std::string_view` as an error type is fine in most contexts. It avoids any dynamic memory allocation given by `std::string`. Even still, highly resource constrained systems may benefit from their own error types with smaller footprints - such as an enumeration. Change the implementation to require a templatized error type. Hint: you may need to look at something like `std::variant` to bubble up the final returned error from the `Controller` class.
 
 These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.
 
