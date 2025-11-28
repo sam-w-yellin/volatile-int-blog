@@ -109,7 +109,7 @@ Let's start out writing a concept for our most abstract component - the `Control
 
 There are two required APIs for a `ControlLaw`:
 
-1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized `State`, or a string view in the case of an error. This is where the config for the law can be validated and return an error if necessary.
+1. `Initialize` configures the internal `ControlLaw` state. It must return the initialized `State`, or a `std::string_view` in the case of an error. This is where the config for the law can be validated and return an error if necessary.
 2. `Compute` takes in a measurement, and returns a tuple of the next `Command` and its current `State`. 
 
 These interfaces enforce two of our requirements - that the controller implements error handling, and that we have visibility into the current state of the controller. 
@@ -163,7 +163,7 @@ concept Actuator = ControlLaw<Law> && requires(AC ac, const typename Law::Comman
 ```
 
 These concepts closely mirror each other. They are designed to encapsulate external-facing dependencies and abstract away conversion to the `ControlLaw`types. The interface entails:
-1. A `Configure` function that ensures the output interfaces are ready for control and returns a string view on error. 
+1. A `Configure` function that ensures the output interfaces are ready for control and returns a `std::string_view` on error. 
 2. A function to interface with the external world - `Read` and `Write` for the `Feedback` and `Actuator` interfaces respectively. 
 3. A `Convert` function that goes from the respective internal type to the data type expected by the template `ControlLaw`.
 
