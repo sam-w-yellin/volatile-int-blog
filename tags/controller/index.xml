@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Controller on Volatile Int</title>
+    <link>http://localhost:1313/tags/controller/</link>
+    <description>Recent content in Controller on Volatile Int</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/controller/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Implementing a Setpoint Controller in Modern C&#43;&#43;: The March to Generic Components </title>
+      <link>http://localhost:1313/posts/setpoint-controller/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/posts/setpoint-controller/</guid>
+      <description>&lt;h1 id=&#34;a-case-study-in-software-evolution&#34;&gt;A Case Study in Software Evolution&lt;/h1&gt;
+&lt;p&gt;In this post, we&amp;rsquo;re going to implement a generic C++ component capable of implementing a wide variety of control loops which utilize a single feedback and have a single output. We&amp;rsquo;ll end with a controller capable of implementing whatever algorithm you&amp;rsquo;d want, with configurable setpoints, and consistent error handling using modern C++ concepts. If you&amp;rsquo;re just interested in the end result, check out the linked GitHub page!&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
