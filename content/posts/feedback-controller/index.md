@@ -342,7 +342,7 @@ The entire difference between these two simulations is constrained to details of
 ```
 
 ##  Size and Performance Analysis
-Let's look at the cost of our template abstraction in terms of binary size and performance. Let's compare an implementation close to the originally presented controller to our `BangBangRangeLaw` implementation. We'll create a minimal binary that instantiates a controller and runs 100000000 iterations of its `Step` function as the basis for our measurements.
+It is important to evaluate our template abstraction's impact on binary size and performance. Let's compare an implementation close to the originally presented controller to our `BangBangRangeLaw` implementation. We'll create a minimal binary that instantiates a controller and runs 100000000 iterations of its `Step` function as the basis for our measurements.
 
 **File**: `example/feedback-controller/example/performance_analysis/simple/main.cpp`
 {{< highlight c >}}
