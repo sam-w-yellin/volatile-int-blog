@@ -382,7 +382,7 @@ I encourage you to try extending this functionality yourself! Consider these cha
 
 1. Enable runtime configuration of the controller via dependency inversion by creating a base class for each of the concepts.
 2. Currently, the `State` objects must be move/copy constructable. Explain why that is the case, and modify the code to permit returning non-copy-able and non-move-able `State` objects
-3. Use of `std::string_view` as an error type is fine in most contexts. It avoids any dynamic memory allocation given by `std::string`. Even still, highly resource constrained systems may benefit from their own error types with smaller footprints - such as an enumeration. Change the implementation to require a templatized error type. Hint: you may need to look at something like `std::variant` to bubble up the final returned error from the `Controller` class.
+3. Use of `std::string_view` as an error type is fine in most contexts. It avoids any dynamic memory allocation that would come with `std::string`. Even still, highly resource constrained systems may benefit from their own error types with smaller footprints - such as an enumeration. Change the implementation to require a templatized error type. Hint: you may need to look at something like `std::variant` to bubble up the final returned error from the `Controller` class.
 
 These exercises both may be very useful to some applications, and are great ways to apply the patterns learned in this post.
 
