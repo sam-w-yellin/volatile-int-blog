@@ -260,16 +260,19 @@ This risk is avoidable. By intentionally separating the high-level business rule
 </ol>
 <p>A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change <em>how</em> a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface? The solution is dependency inversion.</p>
 <p>Let’s dig into our logger example. The tightly-coupled implementation might look like this, where the the component depends directly or transitively on a specific logger implementation:
-<div class="mermaid">
-    
+<div class="mermaid-box">
+    <div class="mermaid">
+        
 graph TD
     Main --> Worker
     Worker --> StdoutLogger
 
+    </div>
 </div></p>
 <p>Dependency inversion frees components from needing to know the details of how logging is implemented. It also leads to sparser build dependency graphs - components that depend only on the interface don’t need to be recompiled when implementations change. The resulting architecture looks as follows:
-<div class="mermaid">
-    
+<div class="mermaid-box">
+    <div class="mermaid">
+        
 graph TD
     Main --> Worker
     Main --> StdoutLogger
@@ -278,6 +281,7 @@ graph TD
     StdoutLogger --> LoggerInterface
     FileLogger --> LoggerInterface
 
+    </div>
 </div></p>
 <p>It’s worth noting that it is not only acceptable but expected that main depends on low-level details. Ideally, <code>main</code> - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.</p>
 <h2 id="defining-the-logger-interface">Defining the Logger Interface<a hidden class="anchor" aria-hidden="true" href="#defining-the-logger-interface">#</a></h2>

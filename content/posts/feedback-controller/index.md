@@ -341,6 +341,42 @@ The entire difference between these two simulations is constrained to details of
 >     BangBangSetpointLaw law(60 /* setpoint deg c */);
 ```
 
+##  Size and Performance Analysis
+Let's look at the cost of our template abstraction in terms of binary size and performance. Let's compare an implementation close to the originally presented controller to our `BangBangRangeLaw` implementation. We'll create a minimal binary that instantiates a controller and runs 100000000 iterations of its `Step` function as the basis for our measurements.
+
+**File**: `example/feedback-controller/example/performance_analysis/simple/main.cpp`
+{{< highlight c >}}
+{{<readfile "feedback-controller/example/performance_analysis/simple/main.cpp" >}}
+{{< /highlight >}}
+
+**File**: `example/feedback-controller/example/performance_analysis/template/main.cpp`
+{{< highlight c >}}
+{{<readfile "feedback-controller/example/performance_analysis/template/main.cpp" >}}
+{{< /highlight >}}
+
+Both of these examples were compiled with `gcc` on OSX without debug symbols and with a few different optimization levels. The results are as follows in the tables below.
+
+| Optimization Level | Simple BangBang | Template BangBang |
+|:-----------------:|:---------------:|:----------------:|
+| `-O0`             | `45K`           | `98K`            |
+| `-O1`             | `35K`           | `34K`            |
+| `-O2`             | `35K`           | `34K`            |
+| `-O3`             | `35K`           | `34K`            |
+| `-Os`             | `35K`           | `35K`            |
+
+
+| Optimization Level | Simple BangBang | Template BangBang |
+|:-----------------:|:---------------:|:----------------:|
+| `-O0`             | `2.20s`         | `13.19s`         |
+| `-O1`             | `0.17s`         | `0.17s`          |
+| `-O2`             | `0.17s`         | `0.17s`          |
+| `-O3`             | `0.16s`         | `0.16s`          |
+| `-Os`             | `0.26s`         | `0.20s`          |
+
+This should be both fascinating and encouraging!. It's natural to expect the template implementation is slower and larger than the simple version at `-O0` optimization level. After all, we're actually evaluating success per our interface contracts, and with no optimization templates produce a lot of code. What may be less intuitive is that at all other optimization levels *the template code is both smaller and more performant than the "simple" implementation*.
+
+Clearly, these results demonstrate that our abstractions really are zero-cost at run-time when we allow even simple optimization from the compiler. We have paid no binary size or performance penalty, and in fact have produced more optimized code than the simple example!
+
 ## Exercises for the Reader
 I encourage you to try extending this functionality yourself! Consider these challenges:
 
