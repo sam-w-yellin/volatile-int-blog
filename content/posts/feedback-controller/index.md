@@ -373,7 +373,7 @@ Both of these examples were compiled with `gcc` on OSX without debug symbols and
 | `-O3`             | `0.16s`         | `0.16s`          |
 | `-Os`             | `0.26s`         | `0.20s`          |
 
-This should be both fascinating and encouraging!. It's natural to expect the template implementation is slower and larger than the simple version at `-O0` optimization level. After all, we're actually evaluating success per our interface contracts, and with no optimization templates produce a lot of code. What may be less intuitive is that at all other optimization levels *the template code is both smaller and more performant than the "simple" implementation*.
+This should be both fascinating and encouraging! It's natural to expect the template implementation is slower and larger than the simple version at `-O0` optimization level. After all, we're actually evaluating success per our interface contracts, and with no optimization templates produce a lot of code. What may be less intuitive is that at all other optimization levels *the template code is both smaller and more performant than the "simple" implementation*.
 
 Clearly, these results demonstrate that our abstractions really are zero-cost at run-time when we allow even simple optimization from the compiler. We have paid no binary size or performance penalty, and in fact have produced more optimized code than the simple example!
 
