@@ -66,7 +66,7 @@ auto v = &x;
 
 {{< quiz_question
       answer="**Type:** `std::nullptr_t`"
-      explanation="**Explanation:** nullptr has its own type"
+      explanation="**Explanation:** `nullptr` has its own type."
 >}}
 auto v = nullptr;
 {{< /quiz_question >}}
@@ -239,7 +239,7 @@ Abandon all hope, ye who attempt to deduce the types of lambda captures in expre
 
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** `x` is captured by reference, but `decltype(auto)` deduces id-expressions only by type."
+      explanation="**Explanation:** `x` is captured by reference, but it is declared as an `int`."
 >}}
 int x;
 [&] {
@@ -259,7 +259,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** Similar to above - `decltype(auto)` deduces id-expressions only by type."
+      explanation="**Explanation:** Similar to above - `decltype(auto)` deduces the id-expression by the captured copy's type."
 >}}
 int x;
 [=] {
@@ -269,7 +269,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** `const int&`"
-      explanation="**Explanation:** Captures by value are `const`, and we are evaluting a non-id expression."
+      explanation="**Explanation:** Captures by value are `const` (because the `()` operator is `const` by default), and we are evaluting a parenthesized expression."
 >}}
 int x;
 [=] {
@@ -289,7 +289,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** Fails to compile."
-      explanation="**Explanation:** `y` is an `int&` outside the lambda. But *inside* the lambda, it is a `const` int&. This fails because we are discarding the captured `y`'s `const` qualifier."
+      explanation="**Explanation:** Lambdas cannot capture references. When `y` is captured, it captures the referred-to value `x`. Because captures are const, the captured value ends up as `const int`. However, `decltype(auto)` sees the symbol `y`'s declaration as an `int&` and deduces the type of `v` as `int&`. Compilation fails on discarding the `const` qualifier when trying to assign a `const int` to an `int&`."
 >}}
 int x;
 int& y = x;
