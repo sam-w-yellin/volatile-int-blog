@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Auto on Volatile Int</title>
+    <link>http://localhost:1313/tags/auto/</link>
+    <description>Recent content in Auto on Volatile Int</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 16 Nov 2025 12:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/auto/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How well do you REALLY know auto type deduction?</title>
+      <link>http://localhost:1313/posts/auto-type-deduction/</link>
+      <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/posts/auto-type-deduction/</guid>
+      <description>&lt;p&gt;One of the most iconic C++ features is the language&amp;rsquo;s ability to deduce types with the &lt;code&gt;auto&lt;/code&gt; keyword. In this post, I&amp;rsquo;ll give a bunch of example code snippits. Your job is to assess what will be deduced - including its type, if its a reference or not, and CV qualifiers. The examples in each section increase in difficulty. Good luck!&lt;/p&gt;
+&lt;h1 id=&#34;auto-type-deduction-quiz&#34;&gt;Auto Type Deduction Quiz&lt;/h1&gt;
+&lt;h1 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;You can check any of these by using this &lt;a href=&#34;https://godbolt.org/z/3EcGaTxb9&#34;&gt;GodBolt link&lt;/a&gt;. godbolt.org/z/3EcGaTxb9). Shoutout to this &lt;a href=&#34;https://stackoverflow.com/questions/81870/is-it-possible-to-print-the-name-of-a-variables-type-in-standard-c/56766138#56766138&#34;&gt;Stack Overflow thread&lt;/a&gt; which provided the code snippit to get human readable names given a type.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

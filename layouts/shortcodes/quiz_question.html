@@ -1,0 +1,12 @@
+<div class="auto-quiz-block">
+  <pre><code>{{ .Inner | safeHTML  }}</code></pre>
+
+  <details>
+    <summary>Answer</summary>
+    <div>
+      {{ with .Get "answer" }}{{ . | markdownify }}{{ end }}
+      <br>
+      {{ with .Get "explanation" }}{{ . | markdownify }}{{ end }}
+    </div>
+  </details>
+</div>
