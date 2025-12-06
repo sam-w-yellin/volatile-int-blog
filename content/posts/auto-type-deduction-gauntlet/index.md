@@ -1,6 +1,6 @@
 ---
-title: "Can you beat the C++ Auto Type Gauntlet?"
-date: 2025-12-09T12:00:00-08:00
+title: "Can you survive the C++ Auto Type Gauntlet?"
+date: 2025-12-05T12:00:00-08:00
 draft: false
 tags: ["C++","type","deduction", "auto", "quiz"]
 ---
@@ -8,17 +8,13 @@ tags: ["C++","type","deduction", "auto", "quiz"]
 One of the most iconic C++ features is the language's ability to deduce types with the `auto` keyword. In this post, I'll give a bunch of example code snippits. Your job is to assess what will be deduced for `v` in each snippit. Determine:
 1. The type
 2. If it is a reference or not
-3. CV qualifiers. 
+3. CV qualifiers
 
-The examples in each section increase in difficulty. Some of these may not even compile, so "this won't work" is a totally valid answer. Good luck!
+Some of these may not even compile, so "this won't work" is a totally valid answer.
+
+Each section increases in difficulty. Good luck!
 
 # The Gauntlet
-
-A few things to remember:
-1. A naked `auto` drops references & CV qualifiers.
-2. Arrays decay unless bound to auto&.
-3. `auto&&` is a forwarding reference, and will result in an lvalue or rvalue reference depending on the assigned expression.
-4. `decltype(auto)` uses the `decltype` rules to deduce the type - meaning it can pick up references and cv qualifiers.
 
 ## Basics
 Basic assignments and deduction from constants and straightforward types.
@@ -38,6 +34,14 @@ auto v = 0.1;
 {{< /quiz_question >}}
 
 {{< quiz_question
+      answer="**Type:** `int`"
+      explanation="**Explanation:** Integer type derived from the assigned-from variable."
+>}}
+int x;
+auto v = x;
+{{< /quiz_question >}}
+
+{{< quiz_question
       answer="**Type:** Fails to compile."
       explanation="**Explanation:** All types in an expression defined with `auto` have to be the same."
 >}}
@@ -46,18 +50,10 @@ auto v = 5, w = 0.1;
 
 {{< quiz_question
       answer="**Type:** int"
-      explanation="**Explanation:** Unless of course you are using structured binding"
+      explanation="**Explanation:** Unless, of course, you are using structured binding."
 >}}
 std::pair<int, float> x {1, 2.0};
 auto [v, w] = x;
-{{< /quiz_question >}}
-
-{{< quiz_question
-      answer="**Type:** `int`"
-      explanation="**Explanation:** Integer type derived from the assigned-from variable."
->}}
-int x;
-auto v = x;
 {{< /quiz_question >}}
 
 {{< quiz_question
@@ -85,7 +81,7 @@ auto v = { 1, 2, 3 };
 
 {{< quiz_question
       answer="**Type:** `int*`"
-      explanation="**Explanation:** C-style decay to a pointer, and the decay happens before `auto` is evaluated."
+      explanation="**Explanation:** C-style arrays decay to a pointer. The decay happens before `auto` is evaluated."
 >}}
 int x[5];
 auto v = x;
@@ -105,7 +101,7 @@ auto v = foo;
 Exploring how references and CV-qualifiers are handled.
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** `auto` drops CV qualifiers (unless they are applied to a pointed-to type)."
+      explanation="**Explanation:** `auto` drops CV qualifiers."
 >}}
 volatile const int x = 1;
 auto v = x;
@@ -113,7 +109,7 @@ auto v = x;
 
 {{< quiz_question
       answer="**Type:** `volatile const int*`"
-      explanation="**Explanation:** CV qualifiers of pointed-to types are maintained"
+      explanation="**Explanation:** Unless, of course, they are applied to a pointed-to or reference type"
 >}}
 volatile const int x = 1;
 auto v = &x;
@@ -155,7 +151,7 @@ auto v = foo;
 {{< /quiz_question >}}
 
 ## Advanced
-rvalue references, `decltype(auto)`, and lambdas.
+Forwarding references, `decltype(auto)`, and lambdas.
 
 {{< quiz_question
       answer="**Type:** `int&`"
@@ -252,8 +248,8 @@ int x;
 {{< /quiz_question >}}
 
 {{< quiz_question
-      answer="**Type:** `int`"
-      explanation="**Explanation:** `x` is captured by reference, and the parenthesis mean `(x)` is not an id-expression."
+      answer="**Type:** `int&`"
+      explanation="**Explanation:** `x` is captured by reference, parenthesized expressions maintain their references with `decltype(auto)`."
 >}}
 int x;
 [&] {
@@ -262,7 +258,7 @@ int x;
 {{< /quiz_question >}}
 
 {{< quiz_question
-      answer="**Type:** `const int`"
+      answer="**Type:** `int`"
       explanation="**Explanation:** Similar to above - `decltype(auto)` deduces id-expressions only by type."
 >}}
 int x;
@@ -282,7 +278,7 @@ int x;
 {{< /quiz_question >}}
 
 {{< quiz_question
-      answer="**Type:** `const int&`"
+      answer="**Type:** `int&`"
       explanation="**Explanation:** Unless, of course, we make the lambda `mutable`. Then the captures are non-`const`."
 >}}
 int x;
@@ -299,12 +295,11 @@ int x;
 int& y = x;
 [=] () {
     decltype(auto) v = y;
-    PRINT_TYPE(v);
 }();
 {{< /quiz_question >}}
 
 # Conclusion
-You can check any of these by using this [GodBolt link](https://godbolt.org/z/f83vKh8j8). Shoutout to this [Stack Overflow thread](https://stackoverflow.com/questions/81870/is-it-possible-to-print-the-name-of-a-variables-type-in-standard-c/56766138#56766138) which provided the code snippit to get human readable names given a type.
+You can check any of these by using this [GodBolt link](https://godbolt.org/z/f83vKh8j8). Shoutout to this [Stack Overflow thread](https://stackoverflow.com/questions/81870/is-it-possible-to-print-the-name-of-a-variables-type-in-standard-c/56766138#56766138) which provided the code snippit to print human readable names for a variable.
 
 Do you have any interesting examples to share? Reach out at sam@volatileint.dev and let me know!
 
