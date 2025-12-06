@@ -301,5 +301,4 @@ int& y = x;
 # Conclusion
 You can check any of these by using this [GodBolt link](https://godbolt.org/z/f83vKh8j8). Shoutout to this [Stack Overflow thread](https://stackoverflow.com/questions/81870/is-it-possible-to-print-the-name-of-a-variables-type-in-standard-c/56766138#56766138) which provided the code snippit to print human readable names for a variable.
 
-Do you have any interesting examples to share? Reach out at sam@volatileint.dev and let me know!
-
+Do you have any interesting examples to share? Reach out at sam@volatileint.dev and let me know! If you found this article interesting, consider subscribing to the [newsletter](https://volatileint.dev/newsletter) to hear about new posts!
