@@ -225,8 +225,8 @@ decltype(auto) v = foo;
 {{< /quiz_question >}}
 
 {{< quiz_question
-      answer="**Type:** Fails to compile."
-      explanation="**Explanation:**  Parenthesized function symbol expressions *do* decay to function pointers with `decltype`."
+      answer="**Type:** `int (&) (int)`"
+      explanation="**Explanation:**  Parenthesized function symbol expressions are deduced as a *reference* to the function."
 >}}
 int foo(int x) {
     return x;
