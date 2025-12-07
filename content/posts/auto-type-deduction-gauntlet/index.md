@@ -126,7 +126,7 @@ auto v = y;
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** References are inferred if explicitly marked as a reference."
+      explanation="**Explanation:** References are deduced if explicitly marked as a reference."
 >}}
 int x;
 auto& v = x;
@@ -239,7 +239,7 @@ Abandon all hope, ye who attempt to deduce the types of lambda captures in expre
 
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** `x` is captured by reference, but it is declared as an `int`."
+      explanation="**Explanation:** `decltype(auto)` always deduces id-expressions strictly with the type of the target symbol. Even though `x` is captured by reference, it is not deduced as a reference."
 >}}
 int x;
 [&] {
@@ -249,7 +249,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** `x` is captured by reference, parenthesized expressions maintain their references with `decltype(auto)`."
+      explanation="**Explanation:** However, lvalues in parenthesized expressions are deduced as references via `decltype(auto)`."
 >}}
 int x;
 [&] {
@@ -259,7 +259,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** Similar to above - `decltype(auto)` deduces the id-expression by the captured copy's type."
+      explanation="**Explanation:** lvalue id-expressions are deduced strictly as their type via `decltype(auto)`."
 >}}
 int x;
 [=] {
@@ -269,7 +269,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** `const int&`"
-      explanation="**Explanation:** Captures by value are `const` (because the `()` operator is `const` by default), and we are evaluting a parenthesized expression."
+      explanation="**Explanation:** Captures by value are `const`, so the type of `x` is `const int`. lvalues in a parenthesized expression are deduced as references - so we end with `const int&`."
 >}}
 int x;
 [=] {
