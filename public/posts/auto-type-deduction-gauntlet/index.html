@@ -5,13 +5,13 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Can you survive the C&#43;&#43; Auto Type Gauntlet? | Volatile Int</title>
+<title>Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? | Volatile Int</title>
 <meta name="keywords" content="C&#43;&#43;, type, deduction, auto, quiz">
-<meta name="description" content="One of the most iconic C&#43;&#43; features is the language&rsquo;s ability to deduce types with the auto keyword. In this post, I&rsquo;ll give a bunch of example code snippits. Your job is to assess what will be deduced for v in each snippit. Determine:
+<meta name="description" content="One of the most iconic C&#43;&#43; features is the language&rsquo;s ability to deduce types with the auto keyword. In this post, I&rsquo;ll give a series of code snippits. Your job is to assess what will be deduced for v in each case. Determine for each:
 
-The type
-If it is a reference or not
-CV qualifiers
+The deduced type
+If it is a value, a lvalue or rvalue reference, or a pointer
+Which CV qualifiers are applicable
 
 Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a totally valid answer.">
 <meta name="author" content="">
@@ -92,9 +92,9 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
         }
       </script><meta property="og:url" content="https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/">
   <meta property="og:site_name" content="Volatile Int">
-  <meta property="og:title" content="Can you survive the C&#43;&#43; Auto Type Gauntlet?">
-  <meta property="og:description" content="One of the most iconic C&#43;&#43; features is the language’s ability to deduce types with the auto keyword. In this post, I’ll give a bunch of example code snippits. Your job is to assess what will be deduced for v in each snippit. Determine:
-The type If it is a reference or not CV qualifiers Some of these may not even compile, so “this won’t work” is a totally valid answer.">
+  <meta property="og:title" content="Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?">
+  <meta property="og:description" content="One of the most iconic C&#43;&#43; features is the language’s ability to deduce types with the auto keyword. In this post, I’ll give a series of code snippits. Your job is to assess what will be deduced for v in each case. Determine for each:
+The deduced type If it is a value, a lvalue or rvalue reference, or a pointer Which CV qualifiers are applicable Some of these may not even compile, so “this won’t work” is a totally valid answer.">
   <meta property="og:locale" content="en-us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -106,12 +106,12 @@ The type If it is a reference or not CV qualifiers Some of these may not even co
     <meta property="article:tag" content="Auto">
     <meta property="article:tag" content="Quiz">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Can you survive the C&#43;&#43; Auto Type Gauntlet?">
-<meta name="twitter:description" content="One of the most iconic C&#43;&#43; features is the language&rsquo;s ability to deduce types with the auto keyword. In this post, I&rsquo;ll give a bunch of example code snippits. Your job is to assess what will be deduced for v in each snippit. Determine:
+<meta name="twitter:title" content="Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?">
+<meta name="twitter:description" content="One of the most iconic C&#43;&#43; features is the language&rsquo;s ability to deduce types with the auto keyword. In this post, I&rsquo;ll give a series of code snippits. Your job is to assess what will be deduced for v in each case. Determine for each:
 
-The type
-If it is a reference or not
-CV qualifiers
+The deduced type
+If it is a value, a lvalue or rvalue reference, or a pointer
+Which CV qualifiers are applicable
 
 Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a totally valid answer.">
 
@@ -130,7 +130,7 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
     {
       "@type": "ListItem",
       "position":  2 ,
-      "name": "Can you survive the C++ Auto Type Gauntlet?",
+      "name": "Can You Survive the C++ Auto Type Deduction Gauntlet?",
       "item": "https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/"
     }
   ]
@@ -140,14 +140,14 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "Can you survive the C++ Auto Type Gauntlet?",
-  "name": "Can you survive the C\u002b\u002b Auto Type Gauntlet?",
-  "description": "One of the most iconic C++ features is the language\u0026rsquo;s ability to deduce types with the auto keyword. In this post, I\u0026rsquo;ll give a bunch of example code snippits. Your job is to assess what will be deduced for v in each snippit. Determine:\nThe type If it is a reference or not CV qualifiers Some of these may not even compile, so \u0026ldquo;this won\u0026rsquo;t work\u0026rdquo; is a totally valid answer.\n",
+  "headline": "Can You Survive the C++ Auto Type Deduction Gauntlet?",
+  "name": "Can You Survive the C\u002b\u002b Auto Type Deduction Gauntlet?",
+  "description": "One of the most iconic C++ features is the language\u0026rsquo;s ability to deduce types with the auto keyword. In this post, I\u0026rsquo;ll give a series of code snippits. Your job is to assess what will be deduced for v in each case. Determine for each:\nThe deduced type If it is a value, a lvalue or rvalue reference, or a pointer Which CV qualifiers are applicable Some of these may not even compile, so \u0026ldquo;this won\u0026rsquo;t work\u0026rdquo; is a totally valid answer.\n",
   "keywords": [
     "C++", "type", "deduction", "auto", "quiz"
   ],
-  "articleBody": "One of the most iconic C++ features is the language’s ability to deduce types with the auto keyword. In this post, I’ll give a bunch of example code snippits. Your job is to assess what will be deduced for v in each snippit. Determine:\nThe type If it is a reference or not CV qualifiers Some of these may not even compile, so “this won’t work” is a totally valid answer.\nEach section increases in difficulty. Good luck!\nThe Gauntlet Basics Basic assignments and deduction from constants and straightforward types.\nauto v = 5; Answer Type: int Explanation: Straightforward type deduction from an integer constant. auto v = 0.1; Answer Type: double Explanation: Notably different than integers. Floating points default to the larger double instead of float. int x; auto v = x; Answer Type: int Explanation: Integer type derived from the assigned-from variable. auto v = 5, w = 0.1; Answer Type: Fails to compile. Explanation: All types in an expression defined with auto have to be the same. std::pair x {1, 2.0}; auto [v, w] = x; Answer Type: int Explanation: Unless, of course, you are using structured binding. int x; auto v = \u0026x; Answer Type: int* Explanation: Auto will deduce pointers. auto v = nullptr; Answer Type: std::nullptr_t Explanation: nullptr has its own type. auto v = { 1, 2, 3 }; Answer Type: std::initializer_list Explanation: It might seem like this should create a container, but it won’t! int x[5]; auto v = x; Answer Type: int* Explanation: C-style arrays decay to a pointer. The decay happens before auto is evaluated. int foo(int x) { return x; } auto v = foo; Answer Type: int (*) (int) Explanation: auto can deduce function pointers. Intermediate Exploring how references and CV-qualifiers are handled. volatile const int x = 1; auto v = x; Answer Type: int Explanation: auto drops CV qualifiers. volatile const int x = 1; auto v = \u0026x; Answer Type: volatile const int* Explanation: Unless, of course, they are applied to a pointed-to or reference type int x; int\u0026 y = x; auto v = y; Answer Type: int Explanation: auto will never deduce a reference on its own. int x; auto\u0026 v = x; Answer Type: int\u0026 Explanation: References are deduced if explicitly marked as a reference. int x[5]; auto\u0026 v = x; Answer Type: int (\u0026) [5] Explanation: When binding arrays to references, they don’t decay. So, auto deduces the actual array type. int foo(const int x) { return x; } auto v = foo; Answer Type: int (*) (int) Explanation: Remember - CV qualifiers are thrown away during function resolution! Advanced Forwarding references, decltype(auto), and lambdas.\nint x; auto\u0026\u0026 v = x; Answer Type: int\u0026 Explanation: A forwarding reference like auto\u0026\u0026 can bind to lvalue or rvalue expressions. We get an lvalue reference because x is an lvalue. auto x = [] () -\u003e int { return 1; }; auto\u0026\u0026 v = x(); Answer Type: int\u0026\u0026 Explanation: x() returns a prvalue, and prvalues assigned to forwarding references result in an rvalue reference. int x; auto y = [\u0026] () -\u003e int\u0026 { return x; }; auto\u0026\u0026 v = y(); Answer Type: int\u0026 Explanation: This time x() returns an lvalue, and lvalues assigned to forwarding references result in an lvalue reference. int x; decltype(auto) v = (x); Answer Type: int\u0026 Explanation: (x) is an expression. decltype(expression) yields a reference when the expression is an lvalue. struct Foo {}; auto\u0026\u0026 v = Foo{}; Answer Type: Foo\u0026\u0026 Explanation: prvalues like Foo{} will bind to a rvalue reference. struct Foo {}; decltype(auto) v = Foo{}; Answer Type: Foo Explanation: For any prvalue expression e, decltype(e) evaluates to the type of e. int x; decltype(auto) v = std::move(x); Answer Type: int\u0026\u0026 Explanation: For any xvalue expression e, decltype(e) evalutes to a rvalue reference to the type of e. int foo(int x) { return x; } decltype(auto) v = foo; Answer Type: Fails to compile. Explanation: Function id-expressions do not decay to pointers when evaluating with decltype! int foo(int x) { return x; } decltype(auto) v = (foo); Answer Type: int (\u0026) (int) Explanation: Parenthesized function symbol expressions are deduced as a reference to the function. Oof Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with decltype(auto).\nint x; [\u0026] { decltype(auto) v = x; } Answer Type: int Explanation: decltype(auto) always deduces id-expressions strictly with the type of the target symbol. Even though x is captured by reference, it is not deduced as a reference. int x; [\u0026] { decltype(auto) v = (x); } Answer Type: int\u0026 Explanation: However, lvalues in parenthesized expressions are deduced as references via decltype(auto). int x; [=] { decltype(auto) v = x; } Answer Type: int Explanation: lvalue id-expressions are deduced strictly as their type via decltype(auto). int x; [=] { decltype(auto) v = (x); } Answer Type: const int\u0026 Explanation: Captures by value are const, so the type of x is const int. lvalues in a parenthesized expression are deduced as references - so we end with const int\u0026. int x; [=] mutable { decltype(auto) v = (x); } Answer Type: int\u0026 Explanation: Unless, of course, we make the lambda mutable. Then the captures are non-const. int x; int\u0026 y = x; [=] () { decltype(auto) v = y; }(); Answer Type: Fails to compile. Explanation: Lambdas cannot capture references. When y is captured, it captures the referred-to value x. Because captures are const, the captured value ends up as const int. However, decltype(auto) sees the symbol y’s declaration as an int\u0026 and deduces the type of v as int\u0026. Compilation fails on discarding the const qualifier when trying to assign a const int to an int\u0026. Conclusion You can check any of these by using this GodBolt link. Shoutout to this Stack Overflow thread which provided the code snippit to print human readable names for a variable.\nDo you have any interesting examples to share? Reach out at sam@volatileint.dev and let me know! If you found this article interesting, consider subscribing to the newsletter to hear about new posts!\n",
-  "wordCount" : "1016",
+  "articleBody": "One of the most iconic C++ features is the language’s ability to deduce types with the auto keyword. In this post, I’ll give a series of code snippits. Your job is to assess what will be deduced for v in each case. Determine for each:\nThe deduced type If it is a value, a lvalue or rvalue reference, or a pointer Which CV qualifiers are applicable Some of these may not even compile, so “this won’t work” is a totally valid answer.\nEach section increases in difficulty. Good luck!\nEnter the Gauntlet Basics Basic assignments and deduction from constants and straightforward types.\nauto v = 5; Answer Type: int Explanation: Straightforward type deduction from an integer constant. auto v = 0.1; Answer Type: double Explanation: Notably different than integers. Floating points default to the larger double instead of float. int x; auto v = x; Answer Type: int Explanation: Simple type derived from the assigned-from variable. auto v = 5, w = 0.1; Answer Type: Fails to compile. Explanation: All types in an expression defined with auto have to be the same. std::pair x {1, 2.0}; auto [v, w] = x; Answer Type: int Explanation: Unless, of course, you are using structured binding. int x; auto v = \u0026x; Answer Type: int* Explanation: Auto will deduce pointers. auto v = nullptr; Answer Type: std::nullptr_t Explanation: nullptr has its own type. auto v = { 1, 2, 3 }; Answer Type: std::initializer_list Explanation: It might seem like this should create a container, but it won’t! int x[5]; auto v = x; Answer Type: int* Explanation: C-style arrays decay to a pointer. The decay happens before auto is evaluated. int foo(int x) { return x; } auto v = foo; Answer Type: int (*) (int) Explanation: auto can deduce function pointers. Intermediate Exploring how references and CV-qualifiers are handled. volatile const int x = 1; auto v = x; Answer Type: int Explanation: auto drops CV qualifiers. volatile const int x = 1; auto v = \u0026x; Answer Type: volatile const int* Explanation: Unless, of course, they are applied to a pointed-to or reference type int x; int\u0026 y = x; auto v = y; Answer Type: int Explanation: auto will never deduce a reference on its own. int x; auto\u0026 v = x; Answer Type: int\u0026 Explanation: lvalue references are deduced via auto\u0026. int x[5]; auto\u0026 v = x; Answer Type: int (\u0026) [5] Explanation: When binding arrays to references, they don’t decay. So auto deduces the actual array type. int foo(const int x) { return x; } auto v = foo; Answer Type: int (*) (int) Explanation: Remember - CV qualifiers on parameters are thrown away during function resolution! Advanced Forwarding references, decltype(auto), inheritance, and lambdas.\nint x; auto\u0026\u0026 v = x; Answer Type: int\u0026 Explanation: A forwarding reference like auto\u0026\u0026 can bind to lvalue or rvalue expressions. Here we get an lvalue reference because x is an lvalue. auto x = [] () -\u003e int { return 1; }; auto\u0026\u0026 v = x(); Answer Type: int\u0026\u0026 Explanation: x() returns a prvalue, and prvalues assigned to forwarding references yield an rvalue reference. int x; auto y = [\u0026] () -\u003e int\u0026 { return x; }; auto\u0026\u0026 v = y(); Answer Type: int\u0026 Explanation: This time x() returns an lvalue, and lvalues assigned to forwarding references yields an lvalue reference. int x; decltype(auto) v = (x); Answer Type: int\u0026 Explanation: (x) is an expression. decltype(expression) yields a rvalue reference when the expression is an lvalue. struct Foo {}; auto\u0026\u0026 v = Foo{}; Answer Type: Foo\u0026\u0026 Explanation: prvalues like Foo{} will bind to an rvalue reference. struct Foo {}; decltype(auto) v = Foo{}; Answer Type: Foo Explanation: For any prvalue expression e, decltype(e) evaluates to the type of e. int x; decltype(auto) v = std::move(x); Answer Type: int\u0026\u0026 Explanation: For any xvalue expression e, decltype(e) evalutes to an rvalue reference to the type of e. int foo(int x) { return x; } decltype(auto) v = foo; Answer Type: Fails to compile. Explanation: Function id-expressions do not decay to pointers when evaluating with decltype! int foo(int x) { return x; } decltype(auto) v = (foo); Answer Type: int (\u0026) (int) Explanation: Parenthesized function symbol expressions are deduced as a reference to the function. class Base { public: auto foo() { return this; }; }; class Derived : public Base { }; Derived d; auto v = d.foo(); Answer Type: Base* Explanation: foo is defined in the Base class, so this has to refer to a Base*, even when foo is called from a child class. Oof Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with decltype(auto).\nint x; [\u0026] { decltype(auto) v = x; }(); Answer Type: int Explanation: decltype(auto) always deduces id-expressions strictly with the type of the target symbol. Even though x is captured by reference, it is not deduced as a reference. int x; [\u0026] { decltype(auto) v = (x); }(); Answer Type: int\u0026 Explanation: However, lvalues in parenthesized expressions are deduced as references via decltype(auto). int x; [=] { decltype(auto) v = x; }(); Answer Type: int Explanation: lvalue id-expressions are deduced strictly as their type via decltype(auto). int x; [=] { decltype(auto) v = (x); }(); Answer Type: const int\u0026 Explanation: Captures by value are const, so the type of x is const int. lvalues in a parenthesized expression are deduced as references - so we end with const int\u0026. int x; [=] mutable { decltype(auto) v = (x); }(); Answer Type: int\u0026 Explanation: Unless, of course, we make the lambda mutable. Then the captures are non-const. int x; int\u0026 y = x; [=] () { decltype(auto) v = y; }(); Answer Type: Fails to compile. Explanation: Lambdas cannot capture references. When y is captured, it captures the referred-to value x. Because captures are const, the captured value ends up as const int. However, decltype(auto) sees the symbol y’s declaration as an int\u0026 and deduces the type of v as int\u0026. Compilation fails on discarding the const qualifier when trying to assign a const int to an int\u0026. Conclusion You can check any of these by using this GodBolt link. Shoutout to this Stack Overflow thread which provided the code snippit to print human readable names for a variable.\nDo you have any interesting examples to share? Reach out at sam@volatileint.dev and let me know! If you found this article interesting, consider subscribing to the newsletter to hear about new posts!\n",
+  "wordCount" : "1080",
   "inLanguage": "en",
   "datePublished": "2025-12-05T12:00:00-08:00",
   "dateModified": "2025-12-05T12:00:00-08:00",
@@ -214,7 +214,7 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
   <header class="post-header">
     
     <h1 class="post-title entry-hint-parent">
-      Can you survive the C&#43;&#43; Auto Type Gauntlet?
+      Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?
     </h1>
     <div class="post-meta"><span title='2025-12-05 12:00:00 -0800 PST'>December 5, 2025</span>
 
@@ -227,7 +227,7 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
 
         <div class="inner"><ul>
                 <li>
-                    <a href="#the-gauntlet" aria-label="The Gauntlet">The Gauntlet</a><ul>
+                    <a href="#enter-the-gauntlet" aria-label="Enter the Gauntlet">Enter the Gauntlet</a><ul>
                         
                 <li>
                     <a href="#basics" aria-label="Basics">Basics</a></li>
@@ -246,15 +246,15 @@ Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a 
     </details>
 </div>
 
-  <div class="post-content"><p>One of the most iconic C++ features is the language&rsquo;s ability to deduce types with the <code>auto</code> keyword. In this post, I&rsquo;ll give a bunch of example code snippits. Your job is to assess what will be deduced for <code>v</code> in each snippit. Determine:</p>
+  <div class="post-content"><p>One of the most iconic C++ features is the language&rsquo;s ability to deduce types with the <code>auto</code> keyword. In this post, I&rsquo;ll give a series of code snippits. Your job is to assess what will be deduced for <code>v</code> in each case. Determine for each:</p>
 <ol>
-<li>The type</li>
-<li>If it is a reference or not</li>
-<li>CV qualifiers</li>
+<li>The deduced type</li>
+<li>If it is a value, a lvalue or rvalue reference, or a pointer</li>
+<li>Which CV qualifiers are applicable</li>
 </ol>
 <p>Some of these may not even compile, so &ldquo;this won&rsquo;t work&rdquo; is a totally valid answer.</p>
 <p>Each section increases in difficulty. Good luck!</p>
-<h1 id="the-gauntlet">The Gauntlet<a hidden class="anchor" aria-hidden="true" href="#the-gauntlet">#</a></h1>
+<h1 id="enter-the-gauntlet">Enter the Gauntlet<a hidden class="anchor" aria-hidden="true" href="#enter-the-gauntlet">#</a></h1>
 <h2 id="basics">Basics<a hidden class="anchor" aria-hidden="true" href="#basics">#</a></h2>
 <p>Basic assignments and deduction from constants and straightforward types.</p>
 <div class="auto-quiz-block">
@@ -296,7 +296,7 @@ auto v = x;
     <div>
       <strong>Type:</strong> <code>int</code>
       <br>
-      <strong>Explanation:</strong> Integer type derived from the assigned-from variable.
+      <strong>Explanation:</strong> Simple type derived from the assigned-from variable.
     </div>
   </details>
 </div>
@@ -463,7 +463,7 @@ auto& v = x;
     <div>
       <strong>Type:</strong> <code>int&amp;</code>
       <br>
-      <strong>Explanation:</strong> References are deduced if explicitly marked as a reference.
+      <strong>Explanation:</strong> lvalue references are deduced via <code>auto&amp;</code>.
     </div>
   </details>
 </div>
@@ -478,7 +478,7 @@ auto& v = x;
     <div>
       <strong>Type:</strong> <code>int (&amp;) [5]</code>
       <br>
-      <strong>Explanation:</strong> When binding arrays to references, they don&rsquo;t decay. So, <code>auto</code> deduces the actual array type.
+      <strong>Explanation:</strong> When binding arrays to references, they don&rsquo;t decay. So <code>auto</code> deduces the actual array type.
     </div>
   </details>
 </div>
@@ -495,12 +495,12 @@ auto v = foo;
     <div>
       <strong>Type:</strong> <code>int (*) (int)</code>
       <br>
-      <strong>Explanation:</strong>  Remember - CV qualifiers are thrown away during function resolution!
+      <strong>Explanation:</strong>  Remember - CV qualifiers on parameters are thrown away during function resolution!
     </div>
   </details>
 </div>
 <h2 id="advanced">Advanced<a hidden class="anchor" aria-hidden="true" href="#advanced">#</a></h2>
-<p>Forwarding references, <code>decltype(auto)</code>, and lambdas.</p>
+<p>Forwarding references, <code>decltype(auto)</code>, inheritance, and lambdas.</p>
 <div class="auto-quiz-block">
   <pre><code>
 int x;
@@ -512,7 +512,7 @@ auto&& v = x;
     <div>
       <strong>Type:</strong> <code>int&amp;</code>
       <br>
-      <strong>Explanation:</strong> A forwarding reference like <code>auto&amp;&amp;</code> can bind to lvalue or rvalue expressions. We get an lvalue reference because <code>x</code> is an lvalue.
+      <strong>Explanation:</strong> A forwarding reference like <code>auto&amp;&amp;</code> can bind to lvalue or rvalue expressions. Here we get an lvalue reference because <code>x</code> is an lvalue.
     </div>
   </details>
 </div>
@@ -529,7 +529,7 @@ auto&& v = x();
     <div>
       <strong>Type:</strong> <code>int&amp;&amp;</code>
       <br>
-      <strong>Explanation:</strong> <code>x()</code> returns a prvalue, and prvalues assigned to forwarding references result in an rvalue reference.
+      <strong>Explanation:</strong> <code>x()</code> returns a prvalue, and prvalues assigned to forwarding references yield an rvalue reference.
     </div>
   </details>
 </div>
@@ -547,7 +547,7 @@ auto&& v = y();
     <div>
       <strong>Type:</strong> <code>int&amp;</code>
       <br>
-      <strong>Explanation:</strong> This time <code>x()</code> returns an lvalue, and lvalues assigned to forwarding references result in an lvalue reference.
+      <strong>Explanation:</strong> This time <code>x()</code> returns an lvalue, and lvalues assigned to forwarding references yields an lvalue reference.
     </div>
   </details>
 </div>
@@ -562,7 +562,7 @@ decltype(auto) v = (x);
     <div>
       <strong>Type:</strong> <code>int&amp;</code>
       <br>
-      <strong>Explanation:</strong> <code>(x)</code> is an expression. <code>decltype(expression)</code> yields a reference when the expression is an lvalue.
+      <strong>Explanation:</strong> <code>(x)</code> is an expression. <code>decltype(expression)</code> yields a rvalue reference when the expression is an lvalue.
     </div>
   </details>
 </div>
@@ -577,7 +577,7 @@ auto&& v = Foo{};
     <div>
       <strong>Type:</strong> <code>Foo&amp;&amp;</code>
       <br>
-      <strong>Explanation:</strong> prvalues like Foo{} will bind to a rvalue reference.
+      <strong>Explanation:</strong> prvalues like Foo{} will bind to an rvalue reference.
     </div>
   </details>
 </div>
@@ -607,7 +607,7 @@ decltype(auto) v = std::move(x);
     <div>
       <strong>Type:</strong> <code>int&amp;&amp;</code>
       <br>
-      <strong>Explanation:</strong> For any xvalue expression <code>e</code>, <code>decltype(e)</code> evalutes to a rvalue reference to the type of e.
+      <strong>Explanation:</strong> For any xvalue expression <code>e</code>, <code>decltype(e)</code> evalutes to an rvalue reference to the type of e.
     </div>
   </details>
 </div>
@@ -645,6 +645,31 @@ decltype(auto) v = (foo);
     </div>
   </details>
 </div>
+<div class="auto-quiz-block">
+  <pre><code>
+class Base {
+    public:
+        auto foo() {
+            return this;
+        };
+};
+
+class Derived : public Base {
+};
+
+Derived d;
+auto v = d.foo();
+</code></pre>
+
+  <details>
+    <summary>Answer</summary>
+    <div>
+      <strong>Type:</strong> <code>Base*</code>
+      <br>
+      <strong>Explanation:</strong> <code>foo</code> is defined in the <code>Base</code> class, so <code>this</code> has to refer to a <code>Base*</code>, even when <code>foo</code> is called from a child class.
+    </div>
+  </details>
+</div>
 <h2 id="oof">Oof<a hidden class="anchor" aria-hidden="true" href="#oof">#</a></h2>
 <p>Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with <code>decltype(auto)</code>.</p>
 <div class="auto-quiz-block">
@@ -652,7 +677,7 @@ decltype(auto) v = (foo);
 int x;
 [&] {
     decltype(auto) v = x;
-}
+}();
 </code></pre>
 
   <details>
@@ -669,7 +694,7 @@ int x;
 int x;
 [&] {
     decltype(auto) v = (x);
-}
+}();
 </code></pre>
 
   <details>
@@ -686,7 +711,7 @@ int x;
 int x;
 [=] {
     decltype(auto) v = x;
-}
+}();
 </code></pre>
 
   <details>
@@ -703,7 +728,7 @@ int x;
 int x;
 [=] {
     decltype(auto) v = (x);
-}
+}();
 </code></pre>
 
   <details>
@@ -720,7 +745,7 @@ int x;
 int x;
 [=] mutable {
     decltype(auto) v = (x);
-}
+}();
 </code></pre>
 
   <details>
@@ -768,8 +793,8 @@ int& y = x;
 
 <ul class="share-buttons">
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on x"
-            href="https://x.com/intent/tweet/?text=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&amp;hashtags=C%2b%2b%2ctype%2cdeduction%2cauto%2cquiz">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on x"
+            href="https://x.com/intent/tweet/?text=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&amp;hashtags=C%2b%2b%2ctype%2cdeduction%2cauto%2cquiz">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -777,8 +802,8 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&amp;title=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f&amp;summary=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f&amp;source=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&amp;title=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f&amp;summary=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f&amp;source=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -786,8 +811,8 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on reddit"
-            href="https://reddit.com/submit?url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&title=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f&title=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
@@ -795,7 +820,7 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on facebook"
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on facebook"
             href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
@@ -804,8 +829,8 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on whatsapp"
-            href="https://api.whatsapp.com/send?text=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f%20-%20https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on whatsapp"
+            href="https://api.whatsapp.com/send?text=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f%20-%20https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
@@ -813,8 +838,8 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on telegram"
-            href="https://telegram.me/share/url?text=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on telegram"
+            href="https://telegram.me/share/url?text=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
             <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
@@ -822,8 +847,8 @@ int& y = x;
         </a>
     </li>
     <li>
-        <a target="_blank" rel="noopener noreferrer" aria-label="share Can you survive the C&#43;&#43; Auto Type Gauntlet? on ycombinator"
-            href="https://news.ycombinator.com/submitlink?t=Can%20you%20survive%20the%20C%2b%2b%20Auto%20Type%20Gauntlet%3f&u=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet? on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Can%20You%20Survive%20the%20C%2b%2b%20Auto%20Type%20Deduction%20Gauntlet%3f&u=https%3a%2f%2fwww.volatileint.dev%2fposts%2fauto-type-deduction-gauntlet%2f">
             <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
                 xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
                 <path

@@ -1,20 +1,20 @@
 ---
-title: "Can you survive the C++ Auto Type Gauntlet?"
+title: "Can You Survive the C++ Auto Type Deduction Gauntlet?"
 date: 2025-12-05T12:00:00-08:00
 draft: false
 tags: ["C++","type","deduction", "auto", "quiz"]
 ---
 
-One of the most iconic C++ features is the language's ability to deduce types with the `auto` keyword. In this post, I'll give a bunch of example code snippits. Your job is to assess what will be deduced for `v` in each snippit. Determine:
-1. The type
-2. If it is a reference or not
-3. CV qualifiers
+One of the most iconic C++ features is the language's ability to deduce types with the `auto` keyword. In this post, I'll give a series of code snippits. Your job is to assess what will be deduced for `v` in each case. Determine for each:
+1. The deduced type
+2. If it is a value, a lvalue or rvalue reference, or a pointer
+3. Which CV qualifiers are applicable
 
 Some of these may not even compile, so "this won't work" is a totally valid answer.
 
 Each section increases in difficulty. Good luck!
 
-# The Gauntlet
+# Enter the Gauntlet
 
 ## Basics
 Basic assignments and deduction from constants and straightforward types.
@@ -35,7 +35,7 @@ auto v = 0.1;
 
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** Integer type derived from the assigned-from variable."
+      explanation="**Explanation:** Simple type derived from the assigned-from variable."
 >}}
 int x;
 auto v = x;
@@ -126,7 +126,7 @@ auto v = y;
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** References are deduced if explicitly marked as a reference."
+      explanation="**Explanation:** lvalue references are deduced via `auto&`."
 >}}
 int x;
 auto& v = x;
@@ -134,7 +134,7 @@ auto& v = x;
 
 {{< quiz_question
       answer="**Type:** `int (&) [5]`"
-      explanation="**Explanation:** When binding arrays to references, they don't decay. So, `auto` deduces the actual array type."
+      explanation="**Explanation:** When binding arrays to references, they don't decay. So `auto` deduces the actual array type."
 >}}
 int x[5];
 auto& v = x;
@@ -142,7 +142,7 @@ auto& v = x;
 
 {{< quiz_question
       answer="**Type:** `int (*) (int)`"
-      explanation="**Explanation:**  Remember - CV qualifiers are thrown away during function resolution!"
+      explanation="**Explanation:**  Remember - CV qualifiers on parameters are thrown away during function resolution!"
 >}}
 int foo(const int x) {
     return x;
@@ -151,11 +151,11 @@ auto v = foo;
 {{< /quiz_question >}}
 
 ## Advanced
-Forwarding references, `decltype(auto)`, and lambdas.
+Forwarding references, `decltype(auto)`, inheritance, and lambdas.
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** A forwarding reference like `auto&&` can bind to lvalue or rvalue expressions. We get an lvalue reference because `x` is an lvalue."
+      explanation="**Explanation:** A forwarding reference like `auto&&` can bind to lvalue or rvalue expressions. Here we get an lvalue reference because `x` is an lvalue."
 >}}
 int x;
 auto&& v = x;
@@ -163,7 +163,7 @@ auto&& v = x;
 
 {{< quiz_question
       answer="**Type:** `int&&`"
-      explanation="**Explanation:** `x()` returns a prvalue, and prvalues assigned to forwarding references result in an rvalue reference."
+      explanation="**Explanation:** `x()` returns a prvalue, and prvalues assigned to forwarding references yield an rvalue reference."
 >}}
 auto x = [] () -> int { 
     return 1;
@@ -173,7 +173,7 @@ auto&& v = x();
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** This time `x()` returns an lvalue, and lvalues assigned to forwarding references result in an lvalue reference."
+      explanation="**Explanation:** This time `x()` returns an lvalue, and lvalues assigned to forwarding references yields an lvalue reference."
 >}}
 int x;
 auto y = [&] () -> int& { 
@@ -184,7 +184,7 @@ auto&& v = y();
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** `(x)` is an expression. `decltype(expression)` yields a reference when the expression is an lvalue."
+      explanation="**Explanation:** `(x)` is an expression. `decltype(expression)` yields a rvalue reference when the expression is an lvalue."
 >}}
 int x;
 decltype(auto) v = (x);
@@ -192,7 +192,7 @@ decltype(auto) v = (x);
 
 {{< quiz_question
       answer="**Type:** `Foo&&`"
-      explanation="**Explanation:** prvalues like Foo{} will bind to a rvalue reference."
+      explanation="**Explanation:** prvalues like Foo{} will bind to an rvalue reference."
 >}}
 struct Foo {};
 auto&& v = Foo{};
@@ -208,7 +208,7 @@ decltype(auto) v = Foo{};
 
 {{< quiz_question
       answer="**Type:** `int&&`"
-      explanation="**Explanation:** For any xvalue expression `e`, `decltype(e)` evalutes to a rvalue reference to the type of e."
+      explanation="**Explanation:** For any xvalue expression `e`, `decltype(e)` evalutes to an rvalue reference to the type of e."
 >}}
 int x;
 decltype(auto) v = std::move(x);
@@ -234,6 +234,24 @@ int foo(int x) {
 decltype(auto) v = (foo);
 {{< /quiz_question >}}
 
+{{< quiz_question
+      answer="**Type:** `Base*`"
+      explanation="**Explanation:** `foo` is defined in the `Base` class, so `this` has to refer to a `Base*`, even when `foo` is called from a child class. "
+>}}
+class Base {
+    public:
+        auto foo() {
+            return this;
+        };
+};
+
+class Derived : public Base {
+};
+
+Derived d;
+auto v = d.foo();
+{{< /quiz_question >}}
+
 ## Oof
 Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with `decltype(auto)`. 
 
@@ -244,7 +262,7 @@ Abandon all hope, ye who attempt to deduce the types of lambda captures in expre
 int x;
 [&] {
     decltype(auto) v = x;
-}
+}();
 {{< /quiz_question >}}
 
 {{< quiz_question
@@ -254,7 +272,7 @@ int x;
 int x;
 [&] {
     decltype(auto) v = (x);
-}
+}();
 {{< /quiz_question >}}
 
 {{< quiz_question
@@ -264,7 +282,7 @@ int x;
 int x;
 [=] {
     decltype(auto) v = x;
-}
+}();
 {{< /quiz_question >}}
 
 {{< quiz_question
@@ -274,7 +292,7 @@ int x;
 int x;
 [=] {
     decltype(auto) v = (x);
-}
+}();
 {{< /quiz_question >}}
 
 {{< quiz_question
@@ -284,7 +302,7 @@ int x;
 int x;
 [=] mutable {
     decltype(auto) v = (x);
-}
+}();
 {{< /quiz_question >}}
 
 {{< quiz_question
