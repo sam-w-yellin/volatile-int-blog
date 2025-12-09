@@ -49,14 +49,6 @@ auto v = 5, w = 0.1;
 {{< /quiz_question >}}
 
 {{< quiz_question
-      answer="**Type:** int"
-      explanation="**Explanation:** Unless, of course, you are using structured binding."
->}}
-std::pair<int, float> x {1, 2.0};
-auto [v, w] = x;
-{{< /quiz_question >}}
-
-{{< quiz_question
       answer="**Type:** `int*`"
       explanation="**Explanation:** Auto will deduce pointers."
 >}}
@@ -151,7 +143,7 @@ auto v = foo;
 {{< /quiz_question >}}
 
 ## Advanced
-Forwarding references, `decltype(auto)`, inheritance, and lambdas.
+Forwarding references, `decltype(auto)`, inheritance, structured binding, and lambdas.
 
 {{< quiz_question
       answer="**Type:** `int&`"
@@ -314,6 +306,16 @@ int& y = x;
 [=] () {
     decltype(auto) v = y;
 }();
+{{< /quiz_question >}}
+
+One last really tricky to correctly answer:
+
+{{< quiz_question
+      answer="**Type:** int (but more like an alias to the first element of a hidden copy of `x`)"
+      explanation="**Explanation:** The GodBolt linked at the bottom of this thread will print this is a copy. In reality, it is an alias of a hidden copy of `x`. There is active discussion on the right answer in this [Reddit thread](https://www.reddit.com/r/cpp/comments/1pieusd), but my original version of this post stating that `v` is an `int` is, at best, an oversimplification."
+>}}
+std::pair<int, float> x {1, 2.0};
+auto [v, w] = x;
 {{< /quiz_question >}}
 
 # Conclusion
