@@ -2,7 +2,7 @@
 title: "About Me"
 layout: "single"
 url: "/about"
-summary: "About Sam Yellin"
+summary: "About the Author"
 ---
 
 I have spent my career developing embedded software systems. I have code executing on rocket engines, communication satellites, autonomous aircraft, and more. My expertise is primarily in C/C++, Python, and the architecture of high-reliability, mission-critical systems.
