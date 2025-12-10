@@ -7,7 +7,7 @@ tags: ["C++","type","deduction", "auto", "quiz"]
 
 One of the most iconic C++ features is the language's ability to deduce types with the `auto` keyword. In this post, I'll give a series of code snippits. Your job is to assess what will be deduced for `v` in each case. Determine for each:
 1. The deduced type
-2. If it is a value, a lvalue or rvalue reference, or a pointer
+2. If it is a value, an lvalue or rvalue reference, or a pointer
 3. Which CV qualifiers are applicable
 
 Some of these may not even compile, so "this won't work" is a totally valid answer.
@@ -93,7 +93,7 @@ auto v = foo;
 Exploring how references and CV-qualifiers are handled.
 {{< quiz_question
       answer="**Type:** `int`"
-      explanation="**Explanation:** `auto` drops CV qualifiers."
+      explanation="**Explanation:** `auto` drops top-level CV qualifiers."
 >}}
 volatile const int x = 1;
 auto v = x;
@@ -101,7 +101,7 @@ auto v = x;
 
 {{< quiz_question
       answer="**Type:** `volatile const int*`"
-      explanation="**Explanation:** Unless, of course, they are applied to a pointed-to or reference type"
+      explanation="**Explanation:** CV qualifiers applied to pointed-to or referred-to types are maintained."
 >}}
 volatile const int x = 1;
 auto v = &x;
@@ -176,7 +176,7 @@ auto&& v = y();
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** `(x)` is an expression. `decltype(expression)` yields a rvalue reference when the expression is an lvalue."
+      explanation="**Explanation:** `(x)` is an expression. `decltype(expression)` yields an lvalue reference when the expression is an lvalue."
 >}}
 int x;
 decltype(auto) v = (x);
@@ -245,7 +245,7 @@ auto v = d.foo();
 {{< /quiz_question >}}
 
 ## Oof
-Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with `decltype(auto)`. 
+Abandon all hope, ye who attempt to deduce the types of lambda captures in expressions with `decltype(auto)` and symbols defined via structured binding. 
 
 {{< quiz_question
       answer="**Type:** `int`"
@@ -299,7 +299,7 @@ int x;
 
 {{< quiz_question
       answer="**Type:** Fails to compile."
-      explanation="**Explanation:** Lambdas cannot capture references. When `y` is captured, it captures the referred-to value `x`. Because captures are const, the captured value ends up as `const int`. However, `decltype(auto)` sees the symbol `y`'s declaration as an `int&` and deduces the type of `v` as `int&`. Compilation fails on discarding the `const` qualifier when trying to assign a `const int` to an `int&`."
+      explanation="**Explanation:** Lambdas cannot capture references. When `y` is captured, it captures the referred-to value `x`. Because captures are `const`, the captured value ends up as `const int`. However, `decltype(auto)` sees the symbol `y`'s declaration as an `int&` and deduces the type of `v` as `int&`. Compilation fails on discarding the `const` qualifier when trying to assign a `const int` to an `int&`."
 >}}
 int x;
 int& y = x;
@@ -308,11 +308,10 @@ int& y = x;
 }();
 {{< /quiz_question >}}
 
-One last really tricky to correctly answer:
 
 {{< quiz_question
-      answer="**Type:** int (but more like an alias to the first element of a hidden copy of `x`)"
-      explanation="**Explanation:** The GodBolt linked at the bottom of this thread will print this is a copy. In reality, it is an alias of a hidden copy of `x`. There is active discussion on the right answer in this [Reddit thread](https://www.reddit.com/r/cpp/comments/1pieusd), but my original version of this post stating that `v` is an `int` is, at best, an oversimplification."
+      answer="**Type:** `std::tuple_element<0, std::pair<int, float> >::type&` (but which presents as an `int` in basically every observable way)"
+      explanation="**Explanation:** The GodBolt linked at the bottom of this thread will print this is an `int` beacuse of special rules around how `decltype` works with structured binding. In reality, it is an alias of a hidden copy of `x`. See this [Reddit thread](https://www.reddit.com/r/cpp/comments/1pieusd) for why the original version of this quiz - which asserted this was an `int` - was wrong."
 >}}
 std::pair<int, float> x {1, 2.0};
 auto [v, w] = x;
