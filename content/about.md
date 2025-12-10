@@ -10,5 +10,3 @@ I have spent my career developing embedded software systems. I have code executi
 If you have any questions or would like input on your software system or architecture, please reach out!
 
 Email: sam@volatileint.dev
-
-LinkedIn: https://www.linkedin.com/in/sam-yellin-73a382105/
