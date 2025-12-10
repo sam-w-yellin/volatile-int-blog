@@ -1,0 +1,58 @@
+.newsletter-box {
+    max-width: 400px;       /* keeps it from stretching too wide */
+    margin: 2rem auto;      /* center on page with some vertical spacing */
+    padding: 1.5rem;        /* space inside the box */
+    border: 1px solid #ddd; /* light gray border */
+    border-radius: 8px;     /* rounded corners */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* subtle shadow */
+    background-color: #f9f9f9; /* gentle background */
+  }
+  
+  .newsletter-box h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+  
+  .newsletter-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .newsletter-box input[type="email"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .newsletter-box input[type="submit"] {
+    padding: 0.6rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #007acc;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .newsletter-box input[type="submit"]:hover {
+    background-color: #005fa3;
+  }
+
+  .mermaid-box {
+    background: #ffffff;    
+    color: #000000;
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    box-shadow: 0 0 8px rgba(0,0,0,0.2);
+  }
+  
+  .mermaid-box .mermaid {
+    background: transparent !important;
+  }
