@@ -1,6 +1,6 @@
 ---
 title: "Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World"
-date: 2025-12-01T13:00:00-08:00
+date: 2025-12-13T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "serdes", "serialization", "message"]
 ---
