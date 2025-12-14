@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+<link rel="stylesheet" href="https://www.volatileint.dev/css/custom.css">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World | Volatile Int</title>
+<meta name="keywords" content="crunch, C&#43;&#43;, serdes, serialization, message">
+<meta name="description" content="There are a lot of different tools for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.">
+<meta name="author" content="">
+<link rel="canonical" href="https://www.volatileint.dev/posts/crunch-intro/">
+<link crossorigin="anonymous" href="https://www.volatileint.dev/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://www.volatileint.dev/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://www.volatileint.dev/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://www.volatileint.dev/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://www.volatileint.dev/apple-touch-icon.png">
+<link rel="mask-icon" href="https://www.volatileint.dev/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://www.volatileint.dev/posts/crunch-intro/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-N81PSXWFLZ"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-N81PSXWFLZ');
+        }
+      </script><meta property="og:url" content="https://www.volatileint.dev/posts/crunch-intro/">
+  <meta property="og:site_name" content="Volatile Int">
+  <meta property="og:title" content="Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World">
+  <meta property="og:description" content="There are a lot of different tools for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-01T12:00:00-08:00">
+    <meta property="article:modified_time" content="2025-12-01T12:00:00-08:00">
+    <meta property="article:tag" content="Crunch">
+    <meta property="article:tag" content="C&#43;&#43;">
+    <meta property="article:tag" content="Serdes">
+    <meta property="article:tag" content="Serialization">
+    <meta property="article:tag" content="Message">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World">
+<meta name="twitter:description" content="There are a lot of different tools for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://www.volatileint.dev/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World",
+      "item": "https://www.volatileint.dev/posts/crunch-intro/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World",
+  "name": "Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World",
+  "description": "There are a lot of different tools for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.\n",
+  "keywords": [
+    "crunch", "C++", "serdes", "serialization", "message"
+  ],
+  "articleBody": "There are a lot of different tools for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.\nAbout a year ago I started thinking about a better type of message definition format. One designed with embedded targets and validation at the forefront. Enter Crunch: a message definition protocol with a few design principles that distinguish it from other options.\nSemantic field verification is opt-out rather than opt-in. Fields are defined not only with a name and a type, but a set of validity criteria. The serialization protocol is swappable. You can choose a flexible serialization based on tag-length-value, or a speed optimized static serialization, or define your own. No external dependencies (for C++ targets. Some other languages may require libraries for API binding). Message integrity checks are built-in, and opt-out. I am going to document the development of Crunch in a series of blog posts. This first one is going to focus on The Dream - requirements, high level interface design, the development environment. I’ll also lay out the development roadmap.\nBackground on Message Protocols We just don’t have good support for message protocols that treat validity and serialization flexibility as first-class concerns.\nprotobuf is probably the most widely used message definition and serialization protocol there is. It’s the backbone of gRPC and a huge number of software projects. The folks at buf realized that semantic validation of fields and messages is a critical feature gap and developed the protovalidate extension for protobuf - the backbone of gRPC and as far as I am aware, the most widely used message definition and serialization protocol around. However, the implementations of this tool have a number of drawbacks.\nprotovalidate relies on runtime parsing of Google CEL. As a result, it is incompatible with environments that cannot support dynamic memory allocation. protovalidate has a long list of dependencies and is not trivial to set up - especially for systems not using buf to manage protobuf-related dependencies. protobuf itself does not provide strong support for embedded systems - relying instead on third-party extensions such as nanopb and capnproto. Any attempts to extend protovalidate support to embedded systems involves bridging multiple plugins maintained by separate folks. Protocols like MAVLink do include some built-in structural validation (checksums, CRC extra, strict field layouts), but they don’t provide semantic validation of field values or cross-field relationships.\nThere are other problems with many of these protocols which make them unfit for some embedded and resource constrained applications. protobuf, and many other protocols, provide only a single serialization/deseralization protocol which optimizes for on-the-wire size, flexibility, and extensibility of message definitions. This is an important consideration. But its not the only consideration. The tag-length-value schema sacrifices serialization and deserialization speed for protocol flexibility. The custom message frameworks I’ve seen in-house in my career utilized more rigid protocols that enabled much faster message processing.\nComparison of Popular Message Frameworks Against Crunch’s Design Goals\nSystem Static Memory Allocation Built-In Integrity Checking (CRC/Parity) Flexible Serialization Protocol (Choose TLV vs Static Layout) Semantic Field Validation Crunch ✔ ✔ ✔ ✔ Protobuf ✘ ✘ ✘ ✘ nanopb ✔ ✘ ✘ ✘ Bebop ✘ ✘ ✘ ✘ MAVLink ✔ ✔ ✘ ✘ FlatBuffers ✔ ✘ ✘ ✘ MessagePack ✘ ✘ ✘ ✘ Requirements and Design Goals Here’s what I want Crunch to do:\nValidation of fields and messages must be opt-out instead of opt-in and a first-class aspect of message definition. Function without any dynamic memory allocation. Serialization formats should be plugins, all working from a single message definition. Crunch will include both a TLV and a read/write speed optimized serialization format. Create highly performant bindings for working with messages in any languages. Some of the things I’m not setting out to do (note some of these may be possible, but I won’t constrain the design to enable them):\nMake the messages compatible with protobuf wire format or any other language specification (Although it would be technically possible via the extensible serialization format, there will be no attempt to unify with the .proto format used to declare protobuf messages). Be optimally performant for every single computer architecture and memory hierarchy. Have native implementations in languages outside C++. Be compatible with C++ versions older than C++23. The Dream Once I decided to actually build this thing, the very first step I took was to try and figure out what I wanted the ergonomics to be. At least in the first iteration, message definition is going to be done directly in C++ - abstracting out a full DSL is a future problem and I want to make sure I have a really solid handle on how I want this to work under the hood with the language I use most often.\nThis is the very first interface design I’ve come up with and is what I’m going to implement to start out. In this example, we have two messages. One of the messages uses the other as a field. This is not a comprehensive description of the protocol, but it is a north star through development. Implementation of a system that meets this interface design is going to be the first major milestone.\nMessage Definition First, the message definition format:\n#include enum class MyEnum : Crunch::EnumType { E1, E2, E3 }; struct BarMessage { using Crunch::types; using Crunch::validators; types::VInt8\u003c 0 /* field ID */, validators::positive \u003e barint; types::VArray\u003c 1, 3 /* 3 elements */, VInt8\u003c /* no id for array elements */ validators::positive \u003e; \u003e bararray; } struct FooMessage { using Crunch::types; using Crunch::validators; types::VInt32\u003c 0, validators::positive, validators::required \u003e field1; types::VEnum\u003c 1, MyEnum, validators::enum_in\u003cE1, E2\u003e \u003e field2; types::VMsg\u003c 2, BarMessage, validators::required \u003e field3; types::VBool\u003c 3, BarMessage, validators::none \u003e field4; static constexpr auto const (FooMessage\u0026 m) validate -\u003e std::expected\u003cvoid, validators::ValidationError\u003e { if (m.field1.get() \u003e m.field3.get().barint.get()) return {}; return std::unexpected({\"field1 must be \u003e barint\"}) }; } Highlighting a few of the important aspects of the design here:\nEverything that can be done at compile time is done at compile time. Template parameters, constexpr field and message validators. We don’t use inheritance. We’ll see this in the serdes section, but instead of inheriting from a base Message class, we utilize template concepts to enforce messages are serializable per the protocol(s). We use a monadic type to bubble up errors. Crunch will not use exceptions so that it is totally applicable to environments with real-time requirements. You have to opt-out of validation. There is no option to omit a validator. If you don’t want a validator, you have to specify that with the none validator. Messages have a field ID which will be used by serialization protocols requiring a field tag. This is omitting some complexity that will be present in the final implementation. For example, until we have reflection in C++26 we’ll probably need to maintain a macro that defines a list of field names. But the spirit is captured above.\nMessage Serialization/Deserialization This example shows how messages can be instantiated, validated, and sent/received over the wire.\n#include #include \"messages/foo.h\" int main() { FooMessage m; static auto foomsg_buffer = Crunch::GetBuffer\u003cFooMessage, Crunch::CRC16, Crunch::serdes::TLV\u003e(); const auto r = Crunch::Validate(m); if (r.has_error()) { std::print(\"{}\", r.error()); } Crunch::Serialize(foomsg_buffer, m); if (Crunch::Deserialize(foomsg_buffer)) { std::printf(\"{}\", r.error()); } } Some of the important things to note:\nMessage classes do not provide utilities like GetBuffer, Serialize, or Deserialize. We don’t want to involve inheritance in our implementation. Instead, Crunch provides these functions as templatized utilities that require the CrunchMessage on the message template parameters. To meet the core requirement of flexible serialization, we provide a parameter to the interface for buffer creation that specifies which protocol to use for serialization. I think its critically important we include CRC by default in all message serialization/deserialization. Crunch will ship with an efficient CRC16 - with the option to use a parity bit, totally omit, or define your own CRC algorithm. As previously stated, the first iteration of the design will use the C++ class definitions as the source of truth for message definitions. But its pretty evident that given sufficient restrictions on the types via concepts, we could derive a domain specific language in the future.\nFields Let’s go through what field types I plan to support and what the programatic interface is to each one.\nField Types We need to support a comprehensive set of field types. The field types will dictate what validators can be utilized, ergonomics for accessing the field, and how they are serialized for any given serialization protocol. The most important principle in creating these types is that all field sizes must be known at compile time.\nTo start out, I plan to have Crunch support these field types:\nSigned Integers (Int8, Int16, Int32, Int64) Unsigned Integers (UInt8, UInt16, UInt32, UInt64) Floating Point (F32, D64) String Bool Array Map User-defined messages Field Accessors Building in validation means we need to establish a reasonable interface and be clear when the validators run. We want the following behavior:\nWhen we write a new value into a field, it should be validated. Reads from a message should assume the message has been validated. We should make it possible to sidestep validation at any point, but it should be an explicit request. We should have a notion of if a field is “set” or not. This will enable TLV serialization schemes to omit them in serialization, and for static schemes to specify if there is garbage values in a field or not during deserialization. Arrays, Maps, and User-defined messages all need to validate both any other types they use, and themselves. However, setting only should run the used-type validators. The top-level map/array/user message validator should run only when Crunch::Validate, Crunch::Serialize, or Crunch::Deserialize is called. The reason for this is that its super common to “build up” messages and aggregate types such that their intermediate forms are not valid, and we don’t want to make that difficult. Let’s say that we have a message Foo with the following definition:\nstruct FooMessage { using Crunch::types; using Crunch::validators; types::VInt32\u003c 0, validators::positive \u003e field1; types::VArray\u003c 1, 20, VInt16\u003c validators::less_than\u003c100\u003e \u003e validators::not_empty \u003e field2; static constexpr auto const (FooMessage\u0026 m) -\u003e std::expected\u003cvoid, validators::ValidationError\u003e { return {}; }; } We should implement the following ergonomics for field access from outside the class:\nFooMessage m; { const auto success = m.field1.set(10); // passes validation if (success.has_error()) { // ... } } { const auto success = m.field2.add(101); // should fail if (success.has_error()) { // ... } } // fails on field2 length if (Crunch::Validate(m).has_error()) { // ... }; Field Validators Crunch should provide a reasonable set of validators to apply to fields. We’ll do a whole post on designing the validators. We can establish a few ground rules now though. Field validators:\nAre constexpr functions. Are pure functions. Do not depend on the values in other fields in the message. Are not recursive. Can be defined by a user Message Definition The message definitions are defined as classes. The classes need to maintain the following properties:\nAll member variables must be a Crunch field. Define a static constexpr message-level validator for cross-field validation, which takes only a const reference to the message type itself as input. Ensure all field IDs are unique. The Roadmap There’s quite a lot of work ahead. The following is my plan at the outset and is very much subject to change as I learn more about the problem space. The development roadmap is as folows:\nBasic End-to-End functionality I want to get something up and running with full message definition with field and message level validation and serialization/deseralization running ASAP rather than building out any one layer in its entirety to start out. This should validate a lot of the basic ideas and ergonomic design. I’ll omit any unit level testing at this phase because I’m really going to be focused on proof-of-concept.\nGet a dev environment set up. Build system selection, linters, static analysis, CI. Cross-compilation support is critical from day 1 because I need to set up a way to test functionality and performance on an embedded device. Implement the message and field template concepts Implement the signed integer types and a small number of validators. Support nested messages. Implement the core Crunch APIs: GetBuffer, Validate, Serialize, Deserialize Implement a single serdes protocol. Write an end-to-end integration test on a single computer (like my laptop). Demonstrate communication via Crunch between an embedded device and another compute node. Supporting Infrastructure Once the end-to-end functionality is in place, I want to create a more robust development environment.\nImplement unit tests around functionality I’m confident will be sticking around. Implement a fuzz testing framework for the serialization protocols and validators. This not only means building integrations with fuzzers like AFL, but also tooling to generate arbitrary message definitions for use in the fuzzers. Track metrics such as code size, on-target performance, and test coverage in CI. Set up some sort of cross-compute-node integration test infrastructure for quickly iterating on cross-platform tests. Implement tests utilizing multiple compilers - at least both gcc and clang. Full Field Type Support After we have all the supporting infrastructure for testing in place, build out the rest of the types.\nSupport all of the scalar types enumerated above. Support the aggregate types. For each of these types, make sure we have everything well covered via our test infrastructure.\nThe Second Serdes Protocol I’m not yet sure which protocol I’ll start with - but I need to implement the other one at this point.\nDefine the second serdes protocol, complete with testing. Expand test coverage to verify behavior when Serialize/Deserialize encounter a message encoded in the wrong protocol. Implement a “universal” Deserialize API that takes in a message and inspects the header to select the right deserialization implementation. Language Interoperability At this point, Crunch will be fully featured for C++. The next challenge is language interoperability. My plan is to generate thin wrappers around the C++ APIs. I’m going to target getting it working with two languages.\nDemonstrate interoperability with C. Demonstrate interoperability with Rust. Long term, I think that this is an excellent opportunity to take advantage of C++26’s reflection to autogenerate out native bindings in other languages. Which leads to the last part of the plan.\nDomain Specific Language Once Crunch is fully functional, and we have demonstrated the ability to go from C++ -\u003e other languages, we’ll finally abstract out the final DSL so we can write .crunch message definitions. Of everything in this project, this step is what I know the least about. Maybe that’s why I’m delaying it so long in the process. I have not implemented or utilized a lexer before, so this feels a bit like the wild west. I don’t want to start on it until I’m really confident in the C++ API and am confident that I can bind that API to other languages.\nConclusion It’s hard not to be reminded of the classic XKCD on standards when thinking about introducing a new message format. Even still, I believe that Crunch’s two primary value propositions of opt-out validation and static memory allocation are critical to a significant number of technical domains, and are underserved by the existing set of options.\nI wouldn’t recommend Crunch for everyone. It is not designed to be as widely supported as protobuf, or to serve a niche domain such as MAVLINK. But for embedded projects that need to prioritize speed and program correctness above all else, I hope it becomes a solid choice.\nIf you’re interested in following along with the Crunch development journey consider subscribing to the newsletter!\n",
+  "wordCount" : "2677",
+  "inLanguage": "en",
+  "datePublished": "2025-12-01T12:00:00-08:00",
+  "dateModified": "2025-12-01T12:00:00-08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.volatileint.dev/posts/crunch-intro/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Volatile Int",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.volatileint.dev/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://www.volatileint.dev/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://www.volatileint.dev/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://www.volatileint.dev/newsletter/" title="Newsletter">
+                    <span>Newsletter</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World
+    </h1>
+    <div class="post-meta"><span title='2025-12-01 12:00:00 -0800 PST'>December 1, 2025</span>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#background-on-message-protocols" aria-label="Background on Message Protocols">Background on Message Protocols</a></li>
+                <li>
+                    <a href="#requirements-and-design-goals" aria-label="Requirements and Design Goals">Requirements and Design Goals</a></li>
+                <li>
+                    <a href="#the-dream" aria-label="The Dream">The Dream</a><ul>
+                        
+                <li>
+                    <a href="#message-definition" aria-label="Message Definition">Message Definition</a></li>
+                <li>
+                    <a href="#message-serializationdeserialization" aria-label="Message Serialization/Deserialization">Message Serialization/Deserialization</a></li>
+                <li>
+                    <a href="#fields" aria-label="Fields">Fields</a><ul>
+                        
+                <li>
+                    <a href="#field-types" aria-label="Field Types">Field Types</a></li>
+                <li>
+                    <a href="#field-accessors" aria-label="Field Accessors">Field Accessors</a></li>
+                <li>
+                    <a href="#field-validators" aria-label="Field Validators">Field Validators</a></li></ul>
+                </li>
+                <li>
+                    <a href="#message-definition-1" aria-label="Message Definition">Message Definition</a></li></ul>
+                </li>
+                <li>
+                    <a href="#the-roadmap" aria-label="The Roadmap">The Roadmap</a><ul>
+                        
+                <li>
+                    <a href="#basic-end-to-end-functionality" aria-label="Basic End-to-End functionality">Basic End-to-End functionality</a></li>
+                <li>
+                    <a href="#supporting-infrastructure" aria-label="Supporting Infrastructure">Supporting Infrastructure</a></li>
+                <li>
+                    <a href="#full-field-type-support" aria-label="Full Field Type Support">Full Field Type Support</a></li>
+                <li>
+                    <a href="#the-second-serdes-protocol" aria-label="The Second Serdes Protocol">The Second Serdes Protocol</a></li>
+                <li>
+                    <a href="#language-interoperability" aria-label="Language Interoperability">Language Interoperability</a></li>
+                <li>
+                    <a href="#domain-specific-language" aria-label="Domain Specific Language">Domain Specific Language</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>There are <a href="https://protobuf.dev/">a</a> <a href="https://mavlink.io/en/">lot</a> <a href="https://github.com/6over3/bebop">of</a> <a href="https://msgpack.org/index.html">different</a> <a href="https://flatbuffers.dev/">tools</a> for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.</p>
+<p>About a year ago I started thinking about a better type of message definition format. One designed with embedded targets and validation at the forefront. Enter <strong>Crunch</strong>: a message definition protocol with a few design principles that distinguish it from other options.</p>
+<ol>
+<li>Semantic field verification is <em>opt-out</em> rather than  <em>opt-in</em>. Fields are defined not only with a name and a type, but a set of validity criteria.</li>
+<li>The serialization protocol is swappable. You can choose a flexible serialization based on tag-length-value, or a speed optimized static serialization, or define your own.</li>
+<li>No external dependencies (for C++ targets. Some other languages may require libraries for API binding).</li>
+<li>Message integrity checks are built-in, and opt-out.</li>
+</ol>
+<p>I am going to document the development of <em>Crunch</em> in a series of blog posts. This first one is going to focus on The Dream - requirements, high level interface design, the development environment. I&rsquo;ll also lay out the development roadmap.</p>
+<h1 id="background-on-message-protocols">Background on Message Protocols<a hidden class="anchor" aria-hidden="true" href="#background-on-message-protocols">#</a></h1>
+<p>We just don&rsquo;t have good support for message protocols that treat validity and serialization flexibility as first-class concerns.</p>
+<p><code>protobuf</code> is probably the most widely used message definition and serialization protocol there is. It&rsquo;s the backbone of <code>gRPC</code> and a huge number of software projects. The folks at <a href="https://buf.build/">buf</a> realized that semantic validation of fields and messages is a critical feature gap and developed the <a href="https://github.com/bufbuild/protovalidate">protovalidate extension</a> for <code>protobuf</code> - the backbone of gRPC and as far as I am aware, the most widely used message definition and serialization protocol around.  However, the implementations of this tool have a number of drawbacks.</p>
+<ol>
+<li><code>protovalidate</code> relies on runtime parsing of Google CEL. As a result, it is incompatible with environments that cannot support dynamic memory allocation.</li>
+<li><code>protovalidate</code> has a long list of dependencies and is not trivial to set up - especially for systems not using <code>buf</code> to manage <code>protobuf</code>-related dependencies.</li>
+<li><code>protobuf</code> itself does not provide strong support for embedded systems - relying instead on third-party extensions such as <a href="https://github.com/nanopb/nanopb">nanopb</a> and <a href="https://capnproto.org/">capnproto</a>. Any attempts to extend <code>protovalidate</code> support to embedded systems involves bridging multiple plugins maintained by separate folks.</li>
+</ol>
+<p>Protocols like MAVLink do include some built-in structural validation (checksums, CRC extra, strict field layouts), but they don’t provide semantic validation of field values or cross-field relationships.</p>
+<p>There are other problems with many of these protocols which make them unfit for some embedded and resource constrained applications. <code>protobuf</code>, and many other protocols, provide only a single serialization/deseralization protocol which optimizes for on-the-wire size, flexibility, and extensibility of message definitions. This is an important consideration. But its not the <em>only</em> consideration. The tag-length-value schema sacrifices serialization and deserialization speed for protocol flexibility. The custom message frameworks I&rsquo;ve seen in-house in my career utilized more rigid protocols that enabled much faster message processing.</p>
+<p><strong>Comparison of Popular Message Frameworks Against Crunch&rsquo;s Design Goals</strong></p>
+<table>
+  <thead>
+      <tr>
+          <th>System</th>
+          <th>Static Memory Allocation</th>
+          <th>Built-In Integrity Checking (CRC/Parity)</th>
+          <th>Flexible Serialization Protocol (Choose TLV vs Static Layout)</th>
+          <th>Semantic Field Validation</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><strong>Crunch</strong></td>
+          <td>✔</td>
+          <td>✔</td>
+          <td>✔</td>
+          <td>✔</td>
+      </tr>
+      <tr>
+          <td><strong>Protobuf</strong></td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+      <tr>
+          <td><strong>nanopb</strong></td>
+          <td>✔</td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+      <tr>
+          <td><strong>Bebop</strong></td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+      <tr>
+          <td><strong>MAVLink</strong></td>
+          <td>✔</td>
+          <td>✔</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+      <tr>
+          <td><strong>FlatBuffers</strong></td>
+          <td>✔</td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+      <tr>
+          <td><strong>MessagePack</strong></td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+          <td>✘</td>
+      </tr>
+  </tbody>
+</table>
+<h1 id="requirements-and-design-goals">Requirements and Design Goals<a hidden class="anchor" aria-hidden="true" href="#requirements-and-design-goals">#</a></h1>
+<p>Here&rsquo;s what I want <em>Crunch</em> to do:</p>
+<ol>
+<li>Validation of fields and messages must be <em>opt-out</em> instead of <em>opt-in</em> and a first-class aspect of message definition.</li>
+<li>Function without any dynamic memory allocation.</li>
+<li>Serialization formats should be plugins, all working from a single message definition. <em>Crunch</em> will include both a TLV and a read/write speed optimized serialization format.</li>
+<li>Create highly performant bindings for working with messages in any languages.</li>
+</ol>
+<p>Some of the things I&rsquo;m not setting out to do (note some of these may be possible, but I won&rsquo;t constrain the design to enable them):</p>
+<ol>
+<li>Make the messages compatible with <code>protobuf</code> wire format or any other language specification (Although it would be technically possible via the extensible serialization format, there will be no attempt to unify with the <code>.proto</code> format used to declare <code>protobuf</code> messages).</li>
+<li>Be optimally performant for every single computer architecture and memory hierarchy.</li>
+<li>Have <em>native</em> implementations in languages outside C++.</li>
+<li>Be compatible with C++ versions older than C++23.</li>
+</ol>
+<h1 id="the-dream">The Dream<a hidden class="anchor" aria-hidden="true" href="#the-dream">#</a></h1>
+<p>Once I decided to actually build this thing, the very first step I took was to try and figure out what I wanted the ergonomics to be. At least in the first iteration, message definition is going to be done directly in C++ - abstracting out a full DSL is a future problem and I want to make sure I have a really solid handle on how I want this to work under the hood with the language I use most often.</p>
+<p>This is the very first interface design I&rsquo;ve come up with and is what I&rsquo;m going to implement to start out. In this example, we have two messages. One of the messages uses the other as a field. This is not a comprehensive description of the protocol, but it is a north star through development. Implementation of a system that meets this interface design is going to be the first major milestone.</p>
+<h2 id="message-definition">Message Definition<a hidden class="anchor" aria-hidden="true" href="#message-definition">#</a></h2>
+<p>First, the message definition format:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;crunch&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyEnum</span> <span style="color:#f92672">:</span> Crunch<span style="color:#f92672">::</span>EnumType {
+</span></span><span style="display:flex;"><span>    E1,
+</span></span><span style="display:flex;"><span>    E2,
+</span></span><span style="display:flex;"><span>    E3
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">BarMessage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>types;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>validators;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VInt8<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span> <span style="color:#75715e">/* field ID */</span>,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>positive
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> barint;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VArray<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">3</span> <span style="color:#75715e">/* 3 elements */</span>,
+</span></span><span style="display:flex;"><span>        VInt8<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">/* no id for array elements */</span>
+</span></span><span style="display:flex;"><span>            validators<span style="color:#f92672">::</span>positive
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> bararray;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">FooMessage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>types;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>validators;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VInt32<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>positive,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>required
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field1;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VEnum<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>        MyEnum,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>enum_in<span style="color:#f92672">&lt;</span>E1, E2<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field2;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VMsg<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">2</span>,
+</span></span><span style="display:flex;"><span>        BarMessage,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>required
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field3;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VBool<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">3</span>,
+</span></span><span style="display:flex;"><span>        BarMessage,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>none
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field4;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">auto</span> <span style="color:#a6e22e">const</span> (FooMessage<span style="color:#f92672">&amp;</span> m) validate <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>, validators<span style="color:#f92672">::</span>ValidationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (m.field1.get() <span style="color:#f92672">&gt;</span> m.field3.get().barint.get())
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>unexpected({<span style="color:#e6db74">&#34;field1 must be &gt; barint&#34;</span>})
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Highlighting a few of the important aspects of the design here:</p>
+<ol>
+<li>Everything that can be done at compile time is done at compile time. Template parameters, <code>constexpr</code> field and message validators.</li>
+<li>We don&rsquo;t use inheritance. We&rsquo;ll see this in the serdes section, but instead of inheriting from a base <code>Message</code> class, we utilize template concepts to enforce messages are serializable per the protocol(s).</li>
+<li>We use a monadic type to bubble up errors. <em>Crunch</em> will not use exceptions so that it is totally applicable to environments with real-time requirements.</li>
+<li>You have to <em>opt-out</em> of validation. There is no option to omit a validator. If you don&rsquo;t want a validator, you have to specify that with the <code>none</code> validator.</li>
+<li>Messages have a field ID which will be used by serialization protocols requiring a field tag.</li>
+</ol>
+<p>This is omitting some complexity that will be present in the final implementation. For example, until we have reflection in C++26 we&rsquo;ll probably need to maintain a macro that defines a list of field names. But the spirit is captured above.</p>
+<h2 id="message-serializationdeserialization">Message Serialization/Deserialization<a hidden class="anchor" aria-hidden="true" href="#message-serializationdeserialization">#</a></h2>
+<p>This example shows how messages can be instantiated, validated, and sent/received over the wire.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;crunch&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;messages/foo.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    FooMessage m;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">auto</span> foomsg_buffer <span style="color:#f92672">=</span> Crunch<span style="color:#f92672">::</span>GetBuffer<span style="color:#f92672">&lt;</span>FooMessage, Crunch<span style="color:#f92672">::</span>CRC16, Crunch<span style="color:#f92672">::</span>serdes<span style="color:#f92672">::</span>TLV<span style="color:#f92672">&gt;</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> r <span style="color:#f92672">=</span> Crunch<span style="color:#f92672">::</span>Validate(m);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (r.has_error()) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>print(<span style="color:#e6db74">&#34;{}&#34;</span>, r.error());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Crunch<span style="color:#f92672">::</span>Serialize(foomsg_buffer, m);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (Crunch<span style="color:#f92672">::</span>Deserialize(foomsg_buffer)) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>printf(<span style="color:#e6db74">&#34;{}&#34;</span>, r.error());
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Some of the important things to note:</p>
+<ol>
+<li>Message classes do not provide utilities like <code>GetBuffer</code>, <code>Serialize</code>, or <code>Deserialize</code>. We don&rsquo;t want to involve inheritance in our implementation. Instead, <em>Crunch</em> provides these functions as templatized utilities that require the <code>CrunchMessage</code> on the message template parameters.</li>
+<li>To meet the core requirement of flexible serialization, we provide a parameter to the interface for buffer creation that specifies which protocol to use for serialization.</li>
+<li>I think its critically important we include CRC by default in all message serialization/deserialization. <em>Crunch</em> will ship with an efficient CRC16 - with the option to use a parity bit, totally omit, or define your own CRC algorithm.</li>
+</ol>
+<p>As previously stated, the first iteration of the design will use the C++ class definitions as the source of truth for message definitions. But its pretty evident that given sufficient restrictions on the types via concepts, we could derive a domain specific language in the future.</p>
+<h2 id="fields">Fields<a hidden class="anchor" aria-hidden="true" href="#fields">#</a></h2>
+<p>Let&rsquo;s go through what field types I plan to support and what the programatic interface is to each one.</p>
+<h3 id="field-types">Field Types<a hidden class="anchor" aria-hidden="true" href="#field-types">#</a></h3>
+<p>We need to support a comprehensive set of field types. The field types will dictate what validators can be utilized, ergonomics for accessing the field, and how they are serialized for any given serialization protocol. The most important principle in creating these types is that all field sizes must be known at compile time.</p>
+<p>To start out, I plan to have <em>Crunch</em> support these field types:</p>
+<ol>
+<li>Signed Integers (Int8, Int16, Int32, Int64)</li>
+<li>Unsigned Integers (UInt8, UInt16, UInt32, UInt64)</li>
+<li>Floating Point (F32, D64)</li>
+<li>String<!-- raw HTML omitted --></li>
+<li>Bool</li>
+<li>Array&lt;MaxCount, Type&gt;</li>
+<li>Map&lt;MaxCount, Key, Value&gt;</li>
+<li>User-defined messages</li>
+</ol>
+<h3 id="field-accessors">Field Accessors<a hidden class="anchor" aria-hidden="true" href="#field-accessors">#</a></h3>
+<p>Building in validation means we need to establish a reasonable interface and be clear when the validators run. We want the following behavior:</p>
+<ol>
+<li>When we write a new value into a field, it should be validated.</li>
+<li>Reads from a message should assume the message has been validated.</li>
+<li>We should make it possible to sidestep validation at any point, but it should be an <em>explicit</em> request.</li>
+<li>We should have a notion of if a field is &ldquo;set&rdquo; or not. This will enable TLV serialization schemes to omit them in serialization, and for static schemes to specify if there is garbage values in a field or not during deserialization.</li>
+<li>Arrays, Maps, and User-defined messages all need to validate both any other types they use, and themselves. However, setting only should run the used-type validators. The top-level map/array/user message validator should run only when <code>Crunch::Validate</code>, <code>Crunch::Serialize</code>, or <code>Crunch::Deserialize</code> is called. The reason for this is that its super common to &ldquo;build up&rdquo; messages and aggregate types such that their intermediate forms are not valid, and we don&rsquo;t want to make that difficult.</li>
+</ol>
+<p>Let&rsquo;s say that we have a message <code>Foo</code> with the following definition:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">FooMessage</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>types;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">using</span> Crunch<span style="color:#f92672">::</span>validators;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VInt32<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">0</span>,
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>positive
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field1;
+</span></span><span style="display:flex;"><span>    types<span style="color:#f92672">::</span>VArray<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">1</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#ae81ff">20</span>,
+</span></span><span style="display:flex;"><span>        VInt16<span style="color:#f92672">&lt;</span>
+</span></span><span style="display:flex;"><span>            validators<span style="color:#f92672">::</span>less_than<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">100</span><span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>        validators<span style="color:#f92672">::</span>not_empty
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">&gt;</span> field2;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">auto</span> <span style="color:#a6e22e">const</span> (FooMessage<span style="color:#f92672">&amp;</span> m) <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>expected<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span>, validators<span style="color:#f92672">::</span>ValidationError<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> {};
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We should implement the following ergonomics for field access from outside the class:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>    FooMessage m;
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> success <span style="color:#f92672">=</span> m.field1.set(<span style="color:#ae81ff">10</span>); <span style="color:#75715e">// passes validation
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (success.has_error()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> success <span style="color:#f92672">=</span> m.field2.add(<span style="color:#ae81ff">101</span>); <span style="color:#75715e">// should fail
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">if</span> (success.has_error()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// fails on field2 length
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (Crunch<span style="color:#f92672">::</span>Validate(m).has_error()) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    };
+</span></span></code></pre></div><h3 id="field-validators">Field Validators<a hidden class="anchor" aria-hidden="true" href="#field-validators">#</a></h3>
+<p><em>Crunch</em> should provide a reasonable set of validators to apply to fields. We&rsquo;ll do a whole post on designing the validators. We can establish a few ground rules now though. Field validators:</p>
+<ol>
+<li>Are <code>constexpr</code> functions.</li>
+<li>Are pure functions.</li>
+<li>Do not depend on the values in other fields in the message.</li>
+<li>Are not recursive.</li>
+<li>Can be defined by a user</li>
+</ol>
+<h2 id="message-definition-1">Message Definition<a hidden class="anchor" aria-hidden="true" href="#message-definition-1">#</a></h2>
+<p>The message definitions are defined as classes. The classes need to maintain the following properties:</p>
+<ol>
+<li>All member variables must be a <em>Crunch</em> field.</li>
+<li>Define a <code>static constexpr</code> message-level validator for cross-field validation, which takes only a <code>const</code> reference to the message type itself as input.</li>
+<li>Ensure all field IDs are unique.</li>
+</ol>
+<h1 id="the-roadmap">The Roadmap<a hidden class="anchor" aria-hidden="true" href="#the-roadmap">#</a></h1>
+<p>There&rsquo;s quite a lot of work ahead. The following is my plan at the outset and is very much subject to change as I learn more about the problem space. The development roadmap is as folows:</p>
+<h2 id="basic-end-to-end-functionality">Basic End-to-End functionality<a hidden class="anchor" aria-hidden="true" href="#basic-end-to-end-functionality">#</a></h2>
+<p>I want to get something up and running with full message definition with field and message level validation and serialization/deseralization running ASAP rather than building out any one layer in its entirety to start out. This should validate a lot of the basic ideas and ergonomic design. I&rsquo;ll omit any unit level testing at this phase because I&rsquo;m really going to be focused on proof-of-concept.</p>
+<ol>
+<li>Get a dev environment set up. Build system selection, linters, static analysis, CI. Cross-compilation support is critical from day 1 because I need to set up a way to test functionality and performance on an embedded device.</li>
+<li>Implement the message and field template concepts</li>
+<li>Implement the signed integer types and a small number of validators.</li>
+<li>Support nested messages.</li>
+<li>Implement the core <em>Crunch</em> APIs: <code>GetBuffer</code>, <code>Validate</code>, <code>Serialize</code>, <code>Deserialize</code></li>
+<li>Implement a single serdes protocol.</li>
+<li>Write an end-to-end integration test on a single computer (like my laptop).</li>
+<li>Demonstrate communication via <em>Crunch</em> between an embedded device and another compute node.</li>
+</ol>
+<h2 id="supporting-infrastructure">Supporting Infrastructure<a hidden class="anchor" aria-hidden="true" href="#supporting-infrastructure">#</a></h2>
+<p>Once the end-to-end functionality is in place, I want to create a more robust development environment.</p>
+<ol>
+<li>Implement unit tests around functionality I&rsquo;m confident will be sticking around.</li>
+<li>Implement a fuzz testing framework for the serialization protocols and validators. This not only means building integrations with fuzzers like AFL, but also tooling to generate arbitrary message definitions for use in the fuzzers.</li>
+<li>Track metrics such as code size, on-target performance, and test coverage in CI.</li>
+<li>Set up some sort of cross-compute-node integration test infrastructure for quickly iterating on cross-platform tests.</li>
+<li>Implement tests utilizing multiple compilers - at least both gcc and clang.</li>
+</ol>
+<h2 id="full-field-type-support">Full Field Type Support<a hidden class="anchor" aria-hidden="true" href="#full-field-type-support">#</a></h2>
+<p>After we have all the supporting infrastructure for testing in place, build out the rest of the types.</p>
+<ol>
+<li>Support all of the scalar types enumerated above.</li>
+<li>Support the aggregate types.</li>
+</ol>
+<p>For each of these types, make sure we have everything well covered via our test infrastructure.</p>
+<h2 id="the-second-serdes-protocol">The Second Serdes Protocol<a hidden class="anchor" aria-hidden="true" href="#the-second-serdes-protocol">#</a></h2>
+<p>I&rsquo;m not yet sure which protocol I&rsquo;ll start with - but I need to implement the other one at this point.</p>
+<ol>
+<li>Define the second serdes protocol, complete with testing.</li>
+<li>Expand test coverage to verify behavior when <code>Serialize</code>/<code>Deserialize</code> encounter a message encoded in the wrong protocol.</li>
+<li>Implement a &ldquo;universal&rdquo; <code>Deserialize</code> API that takes in a message and inspects the header to select the right deserialization implementation.</li>
+</ol>
+<h2 id="language-interoperability">Language Interoperability<a hidden class="anchor" aria-hidden="true" href="#language-interoperability">#</a></h2>
+<p>At this point, <em>Crunch</em> will be fully featured for C++. The next challenge is language interoperability. My plan is to generate thin wrappers around the C++ APIs. I&rsquo;m going to target getting it working with two languages.</p>
+<ol>
+<li>Demonstrate interoperability with C.</li>
+<li>Demonstrate interoperability with Rust.</li>
+</ol>
+<p>Long term, I think that this is an excellent opportunity to take advantage of C++26&rsquo;s reflection to autogenerate out native bindings in other languages. Which leads to the last part of the plan.</p>
+<h2 id="domain-specific-language">Domain Specific Language<a hidden class="anchor" aria-hidden="true" href="#domain-specific-language">#</a></h2>
+<p>Once <em>Crunch</em> is fully functional, and we have demonstrated the ability to go from C++ -&gt; other languages, we&rsquo;ll finally abstract out the final DSL so we can write <code>.crunch</code> message definitions. Of everything in this project, this step is what I know the least about. Maybe that&rsquo;s why I&rsquo;m delaying it so long in the process. I have not implemented or utilized a lexer before, so this feels a bit like the wild west. I don&rsquo;t want to start on it until I&rsquo;m really confident in the C++ API and am confident that I can bind that API to other languages.</p>
+<h1 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h1>
+<p>It&rsquo;s hard not to be reminded of the <a href="https://xkcd.com/927/">classic XKCD on standards</a> when thinking about introducing a new message format. Even still, I believe that <em>Crunch</em>&rsquo;s two primary value propositions of opt-out validation and static memory allocation are critical to a significant number of technical domains, and are underserved by the existing set of options.</p>
+<p>I wouldn&rsquo;t recommend <em>Crunch</em> for everyone. It is not designed to be as widely supported as <code>protobuf</code>, or to serve a niche domain such as <code>MAVLINK</code>. But for embedded projects that need to prioritize speed and program correctness above all else, I hope it becomes a solid choice.</p>
+<p>If you&rsquo;re interested in following along with the <em>Crunch</em> development journey consider subscribing to the <a href="https://volatileint.dev/newsletter">newsletter</a>!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://www.volatileint.dev/tags/crunch/">Crunch</a></li>
+      <li><a href="https://www.volatileint.dev/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="https://www.volatileint.dev/tags/serdes/">Serdes</a></li>
+      <li><a href="https://www.volatileint.dev/tags/serialization/">Serialization</a></li>
+      <li><a href="https://www.volatileint.dev/tags/message/">Message</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on x"
+            href="https://x.com/intent/tweet/?text=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f&amp;hashtags=crunch%2cC%2b%2b%2cserdes%2cserialization%2cmessage">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f&amp;title=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World&amp;summary=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World&amp;source=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on reddit"
+            href="https://reddit.com/submit?url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f&title=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on facebook"
+            href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on whatsapp"
+            href="https://api.whatsapp.com/send?text=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World%20-%20https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on telegram"
+            href="https://telegram.me/share/url?text=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World&amp;url=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f">
+            <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World on ycombinator"
+            href="https://news.ycombinator.com/submitlink?t=Crunch%20Dev%20Blog%20%231%3a%20Designing%20a%20Message%20Definition%20Protocol%20for%20the%20Embedded%20World&u=https%3a%2f%2fwww.volatileint.dev%2fposts%2fcrunch-intro%2f">
+            <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+                xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+                <path
+                    d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="https://www.volatileint.dev/">Volatile Int</a></span> · 
+    <span>
+        <a href="https://www.volatileint.dev/index.xml">Subscribe via RSS</a>
+    </span> · 
+    <span>
+        <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
+    </span> · 
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true });
+</script>
+</body>
+</html>
