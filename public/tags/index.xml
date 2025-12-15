@@ -6,20 +6,48 @@
     <description>Recent content in Tags on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 05 Dec 2025 12:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Sat, 13 Dec 2025 00:00:00 -0800</lastBuildDate>
     <atom:link href="https://www.volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;</title>
+      <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Crunch</title>
+      <link>https://www.volatileint.dev/tags/crunch/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/crunch/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Message</title>
+      <link>https://www.volatileint.dev/tags/message/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/message/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Serdes</title>
+      <link>https://www.volatileint.dev/tags/serdes/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/serdes/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Serialization</title>
+      <link>https://www.volatileint.dev/tags/serialization/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/serialization/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Auto</title>
       <link>https://www.volatileint.dev/tags/auto/</link>
       <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/auto/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
-      <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/c&#43;&#43;/</guid>
       <description></description>
     </item>
     <item>
@@ -41,34 +69,6 @@
       <link>https://www.volatileint.dev/tags/type/</link>
       <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/type/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Crunch</title>
-      <link>https://www.volatileint.dev/tags/crunch/</link>
-      <pubDate>Mon, 01 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/crunch/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Message</title>
-      <link>https://www.volatileint.dev/tags/message/</link>
-      <pubDate>Mon, 01 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/message/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Serdes</title>
-      <link>https://www.volatileint.dev/tags/serdes/</link>
-      <pubDate>Mon, 01 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/serdes/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Serialization</title>
-      <link>https://www.volatileint.dev/tags/serialization/</link>
-      <pubDate>Mon, 01 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/serialization/</guid>
       <description></description>
     </item>
     <item>

@@ -6,8 +6,15 @@
     <description>Recent content in C&#43;&#43; on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 05 Dec 2025 12:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Sat, 13 Dec 2025 00:00:00 -0800</lastBuildDate>
     <atom:link href="https://www.volatileint.dev/tags/c++/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World</title>
+      <link>https://www.volatileint.dev/posts/crunch-intro/</link>
+      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/posts/crunch-intro/</guid>
+      <description>&lt;p&gt;There are &lt;a href=&#34;https://protobuf.dev/&#34;&gt;a&lt;/a&gt; &lt;a href=&#34;https://mavlink.io/en/&#34;&gt;lot&lt;/a&gt; &lt;a href=&#34;https://github.com/6over3/bebop&#34;&gt;of&lt;/a&gt; &lt;a href=&#34;https://msgpack.org/index.html&#34;&gt;different&lt;/a&gt; &lt;a href=&#34;https://flatbuffers.dev/&#34;&gt;tools&lt;/a&gt; for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?</title>
       <link>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</link>
@@ -20,13 +27,6 @@
 &lt;li&gt;Which CV qualifiers are applicable&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Some of these may not even compile, so &amp;ldquo;this won&amp;rsquo;t work&amp;rdquo; is a totally valid answer.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World</title>
-      <link>https://www.volatileint.dev/posts/crunch-intro/</link>
-      <pubDate>Mon, 01 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/crunch-intro/</guid>
-      <description>&lt;p&gt;There are &lt;a href=&#34;https://protobuf.dev/&#34;&gt;a&lt;/a&gt; &lt;a href=&#34;https://mavlink.io/en/&#34;&gt;lot&lt;/a&gt; &lt;a href=&#34;https://github.com/6over3/bebop&#34;&gt;of&lt;/a&gt; &lt;a href=&#34;https://msgpack.org/index.html&#34;&gt;different&lt;/a&gt; &lt;a href=&#34;https://flatbuffers.dev/&#34;&gt;tools&lt;/a&gt; for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;</title>

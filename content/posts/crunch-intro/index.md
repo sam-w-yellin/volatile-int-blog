@@ -7,7 +7,7 @@ tags: ["crunch", "C++", "serdes", "serialization", "message"]
 
 There are [a](https://protobuf.dev/) [lot](https://mavlink.io/en/) [of](https://github.com/6over3/bebop) [different](https://msgpack.org/index.html) [tools](https://flatbuffers.dev/) for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.
 
-About a year ago I started thinking about a better type of message definition format. One designed with embedded targets and validation at the forefront. Enter **Crunch**: a message definition protocol with a few design principles that distinguish it from other options.
+About a year ago I started thinking about a better type of message definition format. One designed with embedded targets and validation at the forefront. Enter [Crunch](https://github.com/sam-w-yellin/crunch): a message definition protocol with a few design principles that distinguish it from other options.
 
 1. Semantic field verification is *opt-out* rather than  *opt-in*. Fields are defined not only with a name and a type, but a set of validity criteria.
 2. The serialization protocol is swappable. You can choose a flexible serialization based on tag-length-value, or a speed optimized static serialization, or define your own.
@@ -257,12 +257,11 @@ I want to get something up and running with full message definition with field a
 
 1. Get a dev environment set up. Build system selection, linters, static analysis, CI. Cross-compilation support is critical from day 1 because I need to set up a way to test functionality and performance on an embedded device.
 2. Implement the message and field template concepts
-3. Implement the signed integer types and a small number of validators.
-4. Support nested messages.
-5. Implement the core *Crunch* APIs: `GetBuffer`, `Validate`, `Serialize`, `Deserialize`
-6. Implement a single serdes protocol.
-7. Write an end-to-end integration test on a single computer (like my laptop).
-8. Demonstrate communication via *Crunch* between an embedded device and another compute node.
+3. Implement the Crunch scalar and aggregate fields & nested messages.
+4. Implement the core *Crunch* APIs: `GetBuffer`, `Validate`, `Serialize`, `Deserialize`
+5. Implement a single serdes protocol.
+6. Write an end-to-end integration test on a single computer (like my laptop).
+7. Demonstrate communication via *Crunch* between an embedded device and another compute node.
 
 ## Supporting Infrastructure
 Once the end-to-end functionality is in place, I want to create a more robust development environment.
@@ -272,14 +271,6 @@ Once the end-to-end functionality is in place, I want to create a more robust de
 3. Track metrics such as code size, on-target performance, and test coverage in CI.
 4. Set up some sort of cross-compute-node integration test infrastructure for quickly iterating on cross-platform tests.
 5. Implement tests utilizing multiple compilers - at least both gcc and clang.
-
-## Full Field Type Support
-After we have all the supporting infrastructure for testing in place, build out the rest of the types.
-
-1. Support all of the scalar types enumerated above.
-2. Support the aggregate types.
-
-For each of these types, make sure we have everything well covered via our test infrastructure.
 
 ## The Second Serdes Protocol 
 I'm not yet sure which protocol I'll start with - but I need to implement the other one at this point.
@@ -303,5 +294,7 @@ Once *Crunch* is fully functional, and we have demonstrated the ability to go fr
 It's hard not to be reminded of the [classic XKCD on standards](https://xkcd.com/927/) when thinking about introducing a new message format. Even still, I believe that *Crunch*'s two primary value propositions of opt-out validation and static memory allocation are critical to a significant number of technical domains, and are underserved by the existing set of options.
 
 I wouldn't recommend *Crunch* for everyone. It is not designed to be as widely supported as `protobuf`, or to serve a niche domain such as `MAVLINK`. But for embedded projects that need to prioritize speed and program correctness above all else, I hope it becomes a solid choice.
+
+Feel free to check out [the repository] (https://github.com/sam-w-yellin/crunch) and contact me if you're interested in contributing.
 
 If you're interested in following along with the *Crunch* development journey consider subscribing to the [newsletter](https://volatileint.dev/newsletter)!
