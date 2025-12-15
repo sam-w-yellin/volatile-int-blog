@@ -35,7 +35,7 @@ There are other problems with many of these protocols which make them unfit for 
 |----------------|--------------------------|------------------------------------------|----------------------------------------------------------------|---------------------------|
 | **Crunch**     | ✔ | ✔ | ✔ | ✔ |
 | **Protobuf**   | ✘ | ✘ | ✘ | ✘ |
-| **nanopb**     | ✔ | ✘ | ✘ | ✘ |
+| **nanopb/Embedded Proto**     | ✔ | ✘ | ✘ | ✘ |
 | **Bebop**      | ✘ | ✘ | ✘ | ✘ |
 | **MAVLink**    | ✔ | ✔ | ✘ | ✘ |
 | **FlatBuffers**| ✔ | ✘ | ✘ | ✘ |
