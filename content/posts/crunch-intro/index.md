@@ -298,6 +298,6 @@ It's hard not to be reminded of the [classic XKCD on standards](https://xkcd.com
 
 I wouldn't recommend *Crunch* for everyone. It is not designed to be as widely supported as `protobuf`, or to serve a niche domain such as `MAVLINK`. But for embedded projects that need to prioritize speed and program correctness above all else, I hope it becomes a solid choice.
 
-Feel free to check out [the repository] (https://github.com/sam-w-yellin/crunch) and contact me if you're interested in contributing.
+Feel free to check out [the repository](https://github.com/sam-w-yellin/crunch) and contact me if you're interested in contributing.
 
 If you're interested in following along with the *Crunch* development journey consider subscribing to the [newsletter](https://volatileint.dev/newsletter)!
