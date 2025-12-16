@@ -19,7 +19,7 @@ I am going to document the development of *Crunch* in a series of blog posts. Th
 # Background on Message Protocols
 We just don't have good support for message protocols that treat validity and serialization flexibility as first-class concerns.
 
-`protobuf` is probably the most widely used message definition and serialization protocol there is. It's the backbone of `gRPC` and a huge number of software projects. The folks at [buf](https://buf.build/) realized that semantic validation of fields and messages is a critical feature gap and developed the [protovalidate extension](https://github.com/bufbuild/protovalidate) for `protobuf` - the backbone of gRPC and as far as I am aware, the most widely used message definition and serialization protocol around.  However, the implementations of this tool have a number of drawbacks.
+`protobuf` is probably the most widely used message definition and serialization protocol there is. It's the backbone of `gRPC` and a huge number of software projects. The folks at [buf](https://buf.build/) realized that semantic validation of fields and messages is a critical feature gap and developed the [protovalidate extension](https://github.com/bufbuild/protovalidate) for `protobuf`. However, the implementations of this tool have a number of drawbacks.
 
 1. `protovalidate` relies on runtime parsing of Google CEL. As a result, it is incompatible with environments that cannot support dynamic memory allocation. 
 2. `protovalidate` has a long list of dependencies and is not trivial to set up - especially for systems not using `buf` to manage `protobuf`-related dependencies.
@@ -27,7 +27,7 @@ We just don't have good support for message protocols that treat validity and se
 
 Protocols like MAVLink do include some built-in structural validation (checksums, CRC extra, strict field layouts), but they don’t provide semantic validation of field values or cross-field relationships.
 
-There are other problems with many of these protocols which make them unfit for some embedded and resource constrained applications. `protobuf`, and many other protocols, provide only a single serialization/deseralization protocol which optimizes for on-the-wire size, flexibility, and extensibility of message definitions. This is an important consideration. But its not the *only* consideration. The tag-length-value schema sacrifices serialization and deserialization speed for protocol flexibility. The custom message frameworks I've seen in-house in my career utilized more rigid protocols that enabled much faster message processing.  
+There are other problems with many of these protocols which make them unfit for some embedded and resource constrained applications. `protobuf`, and many other protocols, provide only a single serialization/deseralization protocol which optimizes for on-the-wire size, flexibility, and extensibility of message definitions. This is an important consideration. But its not the *only* consideration. The tag-length-value schema sacrifices serialization and deserialization speed for protocol flexibility. The custom message frameworks I've seen in-house in my career utilized more rigid protocols that enabled much faster message processing.
 
 **Comparison of Popular Message Frameworks Against Crunch's Design Goals**
 
@@ -54,6 +54,7 @@ Some of the things I'm not setting out to do (note some of these may be possible
 2. Be optimally performant for every single computer architecture and memory hierarchy.
 3. Have *native* implementations in languages outside C++.
 4. Be compatible with C++ versions older than C++23.
+5. Work without the STL.
 
 # The Dream
 Once I decided to actually build this thing, the very first step I took was to try and figure out what I wanted the ergonomics to be. At least in the first iteration, message definition is going to be done directly in C++ - abstracting out a full DSL is a future problem and I want to make sure I have a really solid handle on how I want this to work under the hood with the language I use most often. 
@@ -172,9 +173,10 @@ To start out, I plan to have *Crunch* support these field types:
 3. Floating Point (F32, D64)
 4. String<MaxSize>
 5. Bool
-6. Array<MaxCount, Type>
-7. Map<MaxCount, Key, Value>
-8. User-defined messages
+6. Enums
+7. Array<MaxCount, Type>
+8. Map<MaxCount, Key, Value>
+9. User-defined messages
 
 ### Field Accessors
 Building in validation means we need to establish a reasonable interface and be clear when the validators run. We want the following behavior:
@@ -239,8 +241,7 @@ We should implement the following ergonomics for field access from outside the c
 1. Are `constexpr` functions.
 2. Are pure functions.
 3. Do not depend on the values in other fields in the message.
-4. Are not recursive.
-5. Can be defined by a user
+4. Can be defined by a user
 
 ## Message Definition
 The message definitions are defined as classes. The classes need to maintain the following properties:
@@ -288,7 +289,9 @@ At this point, *Crunch* will be fully featured for C++. The next challenge is la
 Long term, I think that this is an excellent opportunity to take advantage of C++26's reflection to autogenerate out native bindings in other languages. Which leads to the last part of the plan.
 
 ## Domain Specific Language
-Once *Crunch* is fully functional, and we have demonstrated the ability to go from C++ -> other languages, we'll finally abstract out the final DSL so we can write `.crunch` message definitions. Of everything in this project, this step is what I know the least about. Maybe that's why I'm delaying it so long in the process. I have not implemented or utilized a lexer before, so this feels a bit like the wild west. I don't want to start on it until I'm really confident in the C++ API and am confident that I can bind that API to other languages.
+Once *Crunch* is fully functional, and we have demonstrated the ability to go from C++ -> other languages, we'll finally abstract out the final DSL so we can write `.crunch` message definitions. 
+
+I don't want to start on it until I'm really confident in the C++ API and am confident that I can bind that API to other languages. It needs to be carefully designed to maintain the flexibility offered by authoring message definitions in C++ directly. It's possible that I never implement a DSL if the C++ implementation is sufficiently user-friendly.
 
 # Conclusion
 It's hard not to be reminded of the [classic XKCD on standards](https://xkcd.com/927/) when thinking about introducing a new message format. Even still, I believe that *Crunch*'s two primary value propositions of opt-out validation and static memory allocation are critical to a significant number of technical domains, and are underserved by the existing set of options.
