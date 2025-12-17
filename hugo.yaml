@@ -25,3 +25,8 @@ params:
   ShowShareButtons: true
   ShowToc: true
   ShowCodeCopyButtons: true
+  label:
+    text: " "
+    icon: /images/top-logo-light.svg
+    iconDark: /images/top-logo-dark.svg
+    iconHeight: 32
