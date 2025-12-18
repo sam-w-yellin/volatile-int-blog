@@ -165,7 +165,7 @@ auto&& v = x();
 
 {{< quiz_question
       answer="**Type:** `int&`"
-      explanation="**Explanation:** This time `x()` returns an lvalue, and lvalues assigned to forwarding references yields an lvalue reference."
+      explanation="**Explanation:** This time `y()` returns an lvalue, and lvalues assigned to forwarding references yields an lvalue reference."
 >}}
 int x;
 auto y = [&] () -> int& { 
