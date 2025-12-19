@@ -14,6 +14,8 @@ About a year ago I started thinking about a better type of message definition fo
 3. No external dependencies (for C++ targets. Some other languages may require libraries for API binding).
 4. Message integrity checks are built-in, and opt-out.
 
+*Crunch*'s primary interface design decision of note is to encode Validators *into the field and message types*. The concept of what makes a field or message semantically correct is as core to the message definition as the names and data types. The motivation for this decision is to make it *impossible to overlook validation*.
+
 I am going to document the development of *Crunch* in a series of blog posts. This first one is going to focus on The Dream - requirements, high level interface design, the development environment. I'll also lay out the development roadmap.
 
 # Background on Message Protocols
@@ -34,7 +36,7 @@ There are other problems with many of these protocols which make them unfit for 
 | System         | Static Memory Allocation | Built-In Integrity Checking (CRC/Parity) | Flexible Serialization Protocol (Choose TLV vs Static Layout) | Semantic Field Validation |
 |----------------|--------------------------|------------------------------------------|----------------------------------------------------------------|---------------------------|
 | **Crunch**     | ✔ | ✔ | ✔ | ✔ |
-| **Protobuf**   | ✘ | ✘ | ✘ | ✘ |
+| **Protobuf**   | ✘ | ✘ | ✘ | with protovalidate |
 | **nanopb/Embedded Proto**     | ✔ | ✘ | ✘ | ✘ |
 | **Bebop**      | ✘ | ✘ | ✘ | ✘ |
 | **MAVLink**    | ✔ | ✔ | ✘ | ✘ |
@@ -236,7 +238,7 @@ We should implement the following ergonomics for field access from outside the c
 ```
 
 ### Field Validators
-*Crunch* should provide a reasonable set of validators to apply to fields. We'll do a whole post on designing the validators. We can establish a few ground rules now though. Field validators:
+*Crunch* should provide a reasonable set of validators to apply to fields. Field validators:
 
 1. Are `constexpr` functions.
 2. Are pure functions.
