@@ -1,8 +1,8 @@
 ---
-title: "Crunch Dev Blog #1: Designing a Message Definition Protocol for the Embedded World"
+title: "Introducing Crunch: A Message Definition Protocol for Getting Things Right"
 date: 2025-12-13T00:00:00-08:00
 draft: false
-tags: ["crunch", "C++", "serdes", "serialization", "message"]
+tags: ["crunch", "C++", "serdes", "message"]
 ---
 
 There are [a](https://protobuf.dev/) [lot](https://mavlink.io/en/) [of](https://github.com/6over3/bebop) [different](https://msgpack.org/index.html) [tools](https://flatbuffers.dev/) for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.
