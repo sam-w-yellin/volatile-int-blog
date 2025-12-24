@@ -1,11 +1,11 @@
 ---
-title: "Applying Template Concepts to Tuples in C++ "
+title: "Applying Template Concepts to tuple-like Objects in C++"
 date: 2025-12-23T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "template", "tuple", "concept"]
 ---
 
-This article is going to walk through a few different ways to constrain the types within a tuple used as a template parameter. In C++, tuples are a collection of values of different types. You can access different elements at compile time via the `get` method. The very commonly used std::pair is a two-element tuple-like type.
+This article is going to walk through a few different ways to constrain the types within a tuple (and more generally, any [tuple-like](https://en.cppreference.com/w/cpp/utility/tuple/tuple-like.html) object) used as a template parameter. In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element traits provide metadata about the collection's structure. Classes that satisfy this "Tuple Protocol" in the `STL` - and can therefore utilize the techniques in this article - include `std::tuple`, `std::pair`, `std::array`, and some types in the `std::ranges` library.
 
 While [developing Crunch](https://www.volatileint.dev/posts/crunch-intro/), I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting `std::tuple` parameters!
 
@@ -22,7 +22,7 @@ concept ElementsAreIntegral =
     }(std::make_index_sequence<std::tuple_size_v<Tuple>>{});
 ```
 
-*When you don't need to inspect each element*
+*When you don't need to inspect each element*:
 ```c++
 template<typename Tuple>
 concept ElementsSatisfyConcept = requires {
