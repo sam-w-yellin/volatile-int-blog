@@ -11,7 +11,7 @@ While [developing Crunch](https://www.volatileint.dev/posts/crunch-intro/), I ha
 
 For folks who want an at-a-glance solution and are less interested in the motivation and details, I'll quickly show what we're going to build up to. 
 
-*When you need to inspect types or constexpr values of each element*:
+**When you need to inspect types or constexpr values of each element**
 ```c++
 template <typename Tuple>
 concept ElementsAreIntegral =
@@ -22,7 +22,7 @@ concept ElementsAreIntegral =
     }(std::make_index_sequence<std::tuple_size_v<Tuple>>{});
 ```
 
-*When you don't need to inspect each element*:
+**When you don't need to inspect each element**
 ```c++
 template<typename Tuple>
 concept ElementsSatisfyConcept = requires {
