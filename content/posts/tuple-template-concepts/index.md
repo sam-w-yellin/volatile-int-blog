@@ -110,7 +110,7 @@ concept ElementsAreIntegralWithSequenceIdx =
 
 This looks really close to what we want. We are assuming we somehow create a variadic template pack `Is` which represents the index of each element. Then, when unpacking, we use the index to get the tuple element then logically `AND` the result of each individual tuple element's concept check.
 
-How do we get `Is`? The `STL` contains a few utility functions that combine to do  exactly what we need. First, we can use `std::tuple_size_v` to extract out the size of a the tuple, then we can pass the result as a template parameter to `std::make_index_sequence` to get the `Is` parameter pack.  This snippet does what we need for a given `Tuple` typename:
+How do we get `Is`? The `STL` contains a few utility functions that combine to do exactly what we need. First, we can use `std::tuple_size_v` to extract out the size of a the tuple, then we can pass the result as a template parameter to `std::make_index_sequence` to get the `Is` parameter pack.  This snippet does what we need for a given `Tuple` typename:
 
 ```c++
 std::make_index_sequence<std::tuple_size_v<Tuple>>;
