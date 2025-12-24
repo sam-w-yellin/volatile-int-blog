@@ -6,20 +6,41 @@
     <description>Recent content in Tags on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 13 Dec 2025 00:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Tue, 23 Dec 2025 00:00:00 -0800</lastBuildDate>
     <atom:link href="https://www.volatileint.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>C&#43;&#43;</title>
       <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
-      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Concept</title>
+      <link>https://www.volatileint.dev/tags/concept/</link>
+      <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/concept/</guid>
       <description></description>
     </item>
     <item>
       <title>Crunch</title>
       <link>https://www.volatileint.dev/tags/crunch/</link>
-      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
+      <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/crunch/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Template</title>
+      <link>https://www.volatileint.dev/tags/template/</link>
+      <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/template/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Tuple</title>
+      <link>https://www.volatileint.dev/tags/tuple/</link>
+      <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/tags/tuple/</guid>
       <description></description>
     </item>
     <item>
@@ -34,13 +55,6 @@
       <link>https://www.volatileint.dev/tags/serdes/</link>
       <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/serdes/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Serialization</title>
-      <link>https://www.volatileint.dev/tags/serialization/</link>
-      <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/serialization/</guid>
       <description></description>
     </item>
     <item>
@@ -76,13 +90,6 @@
       <link>https://www.volatileint.dev/tags/actuator/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/actuator/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Concept</title>
-      <link>https://www.volatileint.dev/tags/concept/</link>
-      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/concept/</guid>
       <description></description>
     </item>
     <item>
@@ -125,13 +132,6 @@
       <link>https://www.volatileint.dev/tags/logging/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/tags/logging/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Template</title>
-      <link>https://www.volatileint.dev/tags/template/</link>
-      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/tags/template/</guid>
       <description></description>
     </item>
     <item>
