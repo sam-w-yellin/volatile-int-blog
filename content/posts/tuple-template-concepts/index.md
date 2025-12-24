@@ -1,5 +1,5 @@
 ---
-title: "Applying Template Concepts to tuple-like Objects in C++"
+title: "Applying Template Concepts to Elements of tuple-like Objects in C++"
 date: 2025-12-23T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "template", "tuple", "concept"]
@@ -16,7 +16,7 @@ For folks who want an at-a-glance solution and are less interested in the motiva
 template <typename Tuple>
 concept ElementsAreIntegral =
     []<std::size_t... Is>(std::index_sequence<Is...>) {
-        return (std::integral<
+        return (SomeConcept<
             std::remove_cvref_t<std::tuple_element_t<Is, Tuple>>
         > && ...);
     }(std::make_index_sequence<std::tuple_size_v<Tuple>>{});
@@ -28,7 +28,7 @@ template<typename Tuple>
 concept ElementsSatisfyConcept = requires {
     std::apply(
         []<typename... Ts>(Ts&&...)
-            requires (std::remove_cvref_t<YourConcept<Ts>> && ...) {},
+            requires (std::remove_cvref_t<SomeConcept<Ts>> && ...) {},
         std::declval<Tuple>()
     );
 };

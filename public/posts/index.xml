@@ -9,7 +9,7 @@
     <lastBuildDate>Tue, 23 Dec 2025 00:00:00 -0800</lastBuildDate>
     <atom:link href="https://www.volatileint.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Applying Template Concepts to tuple-like Objects in C&#43;&#43;</title>
+      <title>Applying Template Concepts to Elements of tuple-like Objects in C&#43;&#43;</title>
       <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
       <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/tuple-template-concepts/</guid>
