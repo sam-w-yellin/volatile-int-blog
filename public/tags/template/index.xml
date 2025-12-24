@@ -14,7 +14,7 @@
       <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/tuple-template-concepts/</guid>
       <description>&lt;p&gt;This article is going to walk through a few different ways to constrain the types within a tuple used as a template parameter. In C++, tuples are a collection of values of different types. You can access different elements at compile time via the &lt;code&gt;get&lt;/code&gt; method. The very commonly used std::pair is a two-element tuple-like type.&lt;/p&gt;
-&lt;p&gt;While developing Crunch &lt;!-- raw HTML omitted --&gt;, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting &lt;code&gt;std::tuple&lt;/code&gt; parameters!&lt;/p&gt;</description>
+&lt;p&gt;While &lt;a href=&#34;https://www.volatileint.dev/posts/crunch-intro/&#34;&gt;developing Crunch&lt;/a&gt;, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting &lt;code&gt;std::tuple&lt;/code&gt; parameters!&lt;/p&gt;</description>
     </item>
     <item>
       <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;</title>

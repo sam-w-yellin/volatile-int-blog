@@ -7,7 +7,7 @@ tags: ["crunch", "C++", "template", "tuple", "concept"]
 
 This article is going to walk through a few different ways to constrain the types within a tuple used as a template parameter. In C++, tuples are a collection of values of different types. You can access different elements at compile time via the `get` method. The very commonly used std::pair is a two-element tuple-like type.
 
-While developing Crunch <insert link to the intro article>, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting `std::tuple` parameters!
+While [developing Crunch](https://www.volatileint.dev/posts/crunch-intro/), I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting `std::tuple` parameters!
 
 For folks who want an at-a-glance solution and are less interested in the motivation and details, I'll quickly show what we're going to build up to. 
 
