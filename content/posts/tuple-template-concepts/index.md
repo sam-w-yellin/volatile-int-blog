@@ -1,5 +1,5 @@
 ---
-title: "Applying Template Concepts to Elements of tuple-like Objects in C++"
+title: "Applying Template Concepts to Elements of Tuple-Like Objects in C++"
 date: 2025-12-23T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "template", "tuple", "concept"]
