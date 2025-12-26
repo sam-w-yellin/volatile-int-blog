@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Concept on Volatile Int</title>
-    <link>https://www.volatileint.dev/tags/concept/</link>
-    <description>Recent content in Concept on Volatile Int</description>
+    <title>Tuple-Like on Volatile Int</title>
+    <link>https://www.volatileint.dev/tags/tuple-like/</link>
+    <description>Recent content in Tuple-Like on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 23 Dec 2025 00:00:00 -0800</lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/tags/concept/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://www.volatileint.dev/tags/tuple-like/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Applying Template Concepts to Tuples in C&#43;&#43;</title>
       <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
@@ -16,14 +16,6 @@
       <description>&lt;h1 id=&#34;tuples-and-templates&#34;&gt;Tuples and Templates&lt;/h1&gt;
 &lt;p&gt;In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the &lt;code&gt;get&lt;/code&gt; method, while the &lt;code&gt;std::tuple_size&lt;/code&gt; and &lt;code&gt;std::tuple_element&lt;/code&gt; APIs provide metadata about the collection&amp;rsquo;s structure. Classes that satisfy this &amp;ldquo;Tuple Protocol&amp;rdquo; in the &lt;code&gt;STL&lt;/code&gt; - and can therefore utilize the techniques in this article - include &lt;code&gt;std::tuple&lt;/code&gt;, &lt;code&gt;std::pair&lt;/code&gt;, &lt;code&gt;std::array&lt;/code&gt;, and some types in the &lt;code&gt;std::ranges&lt;/code&gt; library.&lt;/p&gt;
 &lt;p&gt;When we use templates, the C++ Core Guidelines &lt;a href=&#34;https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rt-concepts&#34;&gt;tell us to specify concepts for all parameters&lt;/a&gt;. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While &lt;a href=&#34;https://www.volatileint.dev/posts/crunch-intro/&#34;&gt;developing Crunch&lt;/a&gt;, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting &lt;code&gt;std::tuple&lt;/code&gt; parameters in your own projects!&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/posts/feedback-controller/</link>
-      <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/feedback-controller/</guid>
-      <description>&lt;p&gt;In this post, we&amp;rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&amp;rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&amp;rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template &lt;code&gt;concept&lt;/code&gt;s,  &lt;code&gt;std::expected&lt;/code&gt;, and lambda functions.&lt;/p&gt;
-&lt;p&gt;Before we dive in, I want to acknowledge that the final code utilizes a good number of advanced C++ facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

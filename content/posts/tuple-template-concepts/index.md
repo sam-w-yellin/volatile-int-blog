@@ -1,15 +1,16 @@
 ---
-title: "Applying Template Concepts to Elements of Tuple-Like Objects in C++"
+title: "Applying Template Concepts to Tuples in C++"
 date: 2025-12-23T00:00:00-08:00
 draft: false
-tags: ["crunch", "C++", "template", "tuple", "concept"]
+tags: ["crunch", "C++", "template", "tuple", "concept", "tuple-like"]
 ---
 
-This article is going to walk through a few different ways to constrain the types within a tuple (and more generally, any [tuple-like](https://en.cppreference.com/w/cpp/utility/tuple/tuple-like.html) object) used as a template parameter. In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element traits provide metadata about the collection's structure. Classes that satisfy this "Tuple Protocol" in the `STL` - and can therefore utilize the techniques in this article - include `std::tuple`, `std::pair`, `std::array`, and some types in the `std::ranges` library.
+# Tuples and Templates 
+In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the `get` method, while the `std::tuple_size` and `std::tuple_element` APIs provide metadata about the collection's structure. Classes that satisfy this "Tuple Protocol" in the `STL` - and can therefore utilize the techniques in this article - include `std::tuple`, `std::pair`, `std::array`, and some types in the `std::ranges` library. 
 
-While [developing Crunch](https://www.volatileint.dev/posts/crunch-intro/), I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. Hopefully by the end of this article, you feel comfortable writing template concepts targeting `std::tuple` parameters!
+When we use templates, the C++ Core Guidelines [tell us to specify concepts for all parameters](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rt-concepts). This article demonstrates a few methods for applying concepts to tuples and their individual elements. While [developing Crunch](https://www.volatileint.dev/posts/crunch-intro/), I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting `std::tuple` parameters in your own projects!
 
-For folks who want an at-a-glance solution and are less interested in the motivation and details, I'll quickly show what we're going to build up to. 
+For a quick tl;dr - this is what we are going to work up to:
 
 **When you need to inspect types or constexpr values of each element**
 ```c++
@@ -33,12 +34,25 @@ concept ElementsSatisfyConcept = requires {
     );
 };
 ```
-Note: In practice, `std::apply` often produces noticeably worse diagnostics than index-sequence approaches, so you might opt for the first solution even if you don't need to access elements.
 
-The rest of this article will provide the context on why that works, and motivate how you could arrive there yourself from the ground up.
+The rest of this article will provide the context on what those concepts are actually doing, how they work, and motivate how you could arrive there yourself from the ground up.
 
+## Asserting a Template Parameter is a Tuple-Like Object
+First, let's address the most basic conceptual constraint - that the `Tuple` template parameter is actually a `tuple-like` type. The C++ standard defines `tuple-like` types as a strictly enumerated set of types rather than as an object that satisfys the tuple-like inteface. The definition is:
 
-# Setting the Stage
+> A type T models and satisfies the concept tuple-like if std::remove_cvref_t<T> is a specialization of:
+>- std::array,
+>- std::complex,
+>- (since C++26)
+>- std::pair,
+>- std::tuple
+>- std::ranges::subrange.
+
+As of this writing, `gcc` is the only compiler I have found which defines a concept in the `STL` for checking if a class is derived from one of these tuple-like classes, and its hidden as `std::__is_tuple_like_v`. [This Godbolt](https://godbolt.org/z/1rE3q6z6j) demonstrates its use on GCC trunk for x86_64 targets. GCC's implementation can be found [here](https://www.mail-archive.com/gcc-patches@gcc.gnu.org/msg332404.html). Note how the implementation doesn't check for adherence to the tuple protocol APIs, it just hard codes in `true` if the class is one of the enumerated types in the standard.
+
+# Our Motivaging Example
+More interseting than checking if a template paramter is a `tuple-like` object is applying concepts to the elements inside a tuple.
+
 Take a template class which takes some tuple:
 
 ```c++
@@ -46,18 +60,6 @@ template <typename Tuple>
 class Foo {
     Tuple my_tuple;
 };
-```
-
-Going forward, I will omit the constraint that actually forces `Tuple` to be a `std::tuple` because it is a bit orthogonal to the topic of applying concepts to tuple *elements*. A simple one might look something like this:
-```c++
-template <typename T>
-concept TupleLike =
-    requires {
-        typename std::tuple_size<T>::type;
-    } &&
-    requires(T t) {
-        std::get<0>(t);
-    };
 ```
 
 Let's say that we want each element in `Tuple` to satisfy `std::integral` or compilation should fail. Something ergonomically similar to this:
@@ -69,19 +71,16 @@ class Foo {
     Tuple my_tuple;
 };
 ```
+The intuitive high-level approach to accomplishing this is:
 
-In this case, we don't really care what the value or type of each individual element in the tuple is - we just care that the type satisfies some constraint. The intuitive high-level approach to accomplishing this is:
-
-1. Somehow "unpack" the tuple into each of its elements.
+1. Somehow "unpack" the tuple into each of its elements
 2. Apply the `std::integral` concept to each
-3. Fail the concept if any do not satisfy `std::integral`.
+3. Fail the concept if any do not satisfy `std::integral`
 
-First, let's look at a naive approach, and then we'll clean it up.
+## The Manual Approach
+In our first approach, we're going to tackle each of the above steps independently. I call this "manual" because it uses fewer language features and more boilerplate as compared to the next solutions we will look at.
 
-# The Manual Approach
-In our first approach, we're going to tackle each of the above steps independently. I call this "manual" because it uses fewer language features and more boilerplate as compared to the next solutions we will look at. You should almost never write this in real code, but I want to demonstrate the mechanics with a minimal set of language features.
-
-First off, we know that we need a `concept` called `ElementsAreIntegral`. 
+First off, we know that we need a concept called `ElementsAreIntegral`. 
 
 ```c++
 template<typename Tuple>
@@ -89,7 +88,7 @@ concept ElementsAreIntegral = // ...something...
 ```
 Our goal is to have `ElementsAreIntegral` evaluate to `true` when the elements meet `std::integral` and `false` when they do not.
 
-First, we know that we ultimately are going to need to unpack this tuple and check the elements.  So we know we need something that expands out all the tuple elements, applies the target concept, and returns false if any are not satisfied:
+Ultimately we are going to need to unpack this tuple and check the elements.  We need something that expands out all the tuple elements, applies the target concept, and returns false if any are not satisfied:
 
 ```c++
 // Note: this cannot be our final concept — it requires an index pack
@@ -99,6 +98,7 @@ concept ElementsAreIntegralWithSequenceIdx =
 ``` 
 
 Its possible the the tuple was declared with reference or CV-qualified parameters, and your concept probably takes an unqualified, non-reference value. So you'll probably want to actually make sure we strip the reference & CV qualification from the tuple elements:
+
 ```c++
 // Note: this cannot be our final concept — it requires an index pack
 template <typename Tuple, std::size_t... Is>
@@ -108,9 +108,9 @@ concept ElementsAreIntegralWithSequenceIdx =
     > && ...);
 ``` 
 
-This looks really close to what we want. We are assuming we somehow create a variadic template pack `Is` which represents the index of each element. Then, when unpacking, we use the index to get the tuple element then logically `AND` the result of each individual tuple element's concept check.
+This looks really close to what we want. We are assuming we somehow create a template parameter pack `Is` which contains the index of each tuple element. Then, when unpacking, we use the index to get the tuple element then logically `AND` the result of each individual tuple element's concept check.
 
-How do we get `Is`? The `STL` contains a few utility functions that combine to do exactly what we need. First, we can use `std::tuple_size_v` to extract out the size of a the tuple, then we can pass the result as a template parameter to `std::make_index_sequence` to get the `Is` parameter pack.  This snippet does what we need for a given `Tuple` typename:
+How do we get `Is`? The `STL` contains a few utility functions that combine to do exactly what we need. First, we can use `std::tuple_size_v` to extract out the size of a the tuple, then we can pass the result as a template parameter to `std::make_index_sequence` to get the list of indices.
 
 ```c++
 std::make_index_sequence<std::tuple_size_v<Tuple>>;
@@ -130,17 +130,15 @@ concept ElementsAreIntegral =
     ElementsAreIntegralImpl<Tuple, std::make_index_sequence<std::tuple_size_v<Tuple>>>;
 ```
 
-But there's a problem here. `Is` is a *parameter pack*. `std::make_index_sequence<std::tuple_size_v<Tuple>>` returns a *type* which has the parameter pack we want *inside*. Something like `std::index_sequence<0, 1, 2, ..., N>`. In order to get at that set of indices inside the sequence, we need to figure out a way to bind to that sequence. We can do this with a *partial template specialization*.
-
-What we need is a template that is specialized on the `std::index_sequence` parameter pack. Something like:
+But there's a problem here. `Is` is a *parameter pack*. `std::make_index_sequence<std::tuple_size_v<Tuple>>` returns a *type* which has the parameter pack we want *inside* - something like `std::index_sequence<0, 1, 2, ..., N>`. In order to get at that set of indices inside the sequence, we need to bind to that sequence. We can do this with a *partial template specialization*. We need a template that is specialized on the `std::index_sequence` parameter pack. Something like:
 ```c++
 template <std::size_t...Is>
 struct sequence_extractor<std::index_sequence<Is...>> {};
 ```
 
-Now, we have a mechanism to bind the results of `std::make_index_sequence` to a template parameter pack. We need to utilize that mechanism, while still returning either a boolean value to the top-level `ElementsAreIntegral` concept. We can is utilize a struct that extracts out the `std::index_sequence` as a parameter pack, and have that struct extend `std::bool_constant`, where the `value` of that boolean constant is predicated on the result of `ElementsAreIntegralImpl`. That's quite a mouthful, let's write it out step by step. 
+Now we have a mechanism to bind the results of `std::make_index_sequence` to a template parameter pack. We need a struct which utilizes that mechanism to pull out the parameter pack, and which exposes a boolean value to the top-level `ElementsAreIntegral` concept representing if each element is `std::integral`. We can is utilize a struct that extracts out the `std::index_sequence` as a parameter pack, *and* have that struct extend `std::bool_constant`, where the `value` of that boolean constant is predicated on the result of `ElementsAreIntegralImpl`. That's quite a mouthful, let's write it out step by step. 
 
-First, we define our top-level concept predicated on the `::value` of a struct. We'll call that struct `SequenceHelper`. It is templated on the Tuple and the result of `std::make_index_sequence` - both parameters are required because we need to forward them onto the `ElementsAreIntegralImpl` concept.
+First, we define our top-level concept to be predicated on the `::value` static member of a struct we will define. We'll call that struct `SequenceHelper`. It is templated on the `Tuple` parameter to the top-level concept and the result of `std::make_index_sequence` on that parameter. Both parameters are required because we need to forward them onto the `ElementsAreIntegralImpl` concept.
 ```c++
 template <typename Tuple>
 concept ElementsAreIntegral =
@@ -150,7 +148,7 @@ concept ElementsAreIntegral =
     >::value
 ```
 
-Now, we need to actually write our `SequenceHelper`. Remember, this thing's job is to bind a template parameter to the `std::index_sequence`'s parameter pack, and forward it to the `ElementsAreIntegralImpl` which actually checks if each element fulfills `std::integral`. The result of that concept should be stored in the struct's `::value` result. We can have the struct inherit from `bool_constant` so that it has a `::value` static data member. Something like this:
+Now, we need to actually write our `SequenceHelper`. Remember, this thing's job is to bind a template parameter to the `std::index_sequence`'s parameter pack, and forward it to the `ElementsAreIntegralImpl` which actually checks if each element fulfills `std::integral`. We derive this struct from `std::bool_constant` so that it has a `::value` static data member. The value of the constant is set to the result of `ElementsAreIntegralImpl`:
 
 ```c++
 // base
@@ -191,8 +189,8 @@ concept ElementsAreIntegral =
 
 This example can be seen in action at this [Godbolt link](https://godbolt.org/z/6fW61fqbs).
 
-# Variadic Lambda Approach
-Along with template concepts, C++20 introduced *generic template lambda* functions. These play in super interesting ways with template metaprogramming, and are very useful in simplifying the (in my view, very messy and hard to read) code in the "manual" approach. Here's the basic idea: instead of the "helper" structs for retrieving the parameter pack from inside the `std::index_sequence` and containing the result of the concept applied to each parameter, a template lambda can accept the sequence as a parameter. Then we can collapse both the "implementation" concept and the pack extraction into the top-level concept.
+## Variadic Lambda Approach
+Along with template concepts, C++20 introduced *generic template lambda* functions. These interact in super interesting ways with template metaprogramming, and are very useful in simplifying the code in the "manual" approach. Here's the basic idea: instead of the "helper" structs for extracting the parameter pack from inside the `std::index_sequence` and containing the result of the concept applied to each parameter, a template lambda can accept the sequence as a parameter. Then we can collapse both the "implementation" concept and the pack extraction into the top-level concept.
 
 So, we want a concept that calls a templated lambda function which:
 1. Takes a `std::index_sequence` as an input parameter
@@ -213,7 +211,7 @@ concept ElementsAreIntegral = [] <std::size_t... Is>
 
 And that's it. All the sequence-extraction is now handled by our templated lambda, so all the proxy types go away. Feel free to play around with the [Godbolt example](https://godbolt.org/z/YTzjsxM81).
 
-# std::apply Approach
+## std::apply Approach
 
 You may have realized something about these previous examples - we don't *really* care what the type or value of any of the tuple elements is. All we really care about is if the element fulfills some concept. So, do we really need to actually create a `std::index_sequence` that can access each element individually? If you don't need to actually work with the type of each element, we can get even simpler than our previous example. When we don't really care about the elements we can take advantage of `std::apply` and variadic template lambdas together.
 
@@ -255,7 +253,7 @@ Note: The `std::declval` call is used to instantiate a concrete Tuple parameter 
 
 This concept's `requires` clause is only well formed if the constrained lambda is a viable overload, which is only the case if each element in the parameter pack satisfies `std::integral`.
 
-The [Godbolt as proof](https://godbolt.org/z/E1j9e4PE4). It's worth calling out that the error message through this approach is slightly more cryptic than in the others. We do eventually see the message about the failed concept, but it is preceded by lots of failures around `std::apply` as opposed to the extremely clear errors from the prior examples.
+Here is the [Godbolt as proof](https://godbolt.org/z/E1j9e4PE4). It's worth calling out that the error message through this approach is significantly more cryptic than in the others. We do eventually see the message about the failed concept, but it is preceded by lots of failures around `std::apply` as opposed to the extremely clear errors from the prior examples.
 
 # Real-World Example
 `Crunch`'s `CRUNCH_MESSAGE_FIELDS` macro creates a `constexpr` `get_fields` function for easy iteration over all the fields in a message. It returns a tuple where each element is `crunch::field::Field`. I needed to apply two different template concepts to the set of elements in the tuple:
