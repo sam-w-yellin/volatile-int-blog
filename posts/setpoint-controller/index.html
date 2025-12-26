@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Implementing a Setpoint Controller in Modern C&#43;&#43;: The March to Generic Components  | Volatile Int</title>
+<meta name="keywords" content="C&#43;&#43;, setpoint, controller, embedded">
+<meta name="description" content="A Case Study in Software Evolution
+In this post, we&rsquo;re going to implement a generic C&#43;&#43; component capable of implementing a wide variety of control loops which utilize a single feedback and have a single output. We&rsquo;ll end with a controller capable of implementing whatever algorithm you&rsquo;d want, with configurable setpoints, and consistent error handling using modern C&#43;&#43; concepts. If you&rsquo;re just interested in the end result, check out the linked GitHub page!">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/setpoint-controller/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/setpoint-controller/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/newsletter/" title="Newsletter">
+                    <span>Newsletter</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Implementing a Setpoint Controller in Modern C&#43;&#43;: The March to Generic Components 
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h1>
+    <div class="post-meta"><span title='2025-11-16 12:00:00 -0800 PST'>November 16, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="a-case-study-in-software-evolution">A Case Study in Software Evolution<a hidden class="anchor" aria-hidden="true" href="#a-case-study-in-software-evolution">#</a></h1>
+<p>In this post, we&rsquo;re going to implement a generic C++ component capable of implementing a wide variety of control loops which utilize a single feedback and have a single output. We&rsquo;ll end with a controller capable of implementing whatever algorithm you&rsquo;d want, with configurable setpoints, and consistent error handling using modern C++ concepts. If you&rsquo;re just interested in the end result, check out the linked GitHub page!</p>
+<p>This post is also going to explore how this kind of implementation can naturally evolve from a simpler starting point. Hopefully, it provides some insight into what sorts of real engineering challenges motivate code to go from hyper-specific to generic, maintainable components.</p>
+<p>So, lets get started!</p>
+<h2 id="a-simple-bang-bang-controller">A Simple Bang-Bang Controller<a hidden class="anchor" aria-hidden="true" href="#a-simple-bang-bang-controller">#</a></h2>
+<p>Picture yourself as an embedded software engineer working at a scrappy startup designing a revolutionary new technology with a healthy mix of hardware and software co-development. Your co-worker - a thermal engineer responsible for maintaining the health of a temperature-sensitive component of the system - approaches you, asking for software to regulate the temperature of a prototype thingymawut.  The circuit is comprised as follows:</p>
+<ul>
+<li>A thermoelectric cooler (henceforth referred to as a TEC) connected to the component that needs to be cooled. The engineer connected this to a simple switch which will apply either 0 or 100% power.</li>
+<li>A thermocouple connected to the device being cooled to sense the temperature.</li>
+<li>A microcontroller wired control the TEC using the thermocouple as feedback.</li>
+</ul>
+<p>&lt; add chart &gt;</p>
+<p>The thermal engineer explains that the requirements here are really simple. All their analysis shows that they just need to keep the component between 20 and 80 degrees Celsius. Of course, they generate heat during operation, so the only element needed is the cooler. The temperature is expected to change slowly, so they suspect that it will be sufficient to just occasionally monitor the temperature, and if it gets to 80 degrees, turn on the cooler and keep it on until the thermocouple reports 20 degrees.</p>
+<p>You&rsquo;re on the clock and are blocking a critical experiment, so you implement a quick and dirty bang-bang controller. You write a single <code>while(1)</code> loop which runs the control algorithm to either turn the TEC on or off every minute, depending on the temperature reported by the thermocouple. The code is as minimal as possible - it reads a lot like C. The main function looks something like this:</p>
+<p><code>main</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;tec_controller.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Gpio tec{ <span style="color:#ae81ff">1</span> }; <span style="color:#75715e">// TEC is on pin 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Adc thermocouple{ <span style="color:#ae81ff">2</span> }; <span style="color:#75715e">// thermocouple on pin 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    tec.configure(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>    thermocouple.configure();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        control_tec(tec, thermocouple);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>minutes(<span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Note: I&rsquo;m assuming whatever platform has a posix thread interface for the sake of this example. We are also assuming the existence of some reasonable HAL for our platform to control the devices.</p>
+<p>We implement our controller in the <code>tec_controller.hpp</code> header.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdint&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">raw_adc_to_deg_uc</span>(<span style="color:#66d9ef">uint16_t</span> raw) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// details aren&#39;t important, some transfer function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">control_tec</span>(Gpio<span style="color:#f92672">&amp;</span> tec, Adc<span style="color:#f92672">&amp;</span> thermocouple) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> raw_temp_adc <span style="color:#f92672">=</span> thermocouple.read();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> temp_uc <span style="color:#f92672">=</span> raw_adc_to_deg_uc(raw_temp_adc);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">80</span>) {
+</span></span><span style="display:flex;"><span>        tec.set(true);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">20</span>) {
+</span></span><span style="display:flex;"><span>        tec.set(false);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="configuration-is-key">Configuration is Key<a hidden class="anchor" aria-hidden="true" href="#configuration-is-key">#</a></h2>
+<p>You know this code is not tenable long-term. The device operates in a myriad of environments and the setpoints just won&rsquo;t be correct for every use case. You need to have a way to configure them without hard-coding values and generating new binaries for every deployed device. To address this, you add a class representing the configuration of the controller to <code>tec_controller.hpp</code>. You pass that in to the <code>control_tec</code> interface:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TecControllerConfig</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> min_threshold;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> max_threshold;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    TecControllerConfig(<span style="color:#66d9ef">int32_t</span> min, <span style="color:#66d9ef">int32_t</span> max) <span style="color:#f92672">:</span> min_threshold_{min}, max_threshold{max} {};
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">~</span>TecControllerConfig() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">control_tec</span>(Gpio<span style="color:#f92672">&amp;</span> tec, Adc<span style="color:#f92672">&amp;</span> thermocouple, TecControllerConfig<span style="color:#f92672">&amp;</span> config) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> raw_temp_adc <span style="color:#f92672">=</span> thermocouple.read();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> temp_uc <span style="color:#f92672">=</span> raw_adc_to_deg_uc(raw_temp_adc);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&gt;=</span> config.max_threshold) {
+</span></span><span style="display:flex;"><span>        tec.set(true);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (temp_uc <span style="color:#f92672">&lt;=</span> config.min_threshold) {
+</span></span><span style="display:flex;"><span>        tec.set(false);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Long term, this config needs to come from somewhere (but that is a topic for another blog post). For now, you hardcode one into main and are happy the infrastructure exists.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Gpio tec{ <span style="color:#ae81ff">1</span> }; <span style="color:#75715e">// TEC is on pin 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Adc thermocouple{ <span style="color:#ae81ff">2</span> }; <span style="color:#75715e">// thermocouple on pin 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    tec.configure(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>    thermocouple.configure();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    TecControllerConfig config(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">80</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        control_tec(tec, thermocouple, config);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>minutes(<span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="insight-into-controller-state">Insight into Controller State<a hidden class="anchor" aria-hidden="true" href="#insight-into-controller-state">#</a></h2>
+<p>As the hardware team tests the system with your controller, they pretty quickly discover a critical missing feature. There&rsquo;s no insight into the actual temperature being read or commanded state of the TEC. They can observe indirectly, but want to validate the results against the expected state of the controller. So, you return a loggable struct from the main step function which can be parsed after the fact. This struct indicates the current TEC status, the feedback temperature, and if the current tempature is within the configured acceptable range.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">TecControlState</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> tec_on;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> temp_uc;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> in_range;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    TecControlState() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">constexpr</span> <span style="color:#a6e22e">TecControlState</span>(<span style="color:#66d9ef">bool</span> tec_on_status, <span style="color:#66d9ef">int32_t</span> current_temp, <span style="color:#66d9ef">bool</span> is_in_range)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> tec_on(tec_on_status),
+</span></span><span style="display:flex;"><span>          temp_uc(current_temp),
+</span></span><span style="display:flex;"><span>          in_range(is_in_range) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">~</span>TecControlState() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TecControlState <span style="color:#a6e22e">control_tec</span>(Gpio<span style="color:#f92672">&amp;</span> tec, Adc<span style="color:#f92672">&amp;</span> thermocouple, TecControllerConfig<span style="color:#f92672">&amp;</span> config) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> raw_temp_adc <span style="color:#f92672">=</span> thermocouple.read();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> temp_uc <span style="color:#f92672">=</span> raw_adc_to_deg_uc(raw_temp_adc);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> tec_on <span style="color:#f92672">=</span> temp_uc <span style="color:#f92672">&gt;=</span> config.max_threshold;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> is_in_range <span style="color:#f92672">=</span> temp_uc <span style="color:#f92672">&lt;=</span> config.max_threshold <span style="color:#f92672">&amp;&amp;</span> temp_uc <span style="color:#f92672">&gt;=</span> config.min_threshold;
+</span></span><span style="display:flex;"><span>    tec.set(tec_on);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> TecControlState(tec_on, temp_uc, is_in_range);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>You modify the main function to emit this each loop. We&rsquo;ll assume that there&rsquo;s a stdout available:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;tec_controller.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;print&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Gpio tec{ <span style="color:#ae81ff">1</span> }; <span style="color:#75715e">// TEC is on pin 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Adc thermocouple{ <span style="color:#ae81ff">2</span> }; <span style="color:#75715e">// thermocouple on pin 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    tec.configure(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>    thermocouple.configure();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    TecControllerConfig config(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">80</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> ctrl_state <span style="color:#f92672">=</span> control_tec(tec, thermocouple, config);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>println(<span style="color:#e6db74">&#34;tec: {0} temp_uc: {1} in_range: {2}&#34;</span>, ctrl_state.tec_on, ctrl_state.temp_uc, ctrl_state.in_range);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>minutes(<span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="a-new-input-interface">A New Input Interface<a hidden class="anchor" aria-hidden="true" href="#a-new-input-interface">#</a></h2>
+<p>Fast forward a few months. Some iterations of this hardware has been delivered to customers. The thermal team has been monitoring logs, and they come to the conclusion that their thermal model is not of sufficiently high fidelity to explain all the temperature variation they see between units. Your microcontroller only has a low fidelity analog converter and decide to add an off-chip, highly accurate ADC. They ask you to update your code to support reading from this new off-chip ADC which communicates over SPI.</p>
+<p>At the same time, you need to continue supporting the current interface. New units are actively being shipped out and the company cannot abandon support for its first product iteration. You quickly realize that you need to decouple the specific feedback reading mechanism from the rest of the control logic. Having just read an interesting blog post on dependency inversion (<!-- raw HTML omitted -->), you decide to implement that pattern here. As part of that move, you also encapsulate your controller logic in a class.</p>
+<p>You create a new FeedbackInput class. This abstract base class defines an interface that the original on-chip ADC and new off-chip ADC readers will implement, allowing the controller to decouple from the input mechanism. The interface you design is simple, and looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdint&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FeedbackInput</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    FeedbackInput(<span style="color:#66d9ef">const</span> FeedbackInput<span style="color:#f92672">&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>    FeedbackInput<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(<span style="color:#66d9ef">const</span> FeedbackInput<span style="color:#f92672">&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    FeedbackInput(FeedbackInput<span style="color:#f92672">&amp;&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>    FeedbackInput<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(FeedbackInput<span style="color:#f92672">&amp;&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">read</span>() <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">configure</span>() <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>You create concrete implementations for both of your feedback mechanisms. The original on-chip ADC looks something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_input.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdint&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AdcFeedback</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> FeedbackInput {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">explicit</span> AdcFeedback(Adc<span style="color:#f92672">&amp;</span> adc) <span style="color:#f92672">:</span> adc_(adc) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">configure</span>() <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> adc_.configure();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> <span style="color:#a6e22e">read</span>() <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">auto</span> raw <span style="color:#f92672">=</span> adc_.read();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> AdcFeedback<span style="color:#f92672">::</span>raw_adc_to_deg_uc(raw);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int32_t</span> raw_adc_to_deg_uc(<span style="color:#66d9ef">uint16_t</span> raw) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// details aren&#39;t important, some transfer function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>    Adc<span style="color:#f92672">&amp;</span> adc_;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>The core of the controller logic is refactored into a class which takes a <code>FeedbackInput</code>, a <code>Gpio</code>, and a config as parameters to its constructor. It implements public methods for configuring its input and output mechanisms, and for grabbing its state as a loggable string. The primary API is the <code>step</code> function, which runs the control logic and updates the controller&rsquo;s state.</p>
+<p>Your controller header looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;feedback_input.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TecController</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">explicit</span> TecController(FeedbackInput<span style="color:#f92672">&amp;</span> feedback, Gpio<span style="color:#f92672">&amp;</span> tec, TecControllerConfig<span style="color:#f92672">&amp;</span> config);
+</span></span><span style="display:flex;"><span>        TecController(<span style="color:#66d9ef">const</span> TecController<span style="color:#f92672">&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>        TecController<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(<span style="color:#66d9ef">const</span> TecController<span style="color:#f92672">&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        TecController(TecController<span style="color:#f92672">&amp;&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>        TecController<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(TecController<span style="color:#f92672">&amp;&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">Initialize</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">Step</span>();
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>string GetStateString();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>        Gpio<span style="color:#f92672">&amp;</span> tec_;
+</span></span><span style="display:flex;"><span>        FeedbackInput<span style="color:#f92672">&amp;</span> feedback_;
+</span></span><span style="display:flex;"><span>        TecControlState state_;
+</span></span><span style="display:flex;"><span>        TecControllerConfig config_;
+</span></span><span style="display:flex;"><span>} 
+</span></span></code></pre></div><p>The implementation file is about what you&rsquo;d expect:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;tec_controller.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;format&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>TecController<span style="color:#f92672">::</span>TecController(FeedbackInput<span style="color:#f92672">&amp;</span> feedback, Gpio<span style="color:#f92672">&amp;</span> tec, TecControllerConfig<span style="color:#f92672">&amp;</span> config) <span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    feedback_(feedback), tec_(tec), config_(config), state_(TecControlState()) {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> TecController<span style="color:#f92672">::</span>Initialize() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> success <span style="color:#f92672">=</span> true;
+</span></span><span style="display:flex;"><span>    success <span style="color:#f92672">&amp;=</span> tec_.configure(Gpio<span style="color:#f92672">::</span>Gpio);
+</span></span><span style="display:flex;"><span>    success <span style="color:#f92672">&amp;=</span> feedback_.configure();
+</span></span><span style="display:flex;"><span>    state_ <span style="color:#f92672">=</span> {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> success;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> TecController<span style="color:#f92672">::</span>Step() {
+</span></span><span style="display:flex;"><span>    state_.temp_uc <span style="color:#f92672">=</span> feedback_.read();
+</span></span><span style="display:flex;"><span>    state_.tec_on <span style="color:#f92672">=</span> state_.temp_uc <span style="color:#f92672">&gt;=</span> config_.max_threshold;
+</span></span><span style="display:flex;"><span>    state_.in_range <span style="color:#f92672">=</span> state_.temp_uc <span style="color:#f92672">&lt;=</span> config_.max_threshold <span style="color:#f92672">&amp;&amp;</span> state_.temp_uc <span style="color:#f92672">&gt;=</span> config_.min_threshold;
+</span></span><span style="display:flex;"><span>    tec_.set(state_.tec_on);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string TecController<span style="color:#f92672">::</span>GetStateString() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>format(
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;tec_on: {}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;temp_uc: {}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;in_range: {}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>,
+</span></span><span style="display:flex;"><span>        state_.tec_on,
+</span></span><span style="display:flex;"><span>        state_.temp_uc,
+</span></span><span style="display:flex;"><span>        state_.in_range
+</span></span><span style="display:flex;"><span>    );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Finally, main is reorganized to use the class. For this example, we have separate <code>main</code> functions for each variation on our hardware configuration. They&rsquo;re almost identical, here&rsquo;s the basic on-chip ADC version:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;tec_controller.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;chrono&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;print&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;gpio.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;adc.hpp&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Gpio tec{ <span style="color:#ae81ff">1</span> }; <span style="color:#75715e">// TEC is on pin 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    Adc thermocouple{ <span style="color:#ae81ff">2</span> }; <span style="color:#75715e">// thermocouple on pin 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    tec.configure(Gpio<span style="color:#f92672">::</span>Output);
+</span></span><span style="display:flex;"><span>    thermocouple.configure();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    TecControllerConfig config(<span style="color:#ae81ff">20</span>, <span style="color:#ae81ff">80</span>);
+</span></span><span style="display:flex;"><span>    AdcFeedback feedback(thermocouple);
+</span></span><span style="display:flex;"><span>    TecController controller(feedback, tec, config);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>controller.Initialize()) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>print(<span style="color:#e6db74">&#34;Error initializing!&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#ae81ff">1</span>) {
+</span></span><span style="display:flex;"><span>        controller.Step();
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>println(controller.GetStateString());
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>minutes(<span style="color:#ae81ff">1</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>the off-chip version just substitutes a <code>SpiAdcFeedback</code> class for the <code>AdcFeedback</code> instance.</p>
+<h2 id="a-new-output-interface">A New Output Interface<a hidden class="anchor" aria-hidden="true" href="#a-new-output-interface">#</a></h2>
+<p>The insights from the off-chip ADC demonstrated to the thermal team the importance of a slightly more active control mechanism. The drift introduced by the bang-bang controller had undesirable thermal stress on the system. This was OK for the previous iterations, but the next hardware rev is using more sensitive materials and for those platforms, instead of a simple on/off, you must use a PWM waveform generated from the on-chip PWM module to more accurately control the temperature.</p>
+<p>The solution is similar to the input interface - add an abstraction for managing the output interface.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/c&#43;&#43;/">C&#43;&#43;</a></li>
+      <li><a href="http://localhost:1313/tags/setpoint/">Setpoint</a></li>
+      <li><a href="http://localhost:1313/tags/controller/">Controller</a></li>
+      <li><a href="http://localhost:1313/tags/embedded/">Embedded</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Volatile Int</a></span> · 
+    <span>
+        <a href="http://localhost:1313/index.xml">Subscribe via RSS</a>
+    </span> · 
+    <span>
+        <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
+    </span> · 
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true });
+</script>
+</body>
+</html>
