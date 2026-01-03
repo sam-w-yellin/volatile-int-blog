@@ -6,8 +6,15 @@
     <description>Recent content on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 23 Dec 2025 00:00:00 -0800</lastBuildDate>
+    <lastBuildDate>Fri, 02 Jan 2026 12:00:00 -0800</lastBuildDate>
     <atom:link href="https://www.volatileint.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>A Month with Antigravity: The Good, The Bad, and The Ugly</title>
+      <link>https://www.volatileint.dev/posts/antigravity-review/</link>
+      <pubDate>Fri, 02 Jan 2026 12:00:00 -0800</pubDate>
+      <guid>https://www.volatileint.dev/posts/antigravity-review/</guid>
+      <description>A deep dive into the realities of using Antigravity, Opus 4.5, and Gemini 3 Pro for greenfield development and architectural maintenance.</description>
+    </item>
     <item>
       <title>Applying Template Concepts to Tuples in C&#43;&#43;</title>
       <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
