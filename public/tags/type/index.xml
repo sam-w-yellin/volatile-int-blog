@@ -13,13 +13,7 @@
       <link>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</link>
       <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</guid>
-      <description>&lt;p&gt;One of the most iconic C++ features is the language&amp;rsquo;s ability to deduce types with the &lt;code&gt;auto&lt;/code&gt; keyword. In this post, I&amp;rsquo;ll give a series of code snippits. Your job is to assess what will be deduced for &lt;code&gt;v&lt;/code&gt; in each case. Determine for each:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;The deduced type&lt;/li&gt;
-&lt;li&gt;If it is a value, an lvalue or rvalue reference, or a pointer&lt;/li&gt;
-&lt;li&gt;Which CV qualifiers are applicable&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Some of these may not even compile, so &amp;ldquo;this won&amp;rsquo;t work&amp;rdquo; is a totally valid answer.&lt;/p&gt;</description>
+      <description>Test and improve your understanding of C&#43;&#43; auto and decltype(auto) type deduction through a detailed code-based quiz.</description>
     </item>
   </channel>
 </rss>

@@ -1,5 +1,6 @@
 ---
 title: "Can You Survive the C++ Auto Type Deduction Gauntlet?"
+description: "Test and improve your understanding of C++ auto and decltype(auto) type deduction through a detailed code-based quiz."
 date: 2025-12-05T12:00:00-08:00
 draft: false
 tags: ["C++","type","deduction", "auto", "quiz"]

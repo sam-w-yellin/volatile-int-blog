@@ -1,5 +1,6 @@
 ---
 title: "Implementing a Framework For Closed-Loop Controllers in Modern C++"
+description: "Build a flexible, modern C++ library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety."
 date: 2025-11-26T11:00:00-08:00
 draft: false
 tags: ["C++","feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"]

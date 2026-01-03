@@ -1,5 +1,6 @@
 ---
 title: "Introducing Crunch: A Message Definition Protocol for Getting Things Right"
+description: "Discover Crunch, a message definition protocol designed for robust serialization and validation in mission-critical communication systems."
 date: 2025-12-13T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "serdes", "message"]

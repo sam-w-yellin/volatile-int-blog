@@ -1,5 +1,6 @@
 ---
 title: "Applying Template Concepts to Tuples in C++"
+description: "Learn how to apply and constrain C++20 template concepts to tuple elements with practical examples and idiomatic patterns."
 date: 2025-12-23T00:00:00-08:00
 draft: false
 tags: ["crunch", "C++", "template", "tuple", "concept", "tuple-like"]

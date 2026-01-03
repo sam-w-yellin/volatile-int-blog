@@ -13,8 +13,7 @@
       <link>https://www.volatileint.dev/posts/dependency-inversion-c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/dependency-inversion-c/</guid>
-      <description>&lt;p&gt;The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.&lt;/p&gt;
-&lt;p&gt;This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is &lt;a href=&#34;https://en.wikipedia.org/wiki/Dependency_inversion_principle&#34;&gt;dependency inversion&lt;/a&gt;. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the &lt;em&gt;dependencies&lt;/em&gt; flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.&lt;/p&gt;</description>
+      <description>Learn how to implement dependency inversion in C using function pointer interfaces to decouple high-level logic from implementation details.</description>
     </item>
   </channel>
 </rss>

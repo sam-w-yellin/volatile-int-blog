@@ -1,5 +1,6 @@
 ---
 title: "Dependency Inversion in C: A Technique for Extensible Embedded Software"
+description: "Learn how to implement dependency inversion in C using function pointer interfaces to decouple high-level logic from implementation details."
 date: 2025-11-16T12:00:00-08:00
 draft: false
 tags: ["C","architecture","embedded", "dependency", "inversion"]

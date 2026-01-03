@@ -7,9 +7,7 @@
 <meta name="robots" content="index, follow">
 <title>Applying Template Concepts to Tuples in C&#43;&#43; | Volatile Int</title>
 <meta name="keywords" content="crunch, C&#43;&#43;, template, tuple, concept, tuple-like">
-<meta name="description" content="Tuples and Templates
-In C&#43;&#43;, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element APIs provide metadata about the collection&rsquo;s structure. Classes that satisfy this &ldquo;Tuple Protocol&rdquo; in the STL - and can therefore utilize the techniques in this article - include std::tuple, std::pair, std::array, and some types in the std::ranges library.
-When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concepts for all parameters. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While developing Crunch, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting std::tuple parameters in your own projects!">
+<meta name="description" content="Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.">
 <meta name="author" content="">
 <link rel="canonical" href="https://www.volatileint.dev/posts/tuple-template-concepts/">
 <link crossorigin="anonymous" href="https://www.volatileint.dev/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
@@ -89,8 +87,7 @@ When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concep
       </script><meta property="og:url" content="https://www.volatileint.dev/posts/tuple-template-concepts/">
   <meta property="og:site_name" content="Volatile Int">
   <meta property="og:title" content="Applying Template Concepts to Tuples in C&#43;&#43;">
-  <meta property="og:description" content="Tuples and Templates In C&#43;&#43;, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element APIs provide metadata about the collection’s structure. Classes that satisfy this “Tuple Protocol” in the STL - and can therefore utilize the techniques in this article - include std::tuple, std::pair, std::array, and some types in the std::ranges library.
-When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concepts for all parameters. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While developing Crunch, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting std::tuple parameters in your own projects!">
+  <meta property="og:description" content="Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.">
   <meta property="og:locale" content="en-us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -104,9 +101,7 @@ When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concep
     <meta property="article:tag" content="Tuple-Like">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Applying Template Concepts to Tuples in C&#43;&#43;">
-<meta name="twitter:description" content="Tuples and Templates
-In C&#43;&#43;, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element APIs provide metadata about the collection&rsquo;s structure. Classes that satisfy this &ldquo;Tuple Protocol&rdquo; in the STL - and can therefore utilize the techniques in this article - include std::tuple, std::pair, std::array, and some types in the std::ranges library.
-When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concepts for all parameters. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While developing Crunch, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting std::tuple parameters in your own projects!">
+<meta name="twitter:description" content="Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.">
 
 
 <script type="application/ld+json">
@@ -135,7 +130,7 @@ When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concep
   "@type": "BlogPosting",
   "headline": "Applying Template Concepts to Tuples in C++",
   "name": "Applying Template Concepts to Tuples in C\u002b\u002b",
-  "description": "Tuples and Templates In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the get method, while the std::tuple_size and std::tuple_element APIs provide metadata about the collection\u0026rsquo;s structure. Classes that satisfy this \u0026ldquo;Tuple Protocol\u0026rdquo; in the STL - and can therefore utilize the techniques in this article - include std::tuple, std::pair, std::array, and some types in the std::ranges library.\nWhen we use templates, the C++ Core Guidelines tell us to specify concepts for all parameters. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While developing Crunch, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting std::tuple parameters in your own projects!\n",
+  "description": "Learn how to apply and constrain C++20 template concepts to tuple elements with practical examples and idiomatic patterns.",
   "keywords": [
     "crunch", "C++", "template", "tuple", "concept", "tuple-like"
   ],
@@ -211,6 +206,9 @@ When we use templates, the C&#43;&#43; Core Guidelines tell us to specify concep
     <h1 class="post-title entry-hint-parent">
       Applying Template Concepts to Tuples in C&#43;&#43;
     </h1>
+    <div class="post-description">
+      Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.
+    </div>
     <div class="post-meta"><span title='2025-12-23 00:00:00 -0800 PST'>December 23, 2025</span>
 
 </div>
