@@ -102,7 +102,7 @@ I refer to this entire phase as the dead-air portion of the workflow. You are no
 
 ## A Complete Disregard for Maintainability
 
-The book [Software Engineering at Google](https://abseil.io/resources/swe-book) defines software engineering as "programming integrated over time". My time with Opus 4.5 and Gemini 3 Pro has solidified the suspicions I already had - these tools are abysmal at software engineering. Without oversight from a human, especially in greenfield projects with few intentionally crafted architectural patterns to immitate, the models are simply incapable of producing maintainable software which is resiliant in the face of evolving dependencies and requirements.
+The book [Software Engineering at Google](https://abseil.io/resources/swe-book) defines software engineering as "programming integrated over time". My time with Opus 4.5 and Gemini 3 Pro has solidified the suspicions I already had - these tools are abysmal at software engineering. Without oversight from a human, especially in greenfield projects with few intentionally crafted architectural patterns to immitate, the models are simply incapable of producing software which is resiliant in the face of evolving dependencies and requirements.
 
 One of the projects I have been developing has a UI component. I wanted to focus my development on the backend, so I designed the interface contract between the frontend and backend, and let the AI agent fully handle developing an ncurses-based terminal UI. Long term, I planned on replacing the UI with something more polished, and so I saw this as a good opportunity to observe how the AIs handled maintenance of a component with essentially no oversight from me.
 
