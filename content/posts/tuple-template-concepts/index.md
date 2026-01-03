@@ -42,8 +42,7 @@ First, let's address the most basic conceptual constraint - that the `Tuple` tem
 
 > A type T models and satisfies the concept tuple-like if std::remove_cvref_t<T> is a specialization of:
 >- std::array,
->- std::complex,
->- (since C++26)
+>- std::complex (since C++26)
 >- std::pair,
 >- std::tuple
 >- std::ranges::subrange.
