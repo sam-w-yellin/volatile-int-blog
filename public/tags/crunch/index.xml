@@ -13,16 +13,14 @@
       <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
       <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/tuple-template-concepts/</guid>
-      <description>&lt;h1 id=&#34;tuples-and-templates&#34;&gt;Tuples and Templates&lt;/h1&gt;
-&lt;p&gt;In C++, tuples are a collection of values of heterogenous types. You can access different elements at compile time via the &lt;code&gt;get&lt;/code&gt; method, while the &lt;code&gt;std::tuple_size&lt;/code&gt; and &lt;code&gt;std::tuple_element&lt;/code&gt; APIs provide metadata about the collection&amp;rsquo;s structure. Classes that satisfy this &amp;ldquo;Tuple Protocol&amp;rdquo; in the &lt;code&gt;STL&lt;/code&gt; - and can therefore utilize the techniques in this article - include &lt;code&gt;std::tuple&lt;/code&gt;, &lt;code&gt;std::pair&lt;/code&gt;, &lt;code&gt;std::array&lt;/code&gt;, and some types in the &lt;code&gt;std::ranges&lt;/code&gt; library.&lt;/p&gt;
-&lt;p&gt;When we use templates, the C++ Core Guidelines &lt;a href=&#34;https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#rt-concepts&#34;&gt;tell us to specify concepts for all parameters&lt;/a&gt;. This article demonstrates a few methods for applying concepts to tuples and their individual elements. While &lt;a href=&#34;https://www.volatileint.dev/posts/crunch-intro/&#34;&gt;developing Crunch&lt;/a&gt;, I had quite a few use cases for applying template concepts to tuples and found some good - and not so good - ways to do it. I did not find any clear explanations of the syntax proposed for those solutions, or how you could arrive at them yourself. I hope that by the end of this article, you feel comfortable writing template concepts targeting &lt;code&gt;std::tuple&lt;/code&gt; parameters in your own projects!&lt;/p&gt;</description>
+      <description>Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.</description>
     </item>
     <item>
       <title>Introducing Crunch: A Message Definition Protocol for Getting Things Right</title>
       <link>https://www.volatileint.dev/posts/crunch-intro/</link>
       <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
       <guid>https://www.volatileint.dev/posts/crunch-intro/</guid>
-      <description>&lt;p&gt;There are &lt;a href=&#34;https://protobuf.dev/&#34;&gt;a&lt;/a&gt; &lt;a href=&#34;https://mavlink.io/en/&#34;&gt;lot&lt;/a&gt; &lt;a href=&#34;https://github.com/6over3/bebop&#34;&gt;of&lt;/a&gt; &lt;a href=&#34;https://msgpack.org/index.html&#34;&gt;different&lt;/a&gt; &lt;a href=&#34;https://flatbuffers.dev/&#34;&gt;tools&lt;/a&gt; for defining structured messages and working with their serialized representations for communication over-the-wire. I have worked with open source, closed source, and hand-rolled toolchains tackling this problem. Every tool I have seen has a serious design flaw that makes them very difficult to use correctly in mission-critical contexts. Validation - both of individual fields and of whole messages - is completely decoupled from the message definitions. This is a fundamental gap in how messages are specified. A comprehensive description of what makes a message valid is equally important in system design as the types and names of the fields.&lt;/p&gt;</description>
+      <description>Discover Crunch, a message definition protocol designed for robust serialization and validation in mission-critical communication systems.</description>
     </item>
   </channel>
 </rss>

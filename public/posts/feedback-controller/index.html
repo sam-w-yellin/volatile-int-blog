@@ -7,8 +7,7 @@
 <meta name="robots" content="index, follow">
 <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43; | Volatile Int</title>
 <meta name="keywords" content="C&#43;&#43;, feedback, control, law, actuator, concept, embedded, template, lambda, logging">
-<meta name="description" content="In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts,  std::expected, and lambda functions.
-Before we dive in, I want to acknowledge that the final code utilizes a good number of advanced C&#43;&#43; facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
+<meta name="description" content="Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.">
 <meta name="author" content="">
 <link rel="canonical" href="https://www.volatileint.dev/posts/feedback-controller/">
 <link crossorigin="anonymous" href="https://www.volatileint.dev/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
@@ -88,8 +87,7 @@ Before we dive in, I want to acknowledge that the final code utilizes a good num
       </script><meta property="og:url" content="https://www.volatileint.dev/posts/feedback-controller/">
   <meta property="og:site_name" content="Volatile Int">
   <meta property="og:title" content="Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;">
-  <meta property="og:description" content="In this post, we’re going to implement a generic interface for creating a wide variety of closed-loop control systems. We’ll end with a flexible template library capable of implementing whatever control algorithm you’d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts, std::expected, and lambda functions.
-Before we dive in, I want to acknowledge that the final code utilizes a good number of advanced C&#43;&#43; facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
+  <meta property="og:description" content="Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.">
   <meta property="og:locale" content="en-us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -103,8 +101,7 @@ Before we dive in, I want to acknowledge that the final code utilizes a good num
     <meta property="article:tag" content="Concept">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;">
-<meta name="twitter:description" content="In this post, we&rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We&rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you&rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C&#43;&#43; infrastructure such as template concepts,  std::expected, and lambda functions.
-Before we dive in, I want to acknowledge that the final code utilizes a good number of advanced C&#43;&#43; facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.">
+<meta name="twitter:description" content="Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.">
 
 
 <script type="application/ld+json">
@@ -133,7 +130,7 @@ Before we dive in, I want to acknowledge that the final code utilizes a good num
   "@type": "BlogPosting",
   "headline": "Implementing a Framework For Closed-Loop Controllers in Modern C++",
   "name": "Implementing a Framework For Closed-Loop Controllers in Modern C\u002b\u002b",
-  "description": "In this post, we\u0026rsquo;re going to implement a generic interface for creating a wide variety of closed-loop control systems. We\u0026rsquo;ll end with a flexible template library capable of implementing whatever control algorithm you\u0026rsquo;d want, enforced separation of concerns, flexible configuration, consistent error handling, and support for logging. We will use modern C++ infrastructure such as template concepts, std::expected, and lambda functions.\nBefore we dive in, I want to acknowledge that the final code utilizes a good number of advanced C++ facilities for what may appear to be a relatively simple set of functionality. In the course of reading, you may balk at the complexity introduced for the sake of consistent abstraction. Hopefully the culmination of what we have built presented in the last section of the post sufficiently motivates the complexity tradeoff for projects with many controllers or which need to distribute the development responsibilities of the control laws and hardware interfaces across teams.\n",
+  "description": "Build a flexible, modern C++ library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.",
   "keywords": [
     "C++", "feedback", "control", "law", "actuator", "concept", "embedded", "template", "lambda", "logging"
   ],
@@ -209,6 +206,9 @@ Before we dive in, I want to acknowledge that the final code utilizes a good num
     <h1 class="post-title entry-hint-parent">
       Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;
     </h1>
+    <div class="post-description">
+      Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.
+    </div>
     <div class="post-meta"><span title='2025-11-26 11:00:00 -0800 PST'>November 26, 2025</span>
 
 </div>
