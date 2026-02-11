@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+<script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><link rel="stylesheet" href="http://localhost:1313/css/custom.css">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Dependency Inversion in C: A Technique for Extensible Embedded Software | Volatile Int</title>
+<meta name="keywords" content="C, architecture, embedded, dependency, inversion">
+<meta name="description" content="The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.
+This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is dependency inversion. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the dependencies flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/dependency-inversion-c/dependency-inversion-c/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.343cc480b9ffc8f04ccbe5e968ad674880cab773ec19905e93033065c1e7a804.css" integrity="sha256-NDzEgLn/yPBMy&#43;XpaK1nSIDKt3PsGZBekwMwZcHnqAQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/dependency-inversion-c/dependency-inversion-c/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Volatile Int (Alt + H)">Volatile Int</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/about/" title="About">
+                    <span>About</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/newsletter/" title="Newsletter">
+                    <span>Newsletter</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Dependency Inversion in C: A Technique for Extensible Embedded Software
+    </h1>
+    <div class="post-meta"><span title='2025-11-16 12:00:00 -0800 PST'>November 16, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>The core value proposition of software is flexibility - but in embedded systems, we often lose that advantage. Codebases become tightly coupled to a specific hardware revision, making even small platform changes expensive and risky. As hardware complexity grows linearly, software complexity grows exponentially. Costs rise. Schedules slip. Eventually organizations become resistant to improving their own products because the software architecture can’t absorb change.</p>
+<p>This risk is avoidable. By intentionally separating the high-level business rules from low-level hardware details, we regain the flexibility software is supposed to provide. One of the most effective techniques for achieving this separation is <a href="https://en.wikipedia.org/wiki/Dependency_inversion_principle">dependency inversion</a>. In short, lower-level components implement an interface defined at a higher level. Control still flows from high to low abstraction layers, but the <em>dependencies</em> flow upward. High-level code is unaware of how the interface is concretely implemented. In an embedded context, this paradigm allows the software architecture to adapt quickly and cheaply to new hardware iterations without rewriting core logic.</p>
+<p>Languages with full runtime polymorphism natively support this paradigm. They can define abstract base classes from which concrete implementations are derived, and the components depending on these interfaces can depend only on the base class type. C does not have such an elegant built-in solution for inverting dependencies. There is no virtual function table or class hierarchy. But a vtable is just a struct of function pointers - something C expresses naturally. So in C, we provide our own layer of indirection using structs of function pointers.</p>
+<p>In this post, we explore dependency inversion in C through a concrete, practical example: designing a flexible logging interface.</p>
+<h2 id="a-simple-logger">A Simple Logger<a hidden class="anchor" aria-hidden="true" href="#a-simple-logger">#</a></h2>
+<p>Suppose we’re developing a system in need of a logging facility. The logger needs two APIs:</p>
+<ol>
+<li>An initialization function to set up any resources required by the logger.</li>
+<li>A log function that accepts a message to log.</li>
+</ol>
+<p>A naïve implementation might couple the logger directly to a specific output, like stdout. But this has a serious drawback: it becomes difficult to change <em>how</em> a component logs. What if we wanted a component to sometimes log to stdout, and sometimes log to a file? What if we are working on an embedded platform and need to emit log messages via UART or SPI, or some other serial interface? The solution is dependency inversion.</p>
+<p>Let’s dig into our logger example. The tightly-coupled implementation might look like this, where the the component depends directly or transitively on a specific logger implementation:
+<div class="mermaid">
+    
+graph TD
+    Main --> Worker
+    Worker --> StdoutLogger
+
+</div></p>
+<p>Dependency inversion frees components from needing to know the details of how logging is implemented. It also leads to sparser build dependency graphs - components that depend only on the interface don’t need to be recompiled when implementations change. The resulting architecture looks as follows:
+<div class="mermaid">
+    
+graph TD
+    Main --> Worker
+    Main --> StdoutLogger
+    Main --> FileLogger
+    Worker --> LoggerInterface
+    StdoutLogger --> LoggerInterface
+    FileLogger --> LoggerInterface
+
+</div></p>
+<p>It’s worth noting that it is not only acceptable but expected that main depends on low-level details. Ideally, <code>main</code> - or whatever the entry point for your application is - should be the centralized location where all concrete implementations are defined and injected into the more abstract components.</p>
+<h2 id="defining-the-logger-interface">Defining the Logger Interface<a hidden class="anchor" aria-hidden="true" href="#defining-the-logger-interface">#</a></h2>
+<p>So, let&rsquo;s define an abstract interface - implemented via function pointers and let the high-level component code depend only on that. A real implementation would probably be a variadic function, but we&rsquo;ll just log a string for simplicity.</p>
+<p><strong>File</strong>: <code>core/components/logger/include/logger_interface.h</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stddef.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> logger_interface 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>init)(<span style="color:#66d9ef">void</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> (<span style="color:#f92672">*</span>log)(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> logger_name, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>msg);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name;
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">logger_interface_t</span>;</span></span></code></pre></div></p>
+<h3 id="implementing-two-concrete-loggers">Implementing Two Concrete Loggers<a hidden class="anchor" aria-hidden="true" href="#implementing-two-concrete-loggers">#</a></h3>
+<p>Now, we create two low-level implementations of the high-level logger interface. Notice how they depend on the logger interface. Components which do logging do not directly utilize either of these concrete implementations.</p>
+<h4 id="stdout-logger">stdout Logger<a hidden class="anchor" aria-hidden="true" href="#stdout-logger">#</a></h4>
+<p><strong>File</strong>: <code>plugins/stdout_logger/include/stdout_logger.h</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stddef.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;logger_interface.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name);</span></span></code></pre></div>
+<strong>File</strong>: <code>plugins/stdout_logger/src/stdout_logger.c</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stdout_logger.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">stdout_logger_init</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">stdout_logger_log</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> logger_name, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>msg)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">printf</span>(<span style="color:#e6db74">&#34;[%s] %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, logger_name, msg);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> logger;
+</span></span><span style="display:flex;"><span>    logger.name <span style="color:#f92672">=</span> name;
+</span></span><span style="display:flex;"><span>    logger.init <span style="color:#f92672">=</span> stdout_logger_init;
+</span></span><span style="display:flex;"><span>    logger.log <span style="color:#f92672">=</span> stdout_logger_log;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> logger;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div></p>
+<h4 id="file-logger">File Logger<a hidden class="anchor" aria-hidden="true" href="#file-logger">#</a></h4>
+<p><strong>File</strong>: <code>plugins/file_logger/include/file_logger.h</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stddef.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;logger_interface.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_file_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name);</span></span></code></pre></div>
+<strong>File</strong>: <code>plugins/file_logger/src/file_logger.c</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;file_logger.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> logname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;log.txt&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">file_logger_init</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    FILE<span style="color:#f92672">*</span> f <span style="color:#f92672">=</span> <span style="color:#a6e22e">fopen</span>(logname, <span style="color:#e6db74">&#34;w&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (f <span style="color:#f92672">!=</span> NULL) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fclose</span>(f);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">file_logger_log</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> logger_name, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>msg)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    FILE<span style="color:#f92672">*</span> f <span style="color:#f92672">=</span> <span style="color:#a6e22e">fopen</span>(logname, <span style="color:#e6db74">&#34;a&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (f <span style="color:#f92672">!=</span> NULL) {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fprintf</span>(f, <span style="color:#e6db74">&#34;[%s] %s</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, logger_name, msg);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fflush</span>(f);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">fclose</span>(f);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">logger_interface_t</span> <span style="color:#a6e22e">mk_file_logger</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name) 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> logger;
+</span></span><span style="display:flex;"><span>    logger.name <span style="color:#f92672">=</span> name;
+</span></span><span style="display:flex;"><span>    logger.init <span style="color:#f92672">=</span> file_logger_init;
+</span></span><span style="display:flex;"><span>    logger.log <span style="color:#f92672">=</span> file_logger_log;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> logger;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div></p>
+<h2 id="using-the-logger-in-a-high-level-component">Using the Logger in a High-Level Component<a hidden class="anchor" aria-hidden="true" href="#using-the-logger-in-a-high-level-component">#</a></h2>
+<p>Let&rsquo;s create a component that uses a logger. We&rsquo;ll make a generic worker that does some task - in our case, logs a message. This worker depends only on the logging <em>interface</em> and not a particular logger.</p>
+<p><strong>File</strong>: <code>core/components/worker/include/worker.h</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#pragma once
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;logger_interface.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">logger_interface_t</span> <span style="color:#f92672">*</span>logger;
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">worker_t</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">worker_init</span>(<span style="color:#66d9ef">worker_t</span> <span style="color:#f92672">*</span>w,
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">logger_interface_t</span> <span style="color:#f92672">*</span>logger);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">worker_do_work</span>(<span style="color:#66d9ef">worker_t</span> <span style="color:#f92672">*</span>w);</span></span></code></pre></div></p>
+<p><strong>File</strong>: <code>core/components/worker/src/worker.c</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;worker.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">worker_init</span>(<span style="color:#66d9ef">worker_t</span> <span style="color:#f92672">*</span>w,
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">logger_interface_t</span> <span style="color:#f92672">*</span>logger)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    w<span style="color:#f92672">-&gt;</span>logger <span style="color:#f92672">=</span> logger;
+</span></span><span style="display:flex;"><span>    w<span style="color:#f92672">-&gt;</span>logger<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">init</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">worker_do_work</span>(<span style="color:#66d9ef">worker_t</span> <span style="color:#f92672">*</span>w)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    w<span style="color:#f92672">-&gt;</span>logger<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">log</span>(w<span style="color:#f92672">-&gt;</span>logger<span style="color:#f92672">-&gt;</span>name, <span style="color:#e6db74">&#34;Worker did some work&#34;</span>);
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div></p>
+<h2 id="wiring-together-into-an-executable">Wiring Together into an Executable<a hidden class="anchor" aria-hidden="true" href="#wiring-together-into-an-executable">#</a></h2>
+<p>It&rsquo;s now trivial to create a <code>main</code> which instantiates a few different workers, and flexibly select which logger to use. We&rsquo;ll create three loggers: two that utilize the stdout implementation and one that logs to a file. Each logger instance maintains its own module name buffer, allowing multiple workers to share the same logger implementation while retaining independent module names.</p>
+<p><strong>File</strong>: <code>app/main.c</code>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;worker.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;stdout_logger.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;file_logger.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">void</span>)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> stdout1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#e6db74">&#34;stdout1&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> stdout2 <span style="color:#f92672">=</span> <span style="color:#a6e22e">mk_stdout_logger</span>(<span style="color:#e6db74">&#34;stdout2&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">logger_interface_t</span> file1 <span style="color:#f92672">=</span> <span style="color:#a6e22e">mk_file_logger</span>(<span style="color:#e6db74">&#34;file1&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">worker_t</span> w1, w2, w3;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_init</span>(<span style="color:#f92672">&amp;</span>w1, <span style="color:#f92672">&amp;</span>stdout1);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_init</span>(<span style="color:#f92672">&amp;</span>w2, <span style="color:#f92672">&amp;</span>stdout2);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_init</span>(<span style="color:#f92672">&amp;</span>w3, <span style="color:#f92672">&amp;</span>file1);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_do_work</span>(<span style="color:#f92672">&amp;</span>w1);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_do_work</span>(<span style="color:#f92672">&amp;</span>w2);
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">worker_do_work</span>(<span style="color:#f92672">&amp;</span>w3);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div></p>
+<p>If we compile this all together and run, we should see the two stdout loggers emit their messages on the console, and the file logger&rsquo;s output in <code>log.txt</code>. The makefile in the source code for this example defines the required target.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make &gt; /dev/null
+</span></span><span style="display:flex;"><span>./demo
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>stdout1<span style="color:#f92672">]</span> Worker did some work
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>stdout2<span style="color:#f92672">]</span> Worker did some work
+</span></span><span style="display:flex;"><span>cat log.txt
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>file1<span style="color:#f92672">]</span> Worker did some work
+</span></span></code></pre></div><h2 id="verifying-dependency-inversion">Verifying Dependency Inversion<a hidden class="anchor" aria-hidden="true" href="#verifying-dependency-inversion">#</a></h2>
+<p>To confirm the components implementing business logic - like <code>worker</code> - have no dependency on any concrete implementation, let&rsquo;s investigate the <code>worker</code> object file. If we run <code>make worker.o</code> to create the object file for our worker component, we can then use <code>nm</code> to prove there are no undefined symbols. This demonstrates the dependency inversion worked: the worker component has zero dependency on any concrete logger implementation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make worker.o
+</span></span><span style="display:flex;"><span>nm worker.o
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000000030</span> T _worker_do_work
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000000000</span> T _worker_init
+</span></span><span style="display:flex;"><span>000000000000006c s l_.str
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000000000</span> t ltmp0
+</span></span><span style="display:flex;"><span>000000000000006c s ltmp1
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0000000000000088</span> s ltmp2
+</span></span></code></pre></div><h2 id="the-cost-of-indirection">The Cost of Indirection<a hidden class="anchor" aria-hidden="true" href="#the-cost-of-indirection">#</a></h2>
+<p>While this abstraction is very low cost, it is not <em>zero</em> cost. We need to dereference our function pointer, which incurs a small runtime cost each time we log. For almost all applications, this is completely negligible.</p>
+<h2 id="other-options">Other Options<a hidden class="anchor" aria-hidden="true" href="#other-options">#</a></h2>
+<p>What are the other options for tackling this sort of problem?</p>
+<ol>
+<li>Define entirely separate worker components for each logger type: worker-file, worker-stdout, etc</li>
+<li>Conditionally compile our worker or logger libraries with different implementations depending on the desired configuration.</li>
+</ol>
+<p>The first bullet is hitting the problem with a hammer - introduce tons of duplication and maintain tightly coupled interfaces. This makes the project much more expensive to maintain and less scalable. The second option is even worse - we&rsquo;ve made it impossible to instantiate multiple types of loggers in a single translation unit. It&rsquo;s my opinion that conditional compilation is nearly always a code smell and should be avoided at all costs - a topic for another time. In short, both alternatives reduce flexibility and maintainability compared to dependency inversion.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>We’ve now walked through implementing dependency inversion in C - a language without native support for dynamic polymorphism. Using function-pointer interfaces allows you to decouple high-level policy from hardware-specific implementations with minimal overhead. This pattern produces more testable, more portable, and more maintainable embedded systems.</p>
+<p>The full source code for this example is available on <a href="https://github.com/sam-w-yellin/dependency-inversion-c">GitHub</a>. If you’d like to discuss this pattern or how it might apply to your system, feel free to reach out: <a href="mailto:sam@volatileint.dev">sam@volatileint.dev</a></p>
+<p>If you found this article valuable, consider subscribing to the <a href="https://volatileint.dev/newsletter">newsletter</a> to hear about new posts!</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/c/">C</a></li>
+      <li><a href="http://localhost:1313/tags/architecture/">Architecture</a></li>
+      <li><a href="http://localhost:1313/tags/embedded/">Embedded</a></li>
+      <li><a href="http://localhost:1313/tags/dependency/">Dependency</a></li>
+      <li><a href="http://localhost:1313/tags/inversion/">Inversion</a></li>
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">Volatile Int</a></span> · 
+    <span>
+        <a href="http://localhost:1313/index.xml">Subscribe via RSS</a>
+    </span> · 
+    <span>
+        <a href="https://buttondown.com/volatileint">Subscribe via Newsletter</a>
+    </span> · 
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({ startOnLoad: true });
+</script>
+</body>
+</html>
