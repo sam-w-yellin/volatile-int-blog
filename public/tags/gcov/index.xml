@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Gcov on Volatile Int</title>
+    <link>http://localhost:1313/tags/gcov/</link>
+    <description>Recent content in Gcov on Volatile Int</description>
+    <generator>Hugo -- 0.152.2</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 10 Feb 2025 00:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/gcov/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How consteval and constexpr Impact gcov</title>
+      <link>http://localhost:1313/posts/compile-time-coverage/</link>
+      <pubDate>Mon, 10 Feb 2025 00:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/posts/compile-time-coverage/</guid>
+      <description>Simple examples demonstrating the effect of consteval and constexpr in code coverage analysis</description>
+    </item>
+  </channel>
+</rss>

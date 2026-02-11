@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Antigravity on Volatile Int</title>
-    <link>https://www.volatileint.dev/tags/antigravity/</link>
+    <link>http://localhost:1313/tags/antigravity/</link>
     <description>Recent content in Antigravity on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 02 Jan 2026 12:00:00 -0800</lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/tags/antigravity/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/antigravity/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A Month with Antigravity: The Good, The Bad, and The Ugly</title>
-      <link>https://www.volatileint.dev/posts/antigravity-review/</link>
+      <link>http://localhost:1313/posts/antigravity-review/</link>
       <pubDate>Fri, 02 Jan 2026 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/antigravity-review/</guid>
+      <guid>http://localhost:1313/posts/antigravity-review/</guid>
       <description>A deep dive into the realities of using Antigravity, Opus 4.5, and Gemini 3 Pro for greenfield development and architectural maintenance.</description>
     </item>
   </channel>

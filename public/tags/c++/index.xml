@@ -2,39 +2,46 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>C&#43;&#43; on Volatile Int</title>
-    <link>https://www.volatileint.dev/tags/c&#43;&#43;/</link>
+    <link>http://localhost:1313/tags/c&#43;&#43;/</link>
     <description>Recent content in C&#43;&#43; on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 23 Dec 2025 00:00:00 -0800</lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/tags/c++/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/tags/c++/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Applying Template Concepts to Tuples in C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
+      <link>http://localhost:1313/posts/tuple-template-concepts/</link>
       <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/tuple-template-concepts/</guid>
+      <guid>http://localhost:1313/posts/tuple-template-concepts/</guid>
       <description>Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.</description>
     </item>
     <item>
       <title>Introducing Crunch: A Message Definition Protocol for Getting Things Right</title>
-      <link>https://www.volatileint.dev/posts/crunch-intro/</link>
+      <link>http://localhost:1313/posts/crunch-intro/</link>
       <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/crunch-intro/</guid>
+      <guid>http://localhost:1313/posts/crunch-intro/</guid>
       <description>Discover Crunch, a message definition protocol designed for robust serialization and validation in mission-critical communication systems.</description>
     </item>
     <item>
       <title>Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?</title>
-      <link>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</link>
+      <link>http://localhost:1313/posts/auto-type-deduction-gauntlet/</link>
       <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</guid>
+      <guid>http://localhost:1313/posts/auto-type-deduction-gauntlet/</guid>
       <description>Test and improve your understanding of C&#43;&#43; auto and decltype(auto) type deduction through a detailed code-based quiz.</description>
     </item>
     <item>
       <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/posts/feedback-controller/</link>
+      <link>http://localhost:1313/posts/feedback-controller/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/feedback-controller/</guid>
+      <guid>http://localhost:1313/posts/feedback-controller/</guid>
       <description>Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.</description>
+    </item>
+    <item>
+      <title>How consteval and constexpr Impact gcov</title>
+      <link>http://localhost:1313/posts/compile-time-coverage/</link>
+      <pubDate>Mon, 10 Feb 2025 00:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/posts/compile-time-coverage/</guid>
+      <description>Simple examples demonstrating the effect of consteval and constexpr in code coverage analysis</description>
     </item>
   </channel>
 </rss>

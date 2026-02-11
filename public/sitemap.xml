@@ -2,118 +2,130 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.volatileint.dev/posts/antigravity-review/</loc>
+    <loc>http://localhost:1313/posts/antigravity-review/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/ai/</loc>
+    <loc>http://localhost:1313/tags/ai/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/antigravity/</loc>
+    <loc>http://localhost:1313/tags/antigravity/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/dead-air-workflow/</loc>
+    <loc>http://localhost:1313/tags/dead-air-workflow/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/</loc>
+    <loc>http://localhost:1313/posts/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/software-engineering/</loc>
+    <loc>http://localhost:1313/tags/software-engineering/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/</loc>
+    <loc>http://localhost:1313/tags/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/</loc>
+    <loc>http://localhost:1313/</loc>
     <lastmod>2026-01-02T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/tuple-template-concepts/</loc>
+    <loc>http://localhost:1313/posts/tuple-template-concepts/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/c&#43;&#43;/</loc>
+    <loc>http://localhost:1313/tags/c&#43;&#43;/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/concept/</loc>
+    <loc>http://localhost:1313/tags/concept/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/crunch/</loc>
+    <loc>http://localhost:1313/tags/crunch/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/template/</loc>
+    <loc>http://localhost:1313/tags/template/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/tuple/</loc>
+    <loc>http://localhost:1313/tags/tuple/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/tuple-like/</loc>
+    <loc>http://localhost:1313/tags/tuple-like/</loc>
     <lastmod>2025-12-23T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/crunch-intro/</loc>
+    <loc>http://localhost:1313/posts/crunch-intro/</loc>
     <lastmod>2025-12-13T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/message/</loc>
+    <loc>http://localhost:1313/tags/message/</loc>
     <lastmod>2025-12-13T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/serdes/</loc>
+    <loc>http://localhost:1313/tags/serdes/</loc>
     <lastmod>2025-12-13T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/auto/</loc>
+    <loc>http://localhost:1313/tags/auto/</loc>
     <lastmod>2025-12-05T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</loc>
+    <loc>http://localhost:1313/posts/auto-type-deduction-gauntlet/</loc>
     <lastmod>2025-12-05T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/deduction/</loc>
+    <loc>http://localhost:1313/tags/deduction/</loc>
     <lastmod>2025-12-05T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/quiz/</loc>
+    <loc>http://localhost:1313/tags/quiz/</loc>
     <lastmod>2025-12-05T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/type/</loc>
+    <loc>http://localhost:1313/tags/type/</loc>
     <lastmod>2025-12-05T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/actuator/</loc>
+    <loc>http://localhost:1313/tags/actuator/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/control/</loc>
+    <loc>http://localhost:1313/tags/control/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/embedded/</loc>
+    <loc>http://localhost:1313/tags/embedded/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/feedback/</loc>
+    <loc>http://localhost:1313/tags/feedback/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/feedback-controller/</loc>
+    <loc>http://localhost:1313/posts/feedback-controller/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/lambda/</loc>
+    <loc>http://localhost:1313/tags/lambda/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/law/</loc>
+    <loc>http://localhost:1313/tags/law/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/logging/</loc>
+    <loc>http://localhost:1313/tags/logging/</loc>
     <lastmod>2025-11-26T11:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/architecture/</loc>
+    <loc>http://localhost:1313/tags/architecture/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/c/</loc>
+    <loc>http://localhost:1313/tags/c/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/dependency/</loc>
+    <loc>http://localhost:1313/tags/dependency/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/posts/dependency-inversion-c/</loc>
+    <loc>http://localhost:1313/posts/dependency-inversion-c/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/tags/inversion/</loc>
+    <loc>http://localhost:1313/tags/inversion/</loc>
     <lastmod>2025-11-16T12:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/about/</loc>
+    <loc>http://localhost:1313/tags/coverage/</loc>
+    <lastmod>2025-02-10T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/categories/</loc>
+    <loc>http://localhost:1313/tags/gcov/</loc>
+    <lastmod>2025-02-10T00:00:00-08:00</lastmod>
   </url><url>
-    <loc>https://www.volatileint.dev/newsletter/</loc>
+    <loc>http://localhost:1313/posts/compile-time-coverage/</loc>
+    <lastmod>2025-02-10T00:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/tags/static-analysis/</loc>
+    <lastmod>2025-02-10T00:00:00-08:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/about/</loc>
+  </url><url>
+    <loc>http://localhost:1313/categories/</loc>
+  </url><url>
+    <loc>http://localhost:1313/newsletter/</loc>
   </url>
 </urlset>

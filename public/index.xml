@@ -2,66 +2,73 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Volatile Int</title>
-    <link>https://www.volatileint.dev/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Volatile Int</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 02 Jan 2026 12:00:00 -0800</lastBuildDate>
-    <atom:link href="https://www.volatileint.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 10 Feb 2026 00:00:00 -0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How consteval and constexpr Impact gcov</title>
+      <link>http://localhost:1313/posts/compile-time-coverage/</link>
+      <pubDate>Tue, 10 Feb 2026 00:00:00 -0800</pubDate>
+      <guid>http://localhost:1313/posts/compile-time-coverage/</guid>
+      <description>Simple examples demonstrating the effect of consteval and constexpr in code coverage analysis</description>
+    </item>
     <item>
       <title>A Month with Antigravity: The Good, The Bad, and The Ugly</title>
-      <link>https://www.volatileint.dev/posts/antigravity-review/</link>
+      <link>http://localhost:1313/posts/antigravity-review/</link>
       <pubDate>Fri, 02 Jan 2026 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/antigravity-review/</guid>
+      <guid>http://localhost:1313/posts/antigravity-review/</guid>
       <description>A deep dive into the realities of using Antigravity, Opus 4.5, and Gemini 3 Pro for greenfield development and architectural maintenance.</description>
     </item>
     <item>
       <title>Applying Template Concepts to Tuples in C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/posts/tuple-template-concepts/</link>
+      <link>http://localhost:1313/posts/tuple-template-concepts/</link>
       <pubDate>Tue, 23 Dec 2025 00:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/tuple-template-concepts/</guid>
+      <guid>http://localhost:1313/posts/tuple-template-concepts/</guid>
       <description>Learn how to apply and constrain C&#43;&#43;20 template concepts to tuple elements with practical examples and idiomatic patterns.</description>
     </item>
     <item>
       <title>Introducing Crunch: A Message Definition Protocol for Getting Things Right</title>
-      <link>https://www.volatileint.dev/posts/crunch-intro/</link>
+      <link>http://localhost:1313/posts/crunch-intro/</link>
       <pubDate>Sat, 13 Dec 2025 00:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/crunch-intro/</guid>
+      <guid>http://localhost:1313/posts/crunch-intro/</guid>
       <description>Discover Crunch, a message definition protocol designed for robust serialization and validation in mission-critical communication systems.</description>
     </item>
     <item>
       <title>Can You Survive the C&#43;&#43; Auto Type Deduction Gauntlet?</title>
-      <link>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</link>
+      <link>http://localhost:1313/posts/auto-type-deduction-gauntlet/</link>
       <pubDate>Fri, 05 Dec 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/auto-type-deduction-gauntlet/</guid>
+      <guid>http://localhost:1313/posts/auto-type-deduction-gauntlet/</guid>
       <description>Test and improve your understanding of C&#43;&#43; auto and decltype(auto) type deduction through a detailed code-based quiz.</description>
     </item>
     <item>
       <title>Implementing a Framework For Closed-Loop Controllers in Modern C&#43;&#43;</title>
-      <link>https://www.volatileint.dev/posts/feedback-controller/</link>
+      <link>http://localhost:1313/posts/feedback-controller/</link>
       <pubDate>Wed, 26 Nov 2025 11:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/feedback-controller/</guid>
+      <guid>http://localhost:1313/posts/feedback-controller/</guid>
       <description>Build a flexible, modern C&#43;&#43; library for closed-loop control systems that emphasizes abstraction, modularity, and compile-time safety.</description>
     </item>
     <item>
       <title>Dependency Inversion in C: A Technique for Extensible Embedded Software</title>
-      <link>https://www.volatileint.dev/posts/dependency-inversion-c/</link>
+      <link>http://localhost:1313/posts/dependency-inversion-c/</link>
       <pubDate>Sun, 16 Nov 2025 12:00:00 -0800</pubDate>
-      <guid>https://www.volatileint.dev/posts/dependency-inversion-c/</guid>
+      <guid>http://localhost:1313/posts/dependency-inversion-c/</guid>
       <description>Learn how to implement dependency inversion in C using function pointer interfaces to decouple high-level logic from implementation details.</description>
     </item>
     <item>
       <title>About Me</title>
-      <link>https://www.volatileint.dev/about/</link>
+      <link>http://localhost:1313/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://www.volatileint.dev/about/</guid>
+      <guid>http://localhost:1313/about/</guid>
       <description>About the Author</description>
     </item>
     <item>
       <title>Newsletter</title>
-      <link>https://www.volatileint.dev/newsletter/</link>
+      <link>http://localhost:1313/newsletter/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://www.volatileint.dev/newsletter/</guid>
+      <guid>http://localhost:1313/newsletter/</guid>
       <description>Subscribe to the Newsletter</description>
     </item>
   </channel>
